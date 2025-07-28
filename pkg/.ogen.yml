@@ -1,0 +1,10 @@
+# sets generator options.
+generator:
+  # sets generator features.
+  features:
+    enable:
+      # Enables paths client generation
+      - "paths/client"
+      # Enables validation of client requests
+      - "client/request/validation"
+    disable_all: true
