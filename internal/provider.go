@@ -3,9 +3,13 @@ package provider
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"os"
+	"terraform-provider-boxer/pkg/generated/api"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -27,14 +31,92 @@ func (b BoxerProvider) Metadata(ctx context.Context, request provider.MetadataRe
 }
 
 func (b BoxerProvider) Schema(ctx context.Context, request provider.SchemaRequest, response *provider.SchemaResponse) {
-	response.Schema = schema.Schema{}
+	response.Schema = schema.Schema{
+		Attributes: map[string]schema.Attribute{
+			"issuer_host": schema.StringAttribute{
+				Description: "The host of the Boxer Issuer API.",
+				Required:    true,
+			},
+		},
+	}
+}
+
+type boxerProviderModel struct {
+	IssuerHost types.String `tfsdk:"issuer_host"`
+}
+
+type BoxerProviderData struct {
+	issuerClient *issuer.Client
 }
 
 func (b BoxerProvider) Configure(ctx context.Context, request provider.ConfigureRequest, response *provider.ConfigureResponse) {
+	var config boxerProviderModel
+	diags := request.Config.Get(ctx, &config)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if config.IssuerHost.IsUnknown() {
+		response.Diagnostics.AddAttributeError(
+			path.Root("issuer_host"),
+			"Unknown Boxer Issuer host",
+			"The issuer_host parameter is mandatory"+
+				"Either target apply the source of the value first, set the value statically in the configuration,"+
+				"or use the BOXER_ISSUER_HOST environment variable.",
+		)
+	}
+
+	if response.Diagnostics.HasError() {
+		return
+	}
+
+	// Default values to environment variables, but override
+	// with Terraform configuration value if set.
+
+	host := os.Getenv("BOXER_ISSUER_HOST")
+
+	if !config.IssuerHost.IsNull() {
+		host = config.IssuerHost.ValueString()
+	}
+
+	// If any of the expected configurations are missing, return
+	// errors with provider-specific guidance.
+
+	if host == "" {
+		response.Diagnostics.AddAttributeError(
+			path.Root("issuer_host"),
+			"Unknown Boxer Issuer host",
+			"The issuer_host parameter is mandatory"+
+				"Either target apply the source of the value first, set the value statically in the configuration,"+
+				"or use the BOXER_ISSUER_HOST environment variable.",
+		)
+	}
+
+	if response.Diagnostics.HasError() {
+		return
+	}
+
+	issuerClient, err := issuer.NewClient(host)
+	if err != nil {
+		response.Diagnostics.AddError(
+			"Failed to initialize Boxer Issuer Client",
+			"An unexpected error occurred when creating the Boxer Issuer client. "+
+				"Boxer Issuer Client Error: "+err.Error(),
+		)
+		return
+	}
+
+	data := &BoxerProviderData{
+		issuerClient: issuerClient,
+	}
+	response.DataSourceData = data
+	response.ResourceData = data
 }
 
 func (b BoxerProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return nil
+	return []func() datasource.DataSource{
+		NewIdentityProviderDataSource,
+	}
 }
 
 func (b BoxerProvider) Resources(ctx context.Context) []func() resource.Resource {
