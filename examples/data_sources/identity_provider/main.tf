@@ -13,3 +13,7 @@ provider "boxer" {
 data "boxer_identity_provider" "example" {
   id = "provider"
 }
+
+output "identity_provider" {
+  value = data.boxer_identity_provider.example
+}

@@ -7,6 +7,7 @@ type OperationName = string
 
 const (
 	DeleteIdentityOperation  OperationName = "DeleteIdentity"
+	DeleteProviderOperation  OperationName = "DeleteProvider"
 	DeleteSchemaOperation    OperationName = "DeleteSchema"
 	GetAssociationOperation  OperationName = "GetAssociation"
 	GetIdentityOperation     OperationName = "GetIdentity"

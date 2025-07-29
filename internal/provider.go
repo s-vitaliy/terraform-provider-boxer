@@ -120,7 +120,9 @@ func (b BoxerProvider) DataSources(ctx context.Context) []func() datasource.Data
 }
 
 func (b BoxerProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return nil
+	return []func() resource.Resource{
+		IdentityProviderResource,
+	}
 }
 
 func New(version string) func() provider.Provider {

@@ -21,7 +21,7 @@ func NewIdentityProviderDataSource() datasource.DataSource {
 	return &identityProviderDataSource{}
 }
 
-func (d *identityProviderDataSource) Configure(_ context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
+func (dataSource *identityProviderDataSource) Configure(_ context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
 	if request.ProviderData == nil {
 		return
 	}
@@ -40,17 +40,17 @@ func (d *identityProviderDataSource) Configure(_ context.Context, request dataso
 		)
 		return
 	}
-	d.issuerClient = data.issuerClient
+	dataSource.issuerClient = data.issuerClient
 }
 
 // Metadata returns the data source type name.
-func (d *identityProviderDataSource) Metadata(_ context.Context, request datasource.MetadataRequest, response *datasource.MetadataResponse) {
+func (dataSource *identityProviderDataSource) Metadata(_ context.Context, request datasource.MetadataRequest, response *datasource.MetadataResponse) {
 	response.TypeName = request.ProviderTypeName + "_identity_provider"
 }
 
 // Schema defines the schema for the data source.
-func (d *identityProviderDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schema.Schema{
+func (dataSource *identityProviderDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, response *datasource.SchemaResponse) {
+	response.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description: "The unique identifier of the identity provider.",
@@ -69,11 +69,15 @@ func (d *identityProviderDataSource) Schema(_ context.Context, _ datasource.Sche
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (d *identityProviderDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
+func (dataSource *identityProviderDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
 	tflog.Info(ctx, "Reading identity provider data source")
 	var id identityProviderDataSourceModel
-	response.Diagnostics.Append(request.Config.Get(ctx, &id)...)
-	apiData, err := d.issuerClient.GetProvider(ctx, issuer.GetProviderParams{ID: id.ID.ValueString()})
+	diags := request.Config.Get(ctx, &id)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	apiData, err := dataSource.issuerClient.GetProvider(ctx, issuer.GetProviderParams{ID: id.ID.ValueString()})
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Error reading identity provider",
@@ -86,6 +90,9 @@ func (d *identityProviderDataSource) Read(ctx context.Context, request datasourc
 
 	diag := response.State.Set(ctx, &id)
 	response.Diagnostics.Append(diag...)
+	if response.Diagnostics.HasError() {
+		return
+	}
 }
 
 type identityProviderDataSourceModel struct {

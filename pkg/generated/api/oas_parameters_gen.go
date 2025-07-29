@@ -8,6 +8,11 @@ type DeleteIdentityParams struct {
 	ID               string
 }
 
+// DeleteProviderParams is parameters of delete_provider operation.
+type DeleteProviderParams struct {
+	ID string
+}
+
 // DeleteSchemaParams is parameters of delete_schema operation.
 type DeleteSchemaParams struct {
 	ID string

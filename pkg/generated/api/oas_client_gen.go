@@ -25,6 +25,10 @@ type Invoker interface {
 	//
 	// DELETE /identity/{identity_provider}/{id}
 	DeleteIdentity(ctx context.Context, params DeleteIdentityParams) error
+	// DeleteProvider invokes delete_provider operation.
+	//
+	// DELETE /identity_provider/oidc/{id}
+	DeleteProvider(ctx context.Context, params DeleteProviderParams) error
 	// DeleteSchema invokes delete_schema operation.
 	//
 	// DELETE /schema/{id}
@@ -178,6 +182,58 @@ func (c *Client) sendDeleteIdentity(ctx context.Context, params DeleteIdentityPa
 	defer resp.Body.Close()
 
 	result, err := decodeDeleteIdentityResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteProvider invokes delete_provider operation.
+//
+// DELETE /identity_provider/oidc/{id}
+func (c *Client) DeleteProvider(ctx context.Context, params DeleteProviderParams) error {
+	_, err := c.sendDeleteProvider(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeleteProvider(ctx context.Context, params DeleteProviderParams) (res *DeleteProviderOK, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/identity_provider/oidc/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeDeleteProviderResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

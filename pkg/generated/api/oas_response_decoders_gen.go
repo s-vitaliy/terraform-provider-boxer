@@ -23,6 +23,15 @@ func decodeDeleteIdentityResponse(resp *http.Response) (res *DeleteIdentityOK, _
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
+func decodeDeleteProviderResponse(resp *http.Response) (res *DeleteProviderOK, _ error) {
+	switch resp.StatusCode {
+	case 200:
+		// Code 200.
+		return &DeleteProviderOK{}, nil
+	}
+	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+}
+
 func decodeDeleteSchemaResponse(resp *http.Response) (res *DeleteSchemaOK, _ error) {
 	switch resp.StatusCode {
 	case 200:

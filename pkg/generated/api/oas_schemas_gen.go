@@ -5,6 +5,9 @@ package issuer
 // DeleteIdentityOK is response for DeleteIdentity operation.
 type DeleteIdentityOK struct{}
 
+// DeleteProviderOK is response for DeleteProvider operation.
+type DeleteProviderOK struct{}
+
 // DeleteSchemaOK is response for DeleteSchema operation.
 type DeleteSchemaOK struct{}
 
