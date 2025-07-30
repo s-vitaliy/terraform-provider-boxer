@@ -17,9 +17,6 @@ type GetIdentityOK struct{}
 // GetPrincipalOK is response for GetPrincipal operation.
 type GetPrincipalOK struct{}
 
-// GetSchemaOK is response for GetSchema operation.
-type GetSchemaOK struct{}
-
 // Ref: #/components/schemas/IdentityAssociation
 type IdentityAssociation struct {
 	Identity         string `json:"identity"`

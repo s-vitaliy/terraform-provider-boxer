@@ -22,28 +22,17 @@ func NewIdentityProviderDataSource() datasource.DataSource {
 }
 
 func (dataSource *identityProviderDataSource) Configure(_ context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
-	if request.ProviderData == nil {
+	client := getDataSourceIssuerClient(request, response)
+	if client == nil {
+		// If the client is nil, we cannot proceed with the data source.
+		// This method will be called again when the provider is configured,
+		// so we can safely return here without setting the client.
 		return
 	}
-	data, ok := request.ProviderData.(*BoxerProviderData)
-	if !ok {
-		response.Diagnostics.AddError(
-			"Invalid Provider Data",
-			"The provider data must be of type *BoxerProviderData, but was %s. This is most likely the bug in the provider implementation.",
-		)
-		return
-	}
-	if data.issuerClient == nil {
-		response.Diagnostics.AddError(
-			"Invalid Issuer Client",
-			"The issuer client must not be nil. This is most likely the bug in the provider implementation.",
-		)
-		return
-	}
-	dataSource.issuerClient = data.issuerClient
+	dataSource.issuerClient = client
 }
 
-// Metadata returns the data source type name.
+// Metadata responds with the data source type name.
 func (dataSource *identityProviderDataSource) Metadata(_ context.Context, request datasource.MetadataRequest, response *datasource.MetadataResponse) {
 	response.TypeName = request.ProviderTypeName + "_identity_provider"
 }
@@ -79,10 +68,7 @@ func (dataSource *identityProviderDataSource) Read(ctx context.Context, request 
 	}
 	apiData, err := dataSource.issuerClient.GetProvider(ctx, issuer.GetProviderParams{ID: id.ID.ValueString()})
 	if err != nil {
-		response.Diagnostics.AddError(
-			"Error reading identity provider",
-			"An error occurred while reading the identity provider: "+err.Error(),
-		)
+		generateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
 	}
 	id.DiscoveryUrl = types.StringValue(apiData.GetDiscoveryUrl())

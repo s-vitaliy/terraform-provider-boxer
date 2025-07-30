@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/go-faster/errors"
+	"github.com/go-faster/jx"
 
 	"github.com/ogen-go/ogen/conv"
 	ht "github.com/ogen-go/ogen/http"
@@ -52,7 +53,7 @@ type Invoker interface {
 	// GetSchema invokes get_schema operation.
 	//
 	// GET /schema/{id}
-	GetSchema(ctx context.Context, params GetSchemaParams) error
+	GetSchema(ctx context.Context, params GetSchemaParams) (jx.Raw, error)
 	// PostAssociation invokes post_association operation.
 	//
 	// POST /association/
@@ -72,7 +73,7 @@ type Invoker interface {
 	// PostSchema invokes post_schema operation.
 	//
 	// POST /schema/{id}
-	PostSchema(ctx context.Context, params PostSchemaParams) error
+	PostSchema(ctx context.Context, request jx.Raw, params PostSchemaParams) error
 	// Token invokes token operation.
 	//
 	// GET /token/{identity_provider}
@@ -561,12 +562,12 @@ func (c *Client) sendGetProvider(ctx context.Context, params GetProviderParams) 
 // GetSchema invokes get_schema operation.
 //
 // GET /schema/{id}
-func (c *Client) GetSchema(ctx context.Context, params GetSchemaParams) error {
-	_, err := c.sendGetSchema(ctx, params)
-	return err
+func (c *Client) GetSchema(ctx context.Context, params GetSchemaParams) (jx.Raw, error) {
+	res, err := c.sendGetSchema(ctx, params)
+	return res, err
 }
 
-func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res *GetSchemaOK, err error) {
+func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res jx.Raw, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
@@ -837,12 +838,12 @@ func (c *Client) sendPostProvider(ctx context.Context, request *OidcIdentityProv
 // PostSchema invokes post_schema operation.
 //
 // POST /schema/{id}
-func (c *Client) PostSchema(ctx context.Context, params PostSchemaParams) error {
-	_, err := c.sendPostSchema(ctx, params)
+func (c *Client) PostSchema(ctx context.Context, request jx.Raw, params PostSchemaParams) error {
+	_, err := c.sendPostSchema(ctx, request, params)
 	return err
 }
 
-func (c *Client) sendPostSchema(ctx context.Context, params PostSchemaParams) (res *PostSchemaOK, err error) {
+func (c *Client) sendPostSchema(ctx context.Context, request jx.Raw, params PostSchemaParams) (res *PostSchemaOK, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
@@ -870,6 +871,9 @@ func (c *Client) sendPostSchema(ctx context.Context, params PostSchemaParams) (r
 	r, err := ht.NewRequest(ctx, "POST", u)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostSchemaRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
 	}
 
 	resp, err := c.cfg.Client.Do(r)

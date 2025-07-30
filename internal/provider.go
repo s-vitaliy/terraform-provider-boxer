@@ -25,12 +25,12 @@ type BoxerProvider struct {
 	version string
 }
 
-func (b BoxerProvider) Metadata(ctx context.Context, request provider.MetadataRequest, response *provider.MetadataResponse) {
+func (b BoxerProvider) Metadata(_ context.Context, _ provider.MetadataRequest, response *provider.MetadataResponse) {
 	response.TypeName = "boxer"
 	response.Version = b.version
 }
 
-func (b BoxerProvider) Schema(ctx context.Context, request provider.SchemaRequest, response *provider.SchemaResponse) {
+func (b BoxerProvider) Schema(_ context.Context, _ provider.SchemaRequest, response *provider.SchemaResponse) {
 	response.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"issuer_host": schema.StringAttribute{
@@ -113,15 +113,17 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 	response.ResourceData = data
 }
 
-func (b BoxerProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+func (b BoxerProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewIdentityProviderDataSource,
+		NewCedarSchemaDataSource,
 	}
 }
 
-func (b BoxerProvider) Resources(ctx context.Context) []func() resource.Resource {
+func (b BoxerProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		IdentityProviderResource,
+		NewIdentityProviderResource,
+		NewCedarSchemaResource,
 	}
 }
 
