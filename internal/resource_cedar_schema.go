@@ -57,7 +57,8 @@ func (resource *cedarSchemaResource) Schema(_ context.Context, _ resource.Schema
 
 // Create creates the resource and sets the initial Terraform state.
 func (resource *cedarSchemaResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
-	plan, err := readCedarSchemaPlan(ctx, request.Plan, &response.Diagnostics)
+	var planModel cedarSchemaResourceModel
+	err := readFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
@@ -65,14 +66,14 @@ func (resource *cedarSchemaResource) Create(ctx context.Context, request resourc
 		return
 	}
 
-	err = resource.issuerClient.PostSchema(ctx, jx.Raw(plan.DataJson.ValueString()), issuer.PostSchemaParams{ID: plan.ID.ValueString()})
+	err = resource.issuerClient.PostSchema(ctx, jx.Raw(planModel.DataJson.ValueString()), issuer.PostSchemaParams{ID: planModel.ID.ValueString()})
 
 	if err != nil {
 		generateError(&response.Diagnostics, "Creating", "Cedar Schema", err)
 		return
 	}
 
-	err = saveNewState(ctx, plan.ID.ValueString(), plan.DataJson.ValueString(), &response.State, &response.Diagnostics)
+	err = saveNewState(ctx, planModel.ID.ValueString(), planModel.DataJson.ValueString(), &response.State, &response.Diagnostics)
 	// If we can't save the state, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
@@ -83,9 +84,10 @@ func (resource *cedarSchemaResource) Create(ctx context.Context, request resourc
 
 // Read refreshes the Terraform state with the latest data.
 func (resource *cedarSchemaResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
-	state, err := readCedarSchemaState(ctx, request.State, &response.Diagnostics)
+	var stateModel cedarSchemaResourceModel
+	err := readFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
-		// If we can't read the state, we can't proceed with the update.
+		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
 		return
@@ -93,15 +95,15 @@ func (resource *cedarSchemaResource) Read(ctx context.Context, request resource.
 
 	// For now, we don't use the read result from the API since backend returns the normalized schema data
 	// and if we use it, we will get a 'provider produced inconsistent result' error.
-	// Instead, we just check if the schema exists and save the state.
+	// Instead, we just check if the schema exists and save the stateModel.
 	// This will be updated in the future to use the read result.
-	_, err = resource.issuerClient.GetSchema(ctx, issuer.GetSchemaParams{ID: state.ID.ValueString()})
+	_, err = resource.issuerClient.GetSchema(ctx, issuer.GetSchemaParams{ID: stateModel.ID.ValueString()})
 	if err != nil {
 		generateError(&response.Diagnostics, "Reading", "Cedar Schema", err)
 		return
 	}
-	err = saveNewState(ctx, state.ID.ValueString(), state.DataJson.ValueString(), &response.State, &response.Diagnostics)
-	// If we can't save the state, we can't proceed with the update.
+	err = saveNewState(ctx, stateModel.ID.ValueString(), stateModel.DataJson.ValueString(), &response.State, &response.Diagnostics)
+	// If we can't save the stateModel, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
 	if err != nil {
@@ -111,29 +113,31 @@ func (resource *cedarSchemaResource) Read(ctx context.Context, request resource.
 
 // Update updates the resource and sets the updated Terraform state on success.
 func (resource *cedarSchemaResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
-	plan, err := readCedarSchemaPlan(ctx, request.Plan, &response.Diagnostics)
+	var planModel cedarSchemaResourceModel
+	err := readFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
 	if err != nil {
-		// If we can't read the plan, we can't proceed with the update.
+		// If we can't read the planModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	state, err := readCedarSchemaState(ctx, request.State, &response.Diagnostics)
+	var stateModel cedarSchemaResourceModel
+	err = readFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
-		// If we can't read the state, we can't proceed with the update.
+		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
 
-	err = resource.issuerClient.PostSchema(ctx, jx.Raw(plan.DataJson.ValueString()), issuer.PostSchemaParams{ID: plan.ID.ValueString()})
+	err = resource.issuerClient.PostSchema(ctx, jx.Raw(planModel.DataJson.ValueString()), issuer.PostSchemaParams{ID: planModel.ID.ValueString()})
 	if err != nil {
 		generateError(&response.Diagnostics, "Updating", "Cedar Schema", err)
 		return
 	}
 
-	err = saveNewState(ctx, state.ID.ValueString(), plan.DataJson.ValueString(), &response.State, &response.Diagnostics)
-	// If we can't save the state, we can't proceed with the update.
+	err = saveNewState(ctx, stateModel.ID.ValueString(), planModel.DataJson.ValueString(), &response.State, &response.Diagnostics)
+	// If we can't save the stateModel, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
 	if err != nil {
@@ -143,14 +147,15 @@ func (resource *cedarSchemaResource) Update(ctx context.Context, request resourc
 
 // Delete deletes the resource and removes the Terraform state on success.
 func (resource *cedarSchemaResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
-	plan, err := readCedarSchemaState(ctx, request.State, &response.Diagnostics)
+	var stateModel cedarSchemaResourceModel
+	err := readFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	err = resource.issuerClient.DeleteSchema(ctx, issuer.DeleteSchemaParams{ID: plan.ID.ValueString()})
+	err = resource.issuerClient.DeleteSchema(ctx, issuer.DeleteSchemaParams{ID: stateModel.ID.ValueString()})
 	if err != nil {
 		generateError(&response.Diagnostics, "Deleting", "Cedar Schema", err)
 		return
@@ -160,26 +165,6 @@ func (resource *cedarSchemaResource) Delete(ctx context.Context, request resourc
 type cedarSchemaResourceModel struct {
 	ID       types.String `tfsdk:"id"`
 	DataJson types.String `tfsdk:"data_json"`
-}
-
-func readCedarSchemaState(ctx context.Context, baseState tfsdk.State, diagnostics *diag.Diagnostics) (*cedarSchemaResourceModel, error) {
-	var state cedarSchemaResourceModel
-	diags := baseState.Get(ctx, &state)
-	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
-		return nil, fmt.Errorf("error getting state")
-	}
-	return &state, nil
-}
-
-func readCedarSchemaPlan(ctx context.Context, basePlan tfsdk.Plan, diagnostics *diag.Diagnostics) (*cedarSchemaResourceModel, error) {
-	var plan cedarSchemaResourceModel
-	diags := basePlan.Get(ctx, &plan)
-	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
-		return nil, fmt.Errorf("error getting plan")
-	}
-	return &plan, nil
 }
 
 func saveNewState(ctx context.Context, id string, newData string, state *tfsdk.State, diagnostics *diag.Diagnostics) error {

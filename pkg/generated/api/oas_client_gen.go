@@ -45,7 +45,7 @@ type Invoker interface {
 	// GetPrincipal invokes get_principal operation.
 	//
 	// GET /principal/{schema}/{id}
-	GetPrincipal(ctx context.Context, params GetPrincipalParams) error
+	GetPrincipal(ctx context.Context, params GetPrincipalParams) (jx.Raw, error)
 	// GetProvider invokes get_provider operation.
 	//
 	// GET /identity_provider/oidc/{id}
@@ -65,7 +65,7 @@ type Invoker interface {
 	// PostPrincipal invokes post_principal operation.
 	//
 	// POST /principal/{schema}
-	PostPrincipal(ctx context.Context, params PostPrincipalParams) error
+	PostPrincipal(ctx context.Context, request jx.Raw, params PostPrincipalParams) (*PrincipalCreateResponse, error)
 	// PostProvider invokes post_provider operation.
 	//
 	// POST /identity_provider/oidc/{id}
@@ -439,12 +439,12 @@ func (c *Client) sendGetIdentity(ctx context.Context, params GetIdentityParams) 
 // GetPrincipal invokes get_principal operation.
 //
 // GET /principal/{schema}/{id}
-func (c *Client) GetPrincipal(ctx context.Context, params GetPrincipalParams) error {
-	_, err := c.sendGetPrincipal(ctx, params)
-	return err
+func (c *Client) GetPrincipal(ctx context.Context, params GetPrincipalParams) (jx.Raw, error) {
+	res, err := c.sendGetPrincipal(ctx, params)
+	return res, err
 }
 
-func (c *Client) sendGetPrincipal(ctx context.Context, params GetPrincipalParams) (res *GetPrincipalOK, err error) {
+func (c *Client) sendGetPrincipal(ctx context.Context, params GetPrincipalParams) (res jx.Raw, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
@@ -722,12 +722,12 @@ func (c *Client) sendPostIdentity(ctx context.Context, params PostIdentityParams
 // PostPrincipal invokes post_principal operation.
 //
 // POST /principal/{schema}
-func (c *Client) PostPrincipal(ctx context.Context, params PostPrincipalParams) error {
-	_, err := c.sendPostPrincipal(ctx, params)
-	return err
+func (c *Client) PostPrincipal(ctx context.Context, request jx.Raw, params PostPrincipalParams) (*PrincipalCreateResponse, error) {
+	res, err := c.sendPostPrincipal(ctx, request, params)
+	return res, err
 }
 
-func (c *Client) sendPostPrincipal(ctx context.Context, params PostPrincipalParams) (res *PostPrincipalOK, err error) {
+func (c *Client) sendPostPrincipal(ctx context.Context, request jx.Raw, params PostPrincipalParams) (res *PrincipalCreateResponse, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
@@ -755,6 +755,9 @@ func (c *Client) sendPostPrincipal(ctx context.Context, params PostPrincipalPara
 	r, err := ht.NewRequest(ctx, "POST", u)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostPrincipalRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
 	}
 
 	resp, err := c.cfg.Client.Do(r)

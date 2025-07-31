@@ -117,6 +117,7 @@ func (b BoxerProvider) DataSources(_ context.Context) []func() datasource.DataSo
 	return []func() datasource.DataSource{
 		NewIdentityProviderDataSource,
 		NewCedarSchemaDataSource,
+		NewBoxerPrincipalDataSource,
 	}
 }
 
@@ -124,6 +125,7 @@ func (b BoxerProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewIdentityProviderResource,
 		NewCedarSchemaResource,
+		NewBoxerPrincipalResource,
 	}
 }
 

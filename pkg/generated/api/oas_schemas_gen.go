@@ -14,9 +14,6 @@ type DeleteSchemaOK struct{}
 // GetIdentityOK is response for GetIdentity operation.
 type GetIdentityOK struct{}
 
-// GetPrincipalOK is response for GetPrincipal operation.
-type GetPrincipalOK struct{}
-
 // Ref: #/components/schemas/IdentityAssociation
 type IdentityAssociation struct {
 	Identity         string `json:"identity"`
@@ -119,14 +116,26 @@ type PostAssociationOK struct{}
 // PostIdentityOK is response for PostIdentity operation.
 type PostIdentityOK struct{}
 
-// PostPrincipalOK is response for PostPrincipal operation.
-type PostPrincipalOK struct{}
-
 // PostProviderOK is response for PostProvider operation.
 type PostProviderOK struct{}
 
 // PostSchemaOK is response for PostSchema operation.
 type PostSchemaOK struct{}
+
+// Ref: #/components/schemas/PrincipalCreateResponse
+type PrincipalCreateResponse struct {
+	UID string `json:"uid"`
+}
+
+// GetUID returns the value of UID.
+func (s *PrincipalCreateResponse) GetUID() string {
+	return s.UID
+}
+
+// SetUID sets the value of UID.
+func (s *PrincipalCreateResponse) SetUID(val string) {
+	s.UID = val
+}
 
 // TokenOK is response for Token operation.
 type TokenOK struct{}

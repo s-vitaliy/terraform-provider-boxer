@@ -2,10 +2,8 @@ package provider
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	issuer "terraform-provider-boxer/pkg/generated/api"
 
@@ -72,25 +70,26 @@ func (resource *identityProviderResource) Schema(_ context.Context, _ resource.S
 
 // Create creates the resource and sets the initial Terraform state.
 func (resource *identityProviderResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
-	plan, err := readIdentityProviderPlan(ctx, request.Plan, &response.Diagnostics)
+	var planModel identityProviderResourceModel
+	err := readFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	registration, diags := toBoxerIssuerModel(ctx, plan)
+	registration, diags := toBoxerIssuerModel(ctx, &planModel)
 	if diags.HasError() {
 		response.Diagnostics.Append(diags...)
 		return
 	}
-	err = resource.issuerClient.PostProvider(ctx, registration, issuer.PostProviderParams{ID: plan.Name.ValueString()})
+	err = resource.issuerClient.PostProvider(ctx, registration, issuer.PostProviderParams{ID: planModel.Name.ValueString()})
 	if err != nil {
 		generateError(&response.Diagnostics, "Creating", "Identity Provider", err)
 		return
 	}
-	plan.ID = types.StringValue(plan.Name.ValueString())
-	response.State.Set(ctx, plan)
+	planModel.ID = types.StringValue(planModel.Name.ValueString())
+	response.State.Set(ctx, planModel)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
@@ -99,19 +98,20 @@ func (resource *identityProviderResource) Create(ctx context.Context, request re
 
 // Read refreshes the Terraform state with the latest data.
 func (resource *identityProviderResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
-	state, err := readIdentityProviderState(ctx, request.State, &response.Diagnostics)
+	var stateModel identityProviderResourceModel
+	err := readFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
-		// If we can't read the state, we can't proceed with the update.
+		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	apiData, err := resource.issuerClient.GetProvider(ctx, issuer.GetProviderParams{ID: state.Name.ValueString()})
+	apiData, err := resource.issuerClient.GetProvider(ctx, issuer.GetProviderParams{ID: stateModel.Name.ValueString()})
 	if err != nil {
 		generateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
 	}
-	newState := fromBoxerIssuerModel(state.ID.ValueString(), apiData)
+	newState := fromBoxerIssuerModel(stateModel.ID.ValueString(), apiData)
 	diags := response.State.Set(ctx, &newState)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
@@ -121,38 +121,40 @@ func (resource *identityProviderResource) Read(ctx context.Context, request reso
 
 // Update updates the resource and sets the updated Terraform state on success.
 func (resource *identityProviderResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
-	plan, err := readIdentityProviderPlan(ctx, request.Plan, &response.Diagnostics)
+	var planModel identityProviderResourceModel
+	err := readFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
 	if err != nil {
-		// If we can't read the state, we can't proceed with the update.
+		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
 
-	state, err := readIdentityProviderState(ctx, request.State, &response.Diagnostics)
+	var stateModel identityProviderResourceModel
+	err = readFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
-		// If we can't read the state, we can't proceed with the update.
+		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
 
-	registration, diags := toBoxerIssuerModel(ctx, plan)
+	registration, diags := toBoxerIssuerModel(ctx, &planModel)
 	if diags.HasError() {
 		response.Diagnostics.Append(diags...)
 		return
 	}
-	err = resource.issuerClient.PostProvider(ctx, registration, issuer.PostProviderParams{ID: state.Name.ValueString()})
+	err = resource.issuerClient.PostProvider(ctx, registration, issuer.PostProviderParams{ID: stateModel.Name.ValueString()})
 	if err != nil {
 		generateError(&response.Diagnostics, "Updating", "Identity Provider", err)
 		return
 	}
-	apiData, err := resource.issuerClient.GetProvider(ctx, issuer.GetProviderParams{ID: state.Name.ValueString()})
+	apiData, err := resource.issuerClient.GetProvider(ctx, issuer.GetProviderParams{ID: stateModel.Name.ValueString()})
 	if err != nil {
 		generateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
 	}
-	newState := fromBoxerIssuerModel(state.Name.ValueString(), apiData)
+	newState := fromBoxerIssuerModel(stateModel.Name.ValueString(), apiData)
 	diags = response.State.Set(ctx, newState)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
@@ -162,15 +164,16 @@ func (resource *identityProviderResource) Update(ctx context.Context, request re
 
 // Delete deletes the resource and removes the Terraform state on success.
 func (resource *identityProviderResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
-	state, err := readIdentityProviderState(ctx, request.State, &response.Diagnostics)
+	var stateModel identityProviderResourceModel
+	err := readFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
-		// If we can't read the state, we can't proceed with the update.
+		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
 
-	err = resource.issuerClient.DeleteProvider(ctx, issuer.DeleteProviderParams{ID: state.Name.ValueString()})
+	err = resource.issuerClient.DeleteProvider(ctx, issuer.DeleteProviderParams{ID: stateModel.Name.ValueString()})
 	if err != nil {
 		generateError(&response.Diagnostics, "Deleting", "Identity Provider", err)
 		return
@@ -215,16 +218,6 @@ func fromBoxerIssuerModel(id string, apiData *issuer.OidcIdentityProviderRegistr
 	}
 }
 
-func readIdentityProviderState(ctx context.Context, baseState tfsdk.State, diagnostics *diag.Diagnostics) (*identityProviderResourceModel, error) {
-	var state identityProviderResourceModel
-	diags := baseState.Get(ctx, &state)
-	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
-		return nil, fmt.Errorf("error getting state")
-	}
-	return &state, nil
-}
-
 type identityProviderResourceModel struct {
 	ID           types.String `tfsdk:"id"`
 	Name         types.String `tfsdk:"name"`
@@ -237,14 +230,4 @@ type identityProviderResourceModel struct {
 // identityProviderResource is the resource implementation.
 type identityProviderResource struct {
 	issuerClient *issuer.Client
-}
-
-func readIdentityProviderPlan(ctx context.Context, basePlan tfsdk.Plan, diagnostics *diag.Diagnostics) (*identityProviderResourceModel, error) {
-	var plan identityProviderResourceModel
-	diags := basePlan.Get(ctx, &plan)
-	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
-		return nil, fmt.Errorf("error getting plan")
-	}
-	return &plan, nil
 }

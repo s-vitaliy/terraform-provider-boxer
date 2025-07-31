@@ -1,7 +1,11 @@
 package provider
 
 import (
+	"context"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	issuer "terraform-provider-boxer/pkg/generated/api"
 )
 
@@ -26,4 +30,13 @@ func getDataSourceIssuerClient(request datasource.ConfigureRequest, response *da
 	}
 	client := data.issuerClient
 	return client
+}
+
+func readFromConfig(ctx context.Context, target interface{}, baseState tfsdk.Config, diagnostics *diag.Diagnostics) error {
+	diags := baseState.Get(ctx, target)
+	diagnostics.Append(diags...)
+	if diagnostics.HasError() {
+		return fmt.Errorf("error getting config")
+	}
+	return nil
 }

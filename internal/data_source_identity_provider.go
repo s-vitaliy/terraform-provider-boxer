@@ -60,21 +60,24 @@ func (dataSource *identityProviderDataSource) Schema(_ context.Context, _ dataso
 // Read refreshes the Terraform state with the latest data.
 func (dataSource *identityProviderDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
 	tflog.Info(ctx, "Reading identity provider data source")
-	var id identityProviderDataSourceModel
-	diags := request.Config.Get(ctx, &id)
-	response.Diagnostics.Append(diags...)
-	if response.Diagnostics.HasError() {
+	var configModel identityProviderDataSourceModel
+	err := readFromConfig(ctx, &configModel, request.Config, &response.Diagnostics)
+	if err != nil {
+		// If we can't read the config, we can't proceed with the update.
+		// so we return early.
+		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	apiData, err := dataSource.issuerClient.GetProvider(ctx, issuer.GetProviderParams{ID: id.ID.ValueString()})
+
+	apiData, err := dataSource.issuerClient.GetProvider(ctx, issuer.GetProviderParams{ID: configModel.ID.ValueString()})
 	if err != nil {
 		generateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
 	}
-	id.DiscoveryUrl = types.StringValue(apiData.GetDiscoveryUrl())
-	id.UserIdClaim = types.StringValue(apiData.GetUserIdClaim())
+	configModel.DiscoveryUrl = types.StringValue(apiData.GetDiscoveryUrl())
+	configModel.UserIdClaim = types.StringValue(apiData.GetUserIdClaim())
 
-	diag := response.State.Set(ctx, &id)
+	diag := response.State.Set(ctx, &configModel)
 	response.Diagnostics.Append(diag...)
 	if response.Diagnostics.HasError() {
 		return
