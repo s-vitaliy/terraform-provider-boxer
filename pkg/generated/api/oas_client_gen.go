@@ -12,6 +12,7 @@ import (
 
 	"github.com/ogen-go/ogen/conv"
 	ht "github.com/ogen-go/ogen/http"
+	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/uri"
 )
 
@@ -41,7 +42,7 @@ type Invoker interface {
 	// GetIdentity invokes get_identity operation.
 	//
 	// GET /identity/{identity_provider}/{id}
-	GetIdentity(ctx context.Context, params GetIdentityParams) error
+	GetIdentity(ctx context.Context, params GetIdentityParams) (*ExternalIdentityResponse, error)
 	// GetPrincipal invokes get_principal operation.
 	//
 	// GET /principal/{schema}/{id}
@@ -77,17 +78,18 @@ type Invoker interface {
 	// Token invokes token operation.
 	//
 	// GET /token/{identity_provider}
-	Token(ctx context.Context, params TokenParams) error
+	Token(ctx context.Context, params TokenParams) (TokenOK, error)
 }
 
 // Client implements OAS client.
 type Client struct {
 	serverURL *url.URL
+	sec       SecuritySource
 	baseClient
 }
 
 // NewClient initializes new Client defined by OAS.
-func NewClient(serverURL string, opts ...ClientOption) (*Client, error) {
+func NewClient(serverURL string, sec SecuritySource, opts ...ClientOption) (*Client, error) {
 	u, err := url.Parse(serverURL)
 	if err != nil {
 		return nil, err
@@ -100,6 +102,7 @@ func NewClient(serverURL string, opts ...ClientOption) (*Client, error) {
 	}
 	return &Client{
 		serverURL:  u,
+		sec:        sec,
 		baseClient: c,
 	}, nil
 }
@@ -368,12 +371,12 @@ func (c *Client) sendGetAssociation(ctx context.Context, params GetAssociationPa
 // GetIdentity invokes get_identity operation.
 //
 // GET /identity/{identity_provider}/{id}
-func (c *Client) GetIdentity(ctx context.Context, params GetIdentityParams) error {
-	_, err := c.sendGetIdentity(ctx, params)
-	return err
+func (c *Client) GetIdentity(ctx context.Context, params GetIdentityParams) (*ExternalIdentityResponse, error) {
+	res, err := c.sendGetIdentity(ctx, params)
+	return res, err
 }
 
-func (c *Client) sendGetIdentity(ctx context.Context, params GetIdentityParams) (res *GetIdentityOK, err error) {
+func (c *Client) sendGetIdentity(ctx context.Context, params GetIdentityParams) (res *ExternalIdentityResponse, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
@@ -896,12 +899,12 @@ func (c *Client) sendPostSchema(ctx context.Context, request jx.Raw, params Post
 // Token invokes token operation.
 //
 // GET /token/{identity_provider}
-func (c *Client) Token(ctx context.Context, params TokenParams) error {
-	_, err := c.sendToken(ctx, params)
-	return err
+func (c *Client) Token(ctx context.Context, params TokenParams) (TokenOK, error) {
+	res, err := c.sendToken(ctx, params)
+	return res, err
 }
 
-func (c *Client) sendToken(ctx context.Context, params TokenParams) (res *TokenOK, err error) {
+func (c *Client) sendToken(ctx context.Context, params TokenParams) (res TokenOK, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
@@ -929,6 +932,39 @@ func (c *Client) sendToken(ctx context.Context, params TokenParams) (res *TokenO
 	r, err := ht.NewRequest(ctx, "GET", u)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityExternal(ctx, TokenOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"External\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
 	}
 
 	resp, err := c.cfg.Client.Do(r)

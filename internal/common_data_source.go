@@ -32,6 +32,28 @@ func getDataSourceIssuerClient(request datasource.ConfigureRequest, response *da
 	return client
 }
 
+func getDataSourceIssuerHost(request datasource.ConfigureRequest, response *datasource.ConfigureResponse) string {
+	if request.ProviderData == nil {
+		return ""
+	}
+	data, ok := request.ProviderData.(*BoxerProviderData)
+	if !ok {
+		response.Diagnostics.AddError(
+			"Invalid Provider Data",
+			"The provider data must be of type *BoxerProviderData, but was %s. This is most likely the bug in the provider implementation.",
+		)
+		return ""
+	}
+	if data.issuerHost == "" {
+		response.Diagnostics.AddError(
+			"Invalid Issuer Host",
+			"The issuer host must not be empty. This is most likely the bug in the provider implementation.",
+		)
+		return ""
+	}
+	return data.issuerHost
+}
+
 func readFromConfig(ctx context.Context, target interface{}, baseState tfsdk.Config, diagnostics *diag.Diagnostics) error {
 	diags := baseState.Get(ctx, target)
 	diagnostics.Append(diags...)

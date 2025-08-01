@@ -2,6 +2,10 @@
 
 package issuer
 
+import (
+	"io"
+)
+
 // DeleteIdentityOK is response for DeleteIdentity operation.
 type DeleteIdentityOK struct{}
 
@@ -11,8 +15,59 @@ type DeleteProviderOK struct{}
 // DeleteSchemaOK is response for DeleteSchema operation.
 type DeleteSchemaOK struct{}
 
-// GetIdentityOK is response for GetIdentity operation.
-type GetIdentityOK struct{}
+type External struct {
+	Token string
+	Roles []string
+}
+
+// GetToken returns the value of Token.
+func (s *External) GetToken() string {
+	return s.Token
+}
+
+// GetRoles returns the value of Roles.
+func (s *External) GetRoles() []string {
+	return s.Roles
+}
+
+// SetToken sets the value of Token.
+func (s *External) SetToken(val string) {
+	s.Token = val
+}
+
+// SetRoles sets the value of Roles.
+func (s *External) SetRoles(val []string) {
+	s.Roles = val
+}
+
+// Struct that represents an external identity.
+// Ref: #/components/schemas/ExternalIdentityResponse
+type ExternalIdentityResponse struct {
+	// The name of the external identity provider.
+	IdentityProvider string `json:"identityProvider"`
+	// The user ID extracted from the external identity provider.
+	UserId string `json:"userId"`
+}
+
+// GetIdentityProvider returns the value of IdentityProvider.
+func (s *ExternalIdentityResponse) GetIdentityProvider() string {
+	return s.IdentityProvider
+}
+
+// GetUserId returns the value of UserId.
+func (s *ExternalIdentityResponse) GetUserId() string {
+	return s.UserId
+}
+
+// SetIdentityProvider sets the value of IdentityProvider.
+func (s *ExternalIdentityResponse) SetIdentityProvider(val string) {
+	s.IdentityProvider = val
+}
+
+// SetUserId sets the value of UserId.
+func (s *ExternalIdentityResponse) SetUserId(val string) {
+	s.UserId = val
+}
 
 // Ref: #/components/schemas/IdentityAssociation
 type IdentityAssociation struct {
@@ -137,5 +192,16 @@ func (s *PrincipalCreateResponse) SetUID(val string) {
 	s.UID = val
 }
 
-// TokenOK is response for Token operation.
-type TokenOK struct{}
+type TokenOK struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s TokenOK) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
