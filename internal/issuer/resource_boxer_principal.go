@@ -1,4 +1,4 @@
-package provider
+package issuer
 
 import (
 	"context"
@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	issuer "terraform-provider-boxer/pkg/generated/api"
+	"terraform-provider-boxer/internal/common"
+	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -27,7 +28,7 @@ func NewBoxerPrincipalResource() resource.Resource {
 
 // boxerPrincipal is the resource implementation.
 type boxerPrincipal struct {
-	issuerClient *issuer.Client
+	issuerClient *issuerClient.Client
 }
 
 func (resource *boxerPrincipal) Configure(_ context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
@@ -74,10 +75,10 @@ func (resource *boxerPrincipal) Create(ctx context.Context, request resource.Cre
 	tflog.Info(ctx, "Creating Boxer Principal in schema", map[string]any{"schemaId": planModel.SchemaId.ValueString()})
 	apiData, err := resource.issuerClient.PostPrincipal(ctx,
 		jx.Raw(planModel.DataJson.ValueString()),
-		issuer.PostPrincipalParams{Schema: planModel.SchemaId.ValueString()})
+		issuerClient.PostPrincipalParams{Schema: planModel.SchemaId.ValueString()})
 
 	if err != nil {
-		generateError(&response.Diagnostics, "Creating", "Boxer Principal", err)
+		common.GenerateError(&response.Diagnostics, "Creating", "Boxer Principal", err)
 		return
 	}
 
@@ -110,10 +111,10 @@ func (resource *boxerPrincipal) Read(ctx context.Context, request resource.ReadR
 	// Instead, we just check if the schema exists and save the stateModel.
 	// This will be updated in the future to use the read result.
 	tflog.Info(ctx, "Getting principal by ID", map[string]any{"principalId": stateModel.ID.ValueString()})
-	params := issuer.GetPrincipalParams{Schema: stateModel.SchemaId.ValueString(), ID: stateModel.ID.ValueString()}
+	params := issuerClient.GetPrincipalParams{Schema: stateModel.SchemaId.ValueString(), ID: stateModel.ID.ValueString()}
 	_, err = resource.issuerClient.GetPrincipal(ctx, params)
 	if err != nil {
-		generateError(&response.Diagnostics, "Reading", "Boxer Principal", err)
+		common.GenerateError(&response.Diagnostics, "Reading", "Boxer Principal", err)
 		return
 	}
 	err = saveNewBoxerPrincipalState(ctx,
@@ -150,9 +151,9 @@ func (resource *boxerPrincipal) Update(ctx context.Context, request resource.Upd
 
 	_, err = resource.issuerClient.PostPrincipal(ctx,
 		jx.Raw(planModel.DataJson.ValueString()),
-		issuer.PostPrincipalParams{Schema: planModel.SchemaId.ValueString()})
+		issuerClient.PostPrincipalParams{Schema: planModel.SchemaId.ValueString()})
 	if err != nil {
-		generateError(&response.Diagnostics, "Updating", "Boxer Principal", err)
+		common.GenerateError(&response.Diagnostics, "Updating", "Boxer Principal", err)
 		return
 	}
 

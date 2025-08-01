@@ -1,10 +1,11 @@
-package provider
+package issuer
 
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"terraform-provider-boxer/pkg/generated/api"
+	"terraform-provider-boxer/internal/common"
+	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -69,9 +70,9 @@ func (dataSource *identityProviderDataSource) Read(ctx context.Context, request 
 		return
 	}
 
-	apiData, err := dataSource.issuerClient.GetProvider(ctx, issuer.GetProviderParams{ID: configModel.ID.ValueString()})
+	apiData, err := dataSource.issuerClient.GetProvider(ctx, issuerClient.GetProviderParams{ID: configModel.ID.ValueString()})
 	if err != nil {
-		generateError(&response.Diagnostics, "Reading", "Identity Provider", err)
+		common.GenerateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
 	}
 	configModel.DiscoveryUrl = types.StringValue(apiData.GetDiscoveryUrl())
@@ -94,5 +95,5 @@ type identityProviderDataSourceModel struct {
 
 // identityProviderDataSource is the data source implementation.
 type identityProviderDataSource struct {
-	issuerClient *issuer.Client
+	issuerClient *issuerClient.Client
 }

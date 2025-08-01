@@ -1,10 +1,11 @@
-package provider
+package issuer
 
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"terraform-provider-boxer/pkg/generated/api"
+	"terraform-provider-boxer/internal/common"
+	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -64,9 +65,9 @@ func (dataSource *cedarSchemaDataSource) Read(ctx context.Context, request datas
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	apiData, err := dataSource.issuerClient.GetSchema(ctx, issuer.GetSchemaParams{ID: configModel.ID.ValueString()})
+	apiData, err := dataSource.issuerClient.GetSchema(ctx, issuerClient.GetSchemaParams{ID: configModel.ID.ValueString()})
 	if err != nil {
-		generateError(&response.Diagnostics, "Reading", "Cedar Schema", err)
+		common.GenerateError(&response.Diagnostics, "Reading", "Cedar Schema", err)
 		return
 	}
 	configModel.DataJson = types.StringValue(apiData.String())
@@ -85,5 +86,5 @@ type cedarSchemaDataSourceModel struct {
 
 // cedarSchemaDataSource is the data source implementation.
 type cedarSchemaDataSource struct {
-	issuerClient *issuer.Client
+	issuerClient *issuerClient.Client
 }

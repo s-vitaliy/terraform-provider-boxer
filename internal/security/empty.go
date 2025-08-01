@@ -2,16 +2,16 @@ package security
 
 import (
 	"context"
-	issuer "terraform-provider-boxer/pkg/generated/api"
+	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 )
 
 // Validate that emptySecuritySource implements issuer.SecuritySource.
 var (
-	_ issuer.SecuritySource = emptySecuritySource{}
+	_ issuerClient.SecuritySource = emptySecuritySource{}
 )
 
 // NewEmptySecuritySource creates a new instance of emptySecuritySource.
-func NewEmptySecuritySource() issuer.SecuritySource {
+func NewEmptySecuritySource() issuerClient.SecuritySource {
 	return emptySecuritySource{}
 }
 
@@ -20,6 +20,6 @@ func NewEmptySecuritySource() issuer.SecuritySource {
 type emptySecuritySource struct{}
 
 // External implements the issuer.SecuritySource interface.
-func (e emptySecuritySource) External(_ context.Context, _ issuer.OperationName) (issuer.External, error) {
-	return issuer.External{Token: ""}, nil
+func (e emptySecuritySource) External(_ context.Context, _ issuerClient.OperationName) (issuerClient.External, error) {
+	return issuerClient.External{Token: ""}, nil
 }

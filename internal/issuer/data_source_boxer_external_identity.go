@@ -1,9 +1,10 @@
-package provider
+package issuer
 
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-boxer/pkg/generated/api"
+	"terraform-provider-boxer/internal/common"
+	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -77,21 +78,21 @@ func (dataSource *boxerExternalIdentityDataSource) Read(ctx context.Context, req
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	externalIdentity, err := dataSource.issuerClient.GetIdentity(ctx, issuer.GetIdentityParams{
+	externalIdentity, err := dataSource.issuerClient.GetIdentity(ctx, issuerClient.GetIdentityParams{
 		ID:               configModel.ID.ValueString(),
 		IdentityProvider: configModel.IdentityProvider.ValueString(),
 	})
 	if err != nil {
-		generateError(&response.Diagnostics, "Reading", "External Identity", err)
+		common.GenerateError(&response.Diagnostics, "Reading", "External Identity", err)
 		return
 	}
 
-	externalIdentityAssociation, err := dataSource.issuerClient.GetAssociation(ctx, issuer.GetAssociationParams{
+	externalIdentityAssociation, err := dataSource.issuerClient.GetAssociation(ctx, issuerClient.GetAssociationParams{
 		ID:               configModel.ID.ValueString(),
 		IdentityProvider: configModel.IdentityProvider.ValueString(),
 	})
 	if err != nil {
-		generateError(&response.Diagnostics, "Reading", "External Identity association", err)
+		common.GenerateError(&response.Diagnostics, "Reading", "External Identity association", err)
 		return
 	}
 	model := boxerExternalIdentityModel{
@@ -118,5 +119,5 @@ type boxerExternalIdentityDataSourceModel struct {
 
 // boxerExternalIdentityDataSource is the data source implementation.
 type boxerExternalIdentityDataSource struct {
-	issuerClient *issuer.Client
+	issuerClient *issuerClient.Client
 }

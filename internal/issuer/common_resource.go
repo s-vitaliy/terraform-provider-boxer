@@ -1,4 +1,4 @@
-package provider
+package issuer
 
 import (
 	"context"
@@ -6,10 +6,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
-	issuer "terraform-provider-boxer/pkg/generated/api"
+	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 )
 
-func getResourceIssuerClient(request resource.ConfigureRequest, response *resource.ConfigureResponse) *issuer.Client {
+func getResourceIssuerClient(request resource.ConfigureRequest, response *resource.ConfigureResponse) *issuerClient.Client {
 	if request.ProviderData == nil {
 		return nil
 	}

@@ -1,4 +1,4 @@
-package provider
+package issuer
 
 import (
 	"context"
@@ -10,7 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	issuer "terraform-provider-boxer/pkg/generated/api"
+	"terraform-provider-boxer/internal/common"
+	issuer "terraform-provider-boxer/pkg/generated/api/issuerClient"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -101,7 +102,7 @@ func (resource *boxerExternalIdentity) Create(ctx context.Context, request resou
 	}
 	err = resource.issuerClient.PostIdentity(ctx, params)
 	if err != nil {
-		generateError(&response.Diagnostics, "Creating", "External Identity", err)
+		common.GenerateError(&response.Diagnostics, "Creating", "External Identity", err)
 		return
 	}
 
@@ -113,7 +114,7 @@ func (resource *boxerExternalIdentity) Create(ctx context.Context, request resou
 	}
 	err = resource.issuerClient.PostAssociation(ctx, &associationRequest)
 	if err != nil {
-		generateError(&response.Diagnostics, "Creating", "External Identity to Principal Association", err)
+		common.GenerateError(&response.Diagnostics, "Creating", "External Identity to Principal Association", err)
 		return
 	}
 
@@ -147,7 +148,7 @@ func (resource *boxerExternalIdentity) Read(ctx context.Context, request resourc
 		ID:               stateModel.ID.ValueString(),
 	})
 	if err != nil {
-		generateError(&response.Diagnostics, "Reading", "External Identity", err)
+		common.GenerateError(&response.Diagnostics, "Reading", "External Identity", err)
 		return
 	}
 
@@ -156,7 +157,7 @@ func (resource *boxerExternalIdentity) Read(ctx context.Context, request resourc
 		ID:               stateModel.ID.ValueString(),
 	})
 	if err != nil {
-		generateError(&response.Diagnostics, "Reading", "External Identity association", err)
+		common.GenerateError(&response.Diagnostics, "Reading", "External Identity association", err)
 		return
 	}
 
@@ -193,7 +194,7 @@ func (resource *boxerExternalIdentity) Update(ctx context.Context, request resou
 		ID:               planModel.ID.ValueString(),
 	})
 	if err != nil {
-		generateError(&response.Diagnostics, "Updating", "External Identity", err)
+		common.GenerateError(&response.Diagnostics, "Updating", "External Identity", err)
 		return
 	}
 
@@ -214,7 +215,7 @@ func (resource *boxerExternalIdentity) Update(ctx context.Context, request resou
 		PrincipalSchema:  associationPlanModel.SchemaId.ValueString(),
 	})
 	if err != nil {
-		generateError(&response.Diagnostics, "Updating", "External Identity association", err)
+		common.GenerateError(&response.Diagnostics, "Updating", "External Identity association", err)
 		return
 	}
 
@@ -244,7 +245,7 @@ func (resource *boxerExternalIdentity) Delete(ctx context.Context, request resou
 		ID:               stateModel.ID.ValueString(),
 	})
 	if err != nil {
-		generateError(&response.Diagnostics, "Deleting", "External Identity", err)
+		common.GenerateError(&response.Diagnostics, "Deleting", "External Identity", err)
 		return
 	}
 }

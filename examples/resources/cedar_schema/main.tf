@@ -8,9 +8,10 @@ terraform {
 
 provider "boxer" {
   issuer_host = "http://localhost:8888/"
+  validator_host = "http://localhost:8888/"
 }
 
-resource "boxer_cedar_schema" "example"  {
+resource "boxer_issuer_cedar_schema" "example"  {
   id = "example"
   data_json = <<EOT
   {

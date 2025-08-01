@@ -1,11 +1,12 @@
-package provider
+package issuer
 
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	issuer "terraform-provider-boxer/pkg/generated/api"
+	"terraform-provider-boxer/internal/common"
+	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -83,9 +84,9 @@ func (resource *identityProviderResource) Create(ctx context.Context, request re
 		response.Diagnostics.Append(diags...)
 		return
 	}
-	err = resource.issuerClient.PostProvider(ctx, registration, issuer.PostProviderParams{ID: planModel.Name.ValueString()})
+	err = resource.issuerClient.PostProvider(ctx, registration, issuerClient.PostProviderParams{ID: planModel.Name.ValueString()})
 	if err != nil {
-		generateError(&response.Diagnostics, "Creating", "Identity Provider", err)
+		common.GenerateError(&response.Diagnostics, "Creating", "Identity Provider", err)
 		return
 	}
 	planModel.ID = types.StringValue(planModel.Name.ValueString())
@@ -106,9 +107,9 @@ func (resource *identityProviderResource) Read(ctx context.Context, request reso
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	apiData, err := resource.issuerClient.GetProvider(ctx, issuer.GetProviderParams{ID: stateModel.Name.ValueString()})
+	apiData, err := resource.issuerClient.GetProvider(ctx, issuerClient.GetProviderParams{ID: stateModel.Name.ValueString()})
 	if err != nil {
-		generateError(&response.Diagnostics, "Reading", "Identity Provider", err)
+		common.GenerateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
 	}
 	newState := fromBoxerIssuerModel(stateModel.ID.ValueString(), apiData)
@@ -144,14 +145,14 @@ func (resource *identityProviderResource) Update(ctx context.Context, request re
 		response.Diagnostics.Append(diags...)
 		return
 	}
-	err = resource.issuerClient.PostProvider(ctx, registration, issuer.PostProviderParams{ID: stateModel.Name.ValueString()})
+	err = resource.issuerClient.PostProvider(ctx, registration, issuerClient.PostProviderParams{ID: stateModel.Name.ValueString()})
 	if err != nil {
-		generateError(&response.Diagnostics, "Updating", "Identity Provider", err)
+		common.GenerateError(&response.Diagnostics, "Updating", "Identity Provider", err)
 		return
 	}
-	apiData, err := resource.issuerClient.GetProvider(ctx, issuer.GetProviderParams{ID: stateModel.Name.ValueString()})
+	apiData, err := resource.issuerClient.GetProvider(ctx, issuerClient.GetProviderParams{ID: stateModel.Name.ValueString()})
 	if err != nil {
-		generateError(&response.Diagnostics, "Reading", "Identity Provider", err)
+		common.GenerateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
 	}
 	newState := fromBoxerIssuerModel(stateModel.Name.ValueString(), apiData)
@@ -173,9 +174,9 @@ func (resource *identityProviderResource) Delete(ctx context.Context, request re
 		return
 	}
 
-	err = resource.issuerClient.DeleteProvider(ctx, issuer.DeleteProviderParams{ID: stateModel.Name.ValueString()})
+	err = resource.issuerClient.DeleteProvider(ctx, issuerClient.DeleteProviderParams{ID: stateModel.Name.ValueString()})
 	if err != nil {
-		generateError(&response.Diagnostics, "Deleting", "Identity Provider", err)
+		common.GenerateError(&response.Diagnostics, "Deleting", "Identity Provider", err)
 		return
 	}
 }
@@ -189,8 +190,8 @@ func encode(values []string) []attr.Value {
 
 }
 
-func toBoxerIssuerModel(ctx context.Context, plan *identityProviderResourceModel) (*issuer.OidcIdentityProviderRegistration, diag.Diagnostics) {
-	registration := issuer.OidcIdentityProviderRegistration{
+func toBoxerIssuerModel(ctx context.Context, plan *identityProviderResourceModel) (*issuerClient.OidcIdentityProviderRegistration, diag.Diagnostics) {
+	registration := issuerClient.OidcIdentityProviderRegistration{
 		DiscoveryUrl: plan.DiscoveryUrl.ValueString(),
 		UserIdClaim:  plan.UserIdClaim.ValueString(),
 		Audiences:    make([]string, 0, len(plan.Audiences.Elements())),
@@ -207,7 +208,7 @@ func toBoxerIssuerModel(ctx context.Context, plan *identityProviderResourceModel
 	return &registration, nil
 }
 
-func fromBoxerIssuerModel(id string, apiData *issuer.OidcIdentityProviderRegistration) identityProviderResourceModel {
+func fromBoxerIssuerModel(id string, apiData *issuerClient.OidcIdentityProviderRegistration) identityProviderResourceModel {
 	return identityProviderResourceModel{
 		ID:           types.StringValue(id),
 		Name:         types.StringValue(id),
@@ -229,5 +230,5 @@ type identityProviderResourceModel struct {
 
 // identityProviderResource is the resource implementation.
 type identityProviderResource struct {
-	issuerClient *issuer.Client
+	issuerClient *issuerClient.Client
 }

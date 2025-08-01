@@ -1,11 +1,12 @@
-package provider
+package issuer
 
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"io"
+	"terraform-provider-boxer/internal/common"
 	"terraform-provider-boxer/internal/security"
-	"terraform-provider-boxer/pkg/generated/api"
+	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -32,7 +33,7 @@ func (dataSource *boxerTokenDataSource) Configure(_ context.Context, request dat
 		// so we can safely return here without setting the issuerHost.
 		return
 	}
-	client, err := issuer.NewClient(issuerHost, security.NewSecuritySourceFromContext(TokenContextKey))
+	client, err := issuerClient.NewClient(issuerHost, security.NewSecuritySourceFromContext(TokenContextKey))
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Invalid Issuer Client",
@@ -87,17 +88,17 @@ func (dataSource *boxerTokenDataSource) Read(ctx context.Context, request dataso
 	}
 
 	childContext := context.WithValue(ctx, TokenContextKey, configModel.Auth.Header.ValueString())
-	token, err := dataSource.issuerClient.Token(childContext, issuer.TokenParams{
+	token, err := dataSource.issuerClient.Token(childContext, issuerClient.TokenParams{
 		IdentityProvider: configModel.IdentityProvider.ValueString(),
 	})
 	if err != nil {
-		generateError(&response.Diagnostics, "Getting", "Boxer token", err)
+		common.GenerateError(&response.Diagnostics, "Getting", "Boxer token", err)
 		return
 	}
 
 	tokenValue, err := io.ReadAll(token.Data)
 	if err != nil {
-		generateError(&response.Diagnostics, "Reading to string", "Boxer token", err)
+		common.GenerateError(&response.Diagnostics, "Reading to string", "Boxer token", err)
 		return
 	}
 
@@ -128,5 +129,5 @@ type boxerTokenDataSourceModel struct {
 
 // boxerTokenDataSource is the data source implementation.
 type boxerTokenDataSource struct {
-	issuerClient *issuer.Client
+	issuerClient *issuerClient.Client
 }

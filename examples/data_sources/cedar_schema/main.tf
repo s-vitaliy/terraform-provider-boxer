@@ -10,7 +10,7 @@ provider "boxer" {
   issuer_host = "http://localhost:8888/"
 }
 
-data "boxer_cedar_schema" "test" {
+data "boxer_issuer_cedar_schema" "test" {
   id = "test"
 }
 

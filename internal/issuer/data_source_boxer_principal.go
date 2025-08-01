@@ -1,9 +1,10 @@
-package provider
+package issuer
 
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-boxer/pkg/generated/api"
+	"terraform-provider-boxer/internal/common"
+	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,13 +67,13 @@ func (dataSource *boxerPrincipalDataSource) Read(ctx context.Context, request da
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	params := issuer.GetPrincipalParams{
+	params := issuerClient.GetPrincipalParams{
 		ID:     configModel.ID.ValueString(),
 		Schema: configModel.SchemaId.ValueString(),
 	}
 	apiData, err := dataSource.issuerClient.GetPrincipal(ctx, params)
 	if err != nil {
-		generateError(&response.Diagnostics, "Reading", "Boxer Principal", err)
+		common.GenerateError(&response.Diagnostics, "Reading", "Boxer Principal", err)
 		return
 	}
 	configModel.DataJson = types.StringValue(apiData.String())
@@ -92,5 +93,5 @@ type boxerPrincipalDataSourceModel struct {
 
 // boxerPrincipalDataSource is the data source implementation.
 type boxerPrincipalDataSource struct {
-	issuerClient *issuer.Client
+	issuerClient *issuerClient.Client
 }
