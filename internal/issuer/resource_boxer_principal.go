@@ -64,7 +64,7 @@ func (resource *boxerPrincipal) Schema(_ context.Context, _ resource.SchemaReque
 // Create creates the resource and sets the initial Terraform state.
 func (resource *boxerPrincipal) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	var planModel boxerPrincipalModel
-	err := readFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
+	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
@@ -98,7 +98,7 @@ func (resource *boxerPrincipal) Create(ctx context.Context, request resource.Cre
 // Read refreshes the Terraform state with the latest data.
 func (resource *boxerPrincipal) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	var stateModel boxerPrincipalModel
-	err := readFromState(ctx, &stateModel, request.State, &response.Diagnostics)
+	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
@@ -133,7 +133,7 @@ func (resource *boxerPrincipal) Read(ctx context.Context, request resource.ReadR
 // Update updates the resource and sets the updated Terraform state on success.
 func (resource *boxerPrincipal) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	var planModel boxerPrincipalModel
-	err := readFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
+	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the planModel, we can't proceed with the update.
 		// so we return early.
@@ -141,7 +141,7 @@ func (resource *boxerPrincipal) Update(ctx context.Context, request resource.Upd
 		return
 	}
 	var stateModel boxerPrincipalModel
-	err = readFromState(ctx, &stateModel, request.State, &response.Diagnostics)
+	err = common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
@@ -173,7 +173,7 @@ func (resource *boxerPrincipal) Update(ctx context.Context, request resource.Upd
 // Delete deletes the resource and removes the Terraform state on success.
 func (resource *boxerPrincipal) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
 	var stateModel boxerPrincipalModel
-	err := readFromState(ctx, &stateModel, request.State, &response.Diagnostics)
+	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.

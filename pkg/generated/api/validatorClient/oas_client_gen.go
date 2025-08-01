@@ -33,7 +33,7 @@ type Invoker interface {
 	// PostSchema invokes post_schema operation.
 	//
 	// POST /schema/{id}
-	PostSchema(ctx context.Context, params PostSchemaParams) error
+	PostSchema(ctx context.Context, request jx.Raw, params PostSchemaParams) error
 }
 
 // Client implements OAS client.
@@ -182,12 +182,12 @@ func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res
 // PostSchema invokes post_schema operation.
 //
 // POST /schema/{id}
-func (c *Client) PostSchema(ctx context.Context, params PostSchemaParams) error {
-	_, err := c.sendPostSchema(ctx, params)
+func (c *Client) PostSchema(ctx context.Context, request jx.Raw, params PostSchemaParams) error {
+	_, err := c.sendPostSchema(ctx, request, params)
 	return err
 }
 
-func (c *Client) sendPostSchema(ctx context.Context, params PostSchemaParams) (res *PostSchemaOK, err error) {
+func (c *Client) sendPostSchema(ctx context.Context, request jx.Raw, params PostSchemaParams) (res *PostSchemaOK, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
@@ -215,6 +215,9 @@ func (c *Client) sendPostSchema(ctx context.Context, params PostSchemaParams) (r
 	r, err := ht.NewRequest(ctx, "POST", u)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostSchemaRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
 	}
 
 	resp, err := c.cfg.Client.Do(r)

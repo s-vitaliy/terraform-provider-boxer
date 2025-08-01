@@ -1,11 +1,11 @@
-package issuer
+package validator
 
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-boxer/internal/common"
-	"terraform-provider-boxer/pkg/generated/api/issuerClient"
+	"terraform-provider-boxer/pkg/generated/api/validatorClient"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -23,7 +23,7 @@ func NewCedarSchemaDataSource() datasource.DataSource {
 }
 
 func (dataSource *cedarSchemaDataSource) Configure(_ context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
-	client := getDataSourceIssuerClient(request, response)
+	client := getDataSourceValidatorClient(request, response)
 	if client == nil {
 		// If the client is nil, we cannot proceed with the data source.
 		// This method will be called again when the provider is configured,
@@ -35,7 +35,7 @@ func (dataSource *cedarSchemaDataSource) Configure(_ context.Context, request da
 
 // Metadata responds with the data source type name.
 func (dataSource *cedarSchemaDataSource) Metadata(_ context.Context, request datasource.MetadataRequest, response *datasource.MetadataResponse) {
-	response.TypeName = request.ProviderTypeName + "_cedar_schema"
+	response.TypeName = request.ProviderTypeName + "_validator_cedar_schema"
 }
 
 // Schema defines the schema for the data source.
@@ -58,14 +58,14 @@ func (dataSource *cedarSchemaDataSource) Schema(_ context.Context, _ datasource.
 func (dataSource *cedarSchemaDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
 	tflog.Info(ctx, "Reading cedar schema data source")
 	var configModel cedarSchemaDataSourceModel
-	err := readFromConfig(ctx, &configModel, request.Config, &response.Diagnostics)
+	err := common.ReadFromConfig(ctx, &configModel, request.Config, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the configModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	apiData, err := dataSource.issuerClient.GetSchema(ctx, issuerClient.GetSchemaParams{ID: configModel.ID.ValueString()})
+	apiData, err := dataSource.issuerClient.GetSchema(ctx, validatorClient.GetSchemaParams{ID: configModel.ID.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Reading", "Cedar Schema", err)
 		return
@@ -86,5 +86,5 @@ type cedarSchemaDataSourceModel struct {
 
 // cedarSchemaDataSource is the data source implementation.
 type cedarSchemaDataSource struct {
-	issuerClient *issuerClient.Client
+	issuerClient *validatorClient.Client
 }

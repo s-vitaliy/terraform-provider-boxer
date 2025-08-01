@@ -62,7 +62,7 @@ func (dataSource *identityProviderDataSource) Schema(_ context.Context, _ dataso
 func (dataSource *identityProviderDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
 	tflog.Info(ctx, "Reading identity provider data source")
 	var configModel identityProviderDataSourceModel
-	err := readFromConfig(ctx, &configModel, request.Config, &response.Diagnostics)
+	err := common.ReadFromConfig(ctx, &configModel, request.Config, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the config, we can't proceed with the update.
 		// so we return early.

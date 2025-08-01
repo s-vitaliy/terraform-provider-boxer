@@ -71,7 +71,7 @@ func (dataSource *boxerExternalIdentityDataSource) Schema(_ context.Context, _ d
 // Read refreshes the Terraform state with the latest data.
 func (dataSource *boxerExternalIdentityDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
 	var configModel boxerExternalIdentityDataSourceModel
-	err := readFromConfig(ctx, &configModel, request.Config, &response.Diagnostics)
+	err := common.ReadFromConfig(ctx, &configModel, request.Config, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the configModel, we can't proceed with the update.
 		// so we return early.

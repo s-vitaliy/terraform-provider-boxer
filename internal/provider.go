@@ -1,4 +1,4 @@
-package issuer
+package internal
 
 import (
 	"context"
@@ -9,8 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"os"
+	"terraform-provider-boxer/internal/issuer"
 	"terraform-provider-boxer/internal/security"
+	"terraform-provider-boxer/internal/validator"
 	"terraform-provider-boxer/pkg/generated/api/issuerClient"
+	"terraform-provider-boxer/pkg/generated/api/validatorClient"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -38,17 +41,17 @@ func (b BoxerProvider) Schema(_ context.Context, _ provider.SchemaRequest, respo
 				Description: "The host of the Boxer Issuer API.",
 				Required:    true,
 			},
+			"validator_host": schema.StringAttribute{
+				Description: "The host of the Boxer Issuer API.",
+				Required:    true,
+			},
 		},
 	}
 }
 
 type boxerProviderModel struct {
-	IssuerHost types.String `tfsdk:"issuer_host"`
-}
-
-type BoxerProviderData struct {
-	issuerHost   string
-	issuerClient *issuerClient.Client
+	IssuerHost    types.String `tfsdk:"issuer_host"`
+	ValidatorHost types.String `tfsdk:"validator_host"`
 }
 
 func (b BoxerProvider) Configure(ctx context.Context, request provider.ConfigureRequest, response *provider.ConfigureResponse) {
@@ -61,7 +64,7 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 	if config.IssuerHost.IsUnknown() {
 		response.Diagnostics.AddAttributeError(
 			path.Root("issuer_host"),
-			"Unknown Boxer Issuer host",
+			"Unknown Boxer Issuer issuerHost",
 			"The issuer_host parameter is mandatory"+
 				"Either target apply the source of the value first, set the value statically in the configuration,"+
 				"or use the BOXER_ISSUER_HOST environment variable.",
@@ -75,19 +78,24 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 	// Default values to environment variables, but override
 	// with Terraform configuration value if set.
 
-	host := os.Getenv("BOXER_ISSUER_HOST")
+	issuerHost := os.Getenv("BOXER_ISSUER_HOST")
+	validatorHost := os.Getenv("BOXER_VALIDATOR_HOST")
 
 	if !config.IssuerHost.IsNull() {
-		host = config.IssuerHost.ValueString()
+		issuerHost = config.IssuerHost.ValueString()
+	}
+
+	if !config.ValidatorHost.IsNull() {
+		validatorHost = config.ValidatorHost.ValueString()
 	}
 
 	// If any of the expected configurations are missing, return
 	// errors with provider-specific guidance.
 
-	if host == "" {
+	if issuerHost == "" {
 		response.Diagnostics.AddAttributeError(
 			path.Root("issuer_host"),
-			"Unknown Boxer Issuer host",
+			"Unknown Boxer Issuer issuerHost",
 			"The issuer_host parameter is mandatory"+
 				"Either target apply the source of the value first, set the value statically in the configuration,"+
 				"or use the BOXER_ISSUER_HOST environment variable.",
@@ -98,19 +106,28 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 		return
 	}
 
-	client, err := issuerClient.NewClient(host, security.NewEmptySecuritySource())
+	issuerApiClient, err := issuerClient.NewClient(issuerHost, security.NewEmptySecuritySource())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Failed to initialize Boxer Issuer Client",
-			"An unexpected error occurred when creating the Boxer Issuer client. "+
-				"Boxer Issuer Client Error: "+err.Error(),
+			"An unexpected error occurred when creating the Boxer Issuer client: "+err.Error(),
+		)
+		return
+	}
+
+	validatorApiClient, err := validatorClient.NewClient(validatorHost)
+	if err != nil {
+		response.Diagnostics.AddError(
+			"Failed to initialize Boxer Validator Client",
+			"An unexpected error occurred when creating the Boxer Validator client: "+err.Error(),
 		)
 		return
 	}
 
 	data := &BoxerProviderData{
-		issuerClient: client,
-		issuerHost:   host,
+		issuerClient:    issuerApiClient,
+		validatorClient: validatorApiClient,
+		issuerHost:      issuerHost,
 	}
 	response.DataSourceData = data
 	response.ResourceData = data
@@ -118,20 +135,28 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 
 func (b BoxerProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewIdentityProviderDataSource,
-		NewCedarSchemaDataSource,
-		NewBoxerPrincipalDataSource,
-		NewBoxerExternalIdentityDataSource,
-		NewBoxerTokenDataSource,
+		// Issuer Data sources
+		issuer.NewIdentityProviderDataSource,
+		issuer.NewCedarSchemaDataSource,
+		issuer.NewBoxerPrincipalDataSource,
+		issuer.NewBoxerExternalIdentityDataSource,
+		issuer.NewBoxerTokenDataSource,
+
+		// Validator data sources
+		validator.NewCedarSchemaDataSource,
 	}
 }
 
 func (b BoxerProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewIdentityProviderResource,
-		NewCedarSchemaResource,
-		NewBoxerPrincipalResource,
-		NewBoxerExternalIdentityResource,
+		// Boxer Issuer resources
+		issuer.NewIdentityProviderResource,
+		issuer.NewCedarSchemaResource,
+		issuer.NewBoxerPrincipalResource,
+		issuer.NewBoxerExternalIdentityResource,
+
+		// Boxer Validator resources
+		validator.NewCedarSchemaResource,
 	}
 }
 

@@ -3,6 +3,7 @@ package issuer
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-boxer/internal/common"
 	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 
@@ -12,16 +13,16 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ datasource.DataSource              = &boxerPrincipalDataSource{}
-	_ datasource.DataSourceWithConfigure = &boxerPrincipalDataSource{}
+	_ datasource.DataSource              = &cedarSchemaDataSource{}
+	_ datasource.DataSourceWithConfigure = &cedarSchemaDataSource{}
 )
 
-// NewBoxerPrincipalDataSource is a helper function to simplify the provider implementation.
-func NewBoxerPrincipalDataSource() datasource.DataSource {
-	return &boxerPrincipalDataSource{}
+// NewCedarSchemaDataSource is a helper function to simplify the provider implementation.
+func NewCedarSchemaDataSource() datasource.DataSource {
+	return &cedarSchemaDataSource{}
 }
 
-func (dataSource *boxerPrincipalDataSource) Configure(_ context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
+func (dataSource *cedarSchemaDataSource) Configure(_ context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
 	client := getDataSourceIssuerClient(request, response)
 	if client == nil {
 		// If the client is nil, we cannot proceed with the data source.
@@ -33,20 +34,16 @@ func (dataSource *boxerPrincipalDataSource) Configure(_ context.Context, request
 }
 
 // Metadata responds with the data source type name.
-func (dataSource *boxerPrincipalDataSource) Metadata(_ context.Context, request datasource.MetadataRequest, response *datasource.MetadataResponse) {
-	response.TypeName = request.ProviderTypeName + "_principal"
+func (dataSource *cedarSchemaDataSource) Metadata(_ context.Context, request datasource.MetadataRequest, response *datasource.MetadataResponse) {
+	response.TypeName = request.ProviderTypeName + "_cedar_schema"
 }
 
 // Schema defines the schema for the data source.
-func (dataSource *boxerPrincipalDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, response *datasource.SchemaResponse) {
+func (dataSource *cedarSchemaDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description: "The unique identifier of the cedar schema.",
-				Required:    true,
-			},
-			"schema_id": schema.StringAttribute{
-				Description: "The schema ID that this principal belongs to.",
 				Required:    true,
 			},
 			"data_json": schema.StringAttribute{
@@ -58,8 +55,9 @@ func (dataSource *boxerPrincipalDataSource) Schema(_ context.Context, _ datasour
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (dataSource *boxerPrincipalDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
-	var configModel boxerPrincipalDataSourceModel
+func (dataSource *cedarSchemaDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
+	tflog.Info(ctx, "Reading cedar schema data source")
+	var configModel cedarSchemaDataSourceModel
 	err := common.ReadFromConfig(ctx, &configModel, request.Config, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the configModel, we can't proceed with the update.
@@ -67,13 +65,9 @@ func (dataSource *boxerPrincipalDataSource) Read(ctx context.Context, request da
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	params := issuerClient.GetPrincipalParams{
-		ID:     configModel.ID.ValueString(),
-		Schema: configModel.SchemaId.ValueString(),
-	}
-	apiData, err := dataSource.issuerClient.GetPrincipal(ctx, params)
+	apiData, err := dataSource.issuerClient.GetSchema(ctx, issuerClient.GetSchemaParams{ID: configModel.ID.ValueString()})
 	if err != nil {
-		common.GenerateError(&response.Diagnostics, "Reading", "Boxer Principal", err)
+		common.GenerateError(&response.Diagnostics, "Reading", "Cedar Schema", err)
 		return
 	}
 	configModel.DataJson = types.StringValue(apiData.String())
@@ -85,13 +79,12 @@ func (dataSource *boxerPrincipalDataSource) Read(ctx context.Context, request da
 	}
 }
 
-type boxerPrincipalDataSourceModel struct {
+type cedarSchemaDataSourceModel struct {
 	ID       types.String `tfsdk:"id"`
 	DataJson types.String `tfsdk:"data_json"`
-	SchemaId types.String `tfsdk:"schema_id"`
 }
 
-// boxerPrincipalDataSource is the data source implementation.
-type boxerPrincipalDataSource struct {
+// cedarSchemaDataSource is the data source implementation.
+type cedarSchemaDataSource struct {
 	issuerClient *issuerClient.Client
 }

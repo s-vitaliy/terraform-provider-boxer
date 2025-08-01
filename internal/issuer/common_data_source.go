@@ -1,11 +1,7 @@
 package issuer
 
 import (
-	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 )
 
@@ -13,7 +9,7 @@ func getDataSourceIssuerClient(request datasource.ConfigureRequest, response *da
 	if request.ProviderData == nil {
 		return nil
 	}
-	data, ok := request.ProviderData.(*BoxerProviderData)
+	data, ok := request.ProviderData.(ProviderDataReader)
 	if !ok {
 		response.Diagnostics.AddError(
 			"Invalid Provider Data",
@@ -21,14 +17,14 @@ func getDataSourceIssuerClient(request datasource.ConfigureRequest, response *da
 		)
 		return nil
 	}
-	if data.issuerClient == nil {
+	if data.GetIssuerClient() == nil {
 		response.Diagnostics.AddError(
 			"Invalid Issuer Client",
 			"The issuer client must not be nil. This is most likely the bug in the provider implementation.",
 		)
 		return nil
 	}
-	client := data.issuerClient
+	client := data.GetIssuerClient()
 	return client
 }
 
@@ -36,7 +32,7 @@ func getDataSourceIssuerHost(request datasource.ConfigureRequest, response *data
 	if request.ProviderData == nil {
 		return ""
 	}
-	data, ok := request.ProviderData.(*BoxerProviderData)
+	data, ok := request.ProviderData.(ProviderDataReader)
 	if !ok {
 		response.Diagnostics.AddError(
 			"Invalid Provider Data",
@@ -44,21 +40,12 @@ func getDataSourceIssuerHost(request datasource.ConfigureRequest, response *data
 		)
 		return ""
 	}
-	if data.issuerHost == "" {
+	if data.GetHostName() == "" {
 		response.Diagnostics.AddError(
 			"Invalid Issuer Host",
 			"The issuer host must not be empty. This is most likely the bug in the provider implementation.",
 		)
 		return ""
 	}
-	return data.issuerHost
-}
-
-func readFromConfig(ctx context.Context, target interface{}, baseState tfsdk.Config, diagnostics *diag.Diagnostics) error {
-	diags := baseState.Get(ctx, target)
-	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
-		return fmt.Errorf("error getting config")
-	}
-	return nil
+	return data.GetHostName()
 }

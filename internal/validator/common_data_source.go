@@ -1,11 +1,11 @@
-package issuer
+package validator
 
 import (
-	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"terraform-provider-boxer/pkg/generated/api/issuerClient"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"terraform-provider-boxer/pkg/generated/api/validatorClient"
 )
 
-func getResourceIssuerClient(request resource.ConfigureRequest, response *resource.ConfigureResponse) *issuerClient.Client {
+func getDataSourceValidatorClient(request datasource.ConfigureRequest, response *datasource.ConfigureResponse) *validatorClient.Client {
 	if request.ProviderData == nil {
 		return nil
 	}
@@ -17,13 +17,13 @@ func getResourceIssuerClient(request resource.ConfigureRequest, response *resour
 		)
 		return nil
 	}
-	if data.GetIssuerClient() == nil {
+	if data.GetValidatorClient() == nil {
 		response.Diagnostics.AddError(
 			"Invalid Issuer Client",
 			"The issuer client must not be nil. This is most likely the bug in the provider implementation.",
 		)
 		return nil
 	}
-	client := data.GetIssuerClient()
+	client := data.GetValidatorClient()
 	return client
 }

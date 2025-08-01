@@ -72,7 +72,7 @@ func (resource *identityProviderResource) Schema(_ context.Context, _ resource.S
 // Create creates the resource and sets the initial Terraform state.
 func (resource *identityProviderResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	var planModel identityProviderResourceModel
-	err := readFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
+	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
@@ -100,7 +100,7 @@ func (resource *identityProviderResource) Create(ctx context.Context, request re
 // Read refreshes the Terraform state with the latest data.
 func (resource *identityProviderResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	var stateModel identityProviderResourceModel
-	err := readFromState(ctx, &stateModel, request.State, &response.Diagnostics)
+	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
@@ -123,7 +123,7 @@ func (resource *identityProviderResource) Read(ctx context.Context, request reso
 // Update updates the resource and sets the updated Terraform state on success.
 func (resource *identityProviderResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	var planModel identityProviderResourceModel
-	err := readFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
+	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
@@ -132,7 +132,7 @@ func (resource *identityProviderResource) Update(ctx context.Context, request re
 	}
 
 	var stateModel identityProviderResourceModel
-	err = readFromState(ctx, &stateModel, request.State, &response.Diagnostics)
+	err = common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
@@ -166,7 +166,7 @@ func (resource *identityProviderResource) Update(ctx context.Context, request re
 // Delete deletes the resource and removes the Terraform state on success.
 func (resource *identityProviderResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
 	var stateModel identityProviderResourceModel
-	err := readFromState(ctx, &stateModel, request.State, &response.Diagnostics)
+	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.

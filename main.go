@@ -5,7 +5,7 @@ import (
 	"flag"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"log"
-	"terraform-provider-boxer/internal/issuer"
+	"terraform-provider-boxer/internal"
 )
 
 var (
@@ -24,7 +24,7 @@ func main() {
 		Debug:   debug,
 	}
 
-	err := providerserver.Serve(context.Background(), issuer.New(version), opts)
+	err := providerserver.Serve(context.Background(), internal.New(version), opts)
 
 	if err != nil {
 		log.Fatal(err.Error())

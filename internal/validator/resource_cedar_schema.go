@@ -1,4 +1,4 @@
-package issuer
+package validator
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"terraform-provider-boxer/internal/common"
-	"terraform-provider-boxer/pkg/generated/api/issuerClient"
+	"terraform-provider-boxer/pkg/generated/api/validatorClient"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -27,17 +27,17 @@ func NewCedarSchemaResource() resource.Resource {
 
 // cedarSchemaResource is the resource implementation.
 type cedarSchemaResource struct {
-	issuerClient *issuerClient.Client
+	validatorClient *validatorClient.Client
 }
 
 func (resource *cedarSchemaResource) Configure(_ context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
-	client := getResourceIssuerClient(request, response)
-	resource.issuerClient = client
+	client := getResourceValidatorClient(request, response)
+	resource.validatorClient = client
 }
 
 // Metadata responds with the resource type name.
 func (resource *cedarSchemaResource) Metadata(_ context.Context, request resource.MetadataRequest, response *resource.MetadataResponse) {
-	response.TypeName = request.ProviderTypeName + "_issuer_cedar_schema"
+	response.TypeName = request.ProviderTypeName + "_validator_cedar_schema"
 }
 
 // Schema defines the schema for the resource.
@@ -67,7 +67,7 @@ func (resource *cedarSchemaResource) Create(ctx context.Context, request resourc
 		return
 	}
 
-	err = resource.issuerClient.PostSchema(ctx, jx.Raw(planModel.DataJson.ValueString()), issuerClient.PostSchemaParams{ID: planModel.ID.ValueString()})
+	err = resource.validatorClient.PostSchema(ctx, jx.Raw(planModel.DataJson.ValueString()), validatorClient.PostSchemaParams{ID: planModel.ID.ValueString()})
 
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Creating", "Cedar Schema", err)
@@ -98,7 +98,7 @@ func (resource *cedarSchemaResource) Read(ctx context.Context, request resource.
 	// and if we use it, we will get a 'provider produced inconsistent result' error.
 	// Instead, we just check if the schema exists and save the stateModel.
 	// This will be updated in the future to use the read result.
-	_, err = resource.issuerClient.GetSchema(ctx, issuerClient.GetSchemaParams{ID: stateModel.ID.ValueString()})
+	_, err = resource.validatorClient.GetSchema(ctx, validatorClient.GetSchemaParams{ID: stateModel.ID.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Reading", "Cedar Schema", err)
 		return
@@ -131,7 +131,7 @@ func (resource *cedarSchemaResource) Update(ctx context.Context, request resourc
 		return
 	}
 
-	err = resource.issuerClient.PostSchema(ctx, jx.Raw(planModel.DataJson.ValueString()), issuerClient.PostSchemaParams{ID: planModel.ID.ValueString()})
+	err = resource.validatorClient.PostSchema(ctx, jx.Raw(planModel.DataJson.ValueString()), validatorClient.PostSchemaParams{ID: planModel.ID.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Updating", "Cedar Schema", err)
 		return
@@ -156,7 +156,7 @@ func (resource *cedarSchemaResource) Delete(ctx context.Context, request resourc
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	err = resource.issuerClient.DeleteSchema(ctx, issuerClient.DeleteSchemaParams{ID: stateModel.ID.ValueString()})
+	err = resource.validatorClient.DeleteSchema(ctx, validatorClient.DeleteSchemaParams{ID: stateModel.ID.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Deleting", "Cedar Schema", err)
 		return
