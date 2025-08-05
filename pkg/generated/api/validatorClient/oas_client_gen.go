@@ -26,6 +26,10 @@ type Invoker interface {
 	//
 	// DELETE /action_set/{id}
 	DeleteActionSet(ctx context.Context, params DeleteActionSetParams) error
+	// DeletePolicySet invokes delete_policy_set operation.
+	//
+	// DELETE /policy_set/{id}
+	DeletePolicySet(ctx context.Context, params DeletePolicySetParams) error
 	// DeleteResourceSet invokes delete_resource_set operation.
 	//
 	// DELETE /resource_set/{id}
@@ -38,6 +42,10 @@ type Invoker interface {
 	//
 	// GET /action_set/{id}
 	GetActionSet(ctx context.Context, params GetActionSetParams) (*ActionSetRegistration, error)
+	// GetPolicySet invokes get_policy_set operation.
+	//
+	// GET /policy_set/{id}
+	GetPolicySet(ctx context.Context, params GetPolicySetParams) (*PolicySetRegistration, error)
 	// GetResourceSet invokes get_resource_set operation.
 	//
 	// GET /resource_set/{id}
@@ -50,6 +58,10 @@ type Invoker interface {
 	//
 	// POST /action_set/{id}
 	PostActionSet(ctx context.Context, request *ActionSetRegistration, params PostActionSetParams) error
+	// PostPolicySet invokes post_policy_set operation.
+	//
+	// POST /policy_set/{id}
+	PostPolicySet(ctx context.Context, request *PolicySetRegistration, params PostPolicySetParams) error
 	// PostResourceSet invokes post_resource_set operation.
 	//
 	// POST /resource_set/{id}
@@ -144,6 +156,58 @@ func (c *Client) sendDeleteActionSet(ctx context.Context, params DeleteActionSet
 	defer resp.Body.Close()
 
 	result, err := decodeDeleteActionSetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeletePolicySet invokes delete_policy_set operation.
+//
+// DELETE /policy_set/{id}
+func (c *Client) DeletePolicySet(ctx context.Context, params DeletePolicySetParams) error {
+	_, err := c.sendDeletePolicySet(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeletePolicySet(ctx context.Context, params DeletePolicySetParams) (res *DeletePolicySetOK, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/policy_set/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeDeletePolicySetResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -300,6 +364,58 @@ func (c *Client) sendGetActionSet(ctx context.Context, params GetActionSetParams
 	defer resp.Body.Close()
 
 	result, err := decodeGetActionSetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetPolicySet invokes get_policy_set operation.
+//
+// GET /policy_set/{id}
+func (c *Client) GetPolicySet(ctx context.Context, params GetPolicySetParams) (*PolicySetRegistration, error) {
+	res, err := c.sendGetPolicySet(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetPolicySet(ctx context.Context, params GetPolicySetParams) (res *PolicySetRegistration, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/policy_set/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeGetPolicySetResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -468,6 +584,61 @@ func (c *Client) sendPostActionSet(ctx context.Context, request *ActionSetRegist
 	defer resp.Body.Close()
 
 	result, err := decodePostActionSetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostPolicySet invokes post_policy_set operation.
+//
+// POST /policy_set/{id}
+func (c *Client) PostPolicySet(ctx context.Context, request *PolicySetRegistration, params PostPolicySetParams) error {
+	_, err := c.sendPostPolicySet(ctx, request, params)
+	return err
+}
+
+func (c *Client) sendPostPolicySet(ctx context.Context, request *PolicySetRegistration, params PostPolicySetParams) (res *PostPolicySetOK, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/policy_set/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostPolicySetRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodePostPolicySetResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

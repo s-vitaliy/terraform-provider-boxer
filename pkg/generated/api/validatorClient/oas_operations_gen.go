@@ -7,12 +7,15 @@ type OperationName = string
 
 const (
 	DeleteActionSetOperation   OperationName = "DeleteActionSet"
+	DeletePolicySetOperation   OperationName = "DeletePolicySet"
 	DeleteResourceSetOperation OperationName = "DeleteResourceSet"
 	DeleteSchemaOperation      OperationName = "DeleteSchema"
 	GetActionSetOperation      OperationName = "GetActionSet"
+	GetPolicySetOperation      OperationName = "GetPolicySet"
 	GetResourceSetOperation    OperationName = "GetResourceSet"
 	GetSchemaOperation         OperationName = "GetSchema"
 	PostActionSetOperation     OperationName = "PostActionSet"
+	PostPolicySetOperation     OperationName = "PostPolicySet"
 	PostResourceSetOperation   OperationName = "PostResourceSet"
 	PostSchemaOperation        OperationName = "PostSchema"
 )

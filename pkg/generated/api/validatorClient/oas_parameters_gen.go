@@ -7,6 +7,11 @@ type DeleteActionSetParams struct {
 	ID string
 }
 
+// DeletePolicySetParams is parameters of delete_policy_set operation.
+type DeletePolicySetParams struct {
+	ID string
+}
+
 // DeleteResourceSetParams is parameters of delete_resource_set operation.
 type DeleteResourceSetParams struct {
 	ID string
@@ -22,6 +27,11 @@ type GetActionSetParams struct {
 	ID string
 }
 
+// GetPolicySetParams is parameters of get_policy_set operation.
+type GetPolicySetParams struct {
+	ID string
+}
+
 // GetResourceSetParams is parameters of get_resource_set operation.
 type GetResourceSetParams struct {
 	ID string
@@ -34,6 +44,11 @@ type GetSchemaParams struct {
 
 // PostActionSetParams is parameters of post_action_set operation.
 type PostActionSetParams struct {
+	ID string
+}
+
+// PostPolicySetParams is parameters of post_policy_set operation.
+type PostPolicySetParams struct {
 	ID string
 }
 

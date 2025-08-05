@@ -68,14 +68,35 @@ func (s *ActionSetRegistration) SetRoutes(val []ActionRouteRegistration) {
 // DeleteActionSetOK is response for DeleteActionSet operation.
 type DeleteActionSetOK struct{}
 
+// DeletePolicySetOK is response for DeletePolicySet operation.
+type DeletePolicySetOK struct{}
+
 // DeleteResourceSetOK is response for DeleteResourceSet operation.
 type DeleteResourceSetOK struct{}
 
 // DeleteSchemaOK is response for DeleteSchema operation.
 type DeleteSchemaOK struct{}
 
+// Ref: #/components/schemas/PolicySetRegistration
+type PolicySetRegistration struct {
+	Policy string `json:"policy"`
+}
+
+// GetPolicy returns the value of Policy.
+func (s *PolicySetRegistration) GetPolicy() string {
+	return s.Policy
+}
+
+// SetPolicy sets the value of Policy.
+func (s *PolicySetRegistration) SetPolicy(val string) {
+	s.Policy = val
+}
+
 // PostActionSetOK is response for PostActionSet operation.
 type PostActionSetOK struct{}
+
+// PostPolicySetOK is response for PostPolicySet operation.
+type PostPolicySetOK struct{}
 
 // PostResourceSetOK is response for PostResourceSet operation.
 type PostResourceSetOK struct{}
