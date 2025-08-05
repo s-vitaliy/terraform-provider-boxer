@@ -145,6 +145,7 @@ func (b BoxerProvider) DataSources(_ context.Context) []func() datasource.DataSo
 		// Validator data sources
 		validator.NewCedarSchemaDataSource,
 		validator.NewActionDiscoveryDocumentDataSource,
+		validator.NewResourceDiscoveryDocumentDataSource,
 	}
 }
 
@@ -159,6 +160,7 @@ func (b BoxerProvider) Resources(_ context.Context) []func() resource.Resource {
 		// Boxer Validator resources
 		validator.NewCedarSchemaResource,
 		validator.NewActionDiscoveryDocumentResource,
+		validator.NewResourceDiscoveryDocumentResource,
 	}
 }
 

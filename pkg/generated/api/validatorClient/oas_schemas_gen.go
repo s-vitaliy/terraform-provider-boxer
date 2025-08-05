@@ -68,11 +68,69 @@ func (s *ActionSetRegistration) SetRoutes(val []ActionRouteRegistration) {
 // DeleteActionSetOK is response for DeleteActionSet operation.
 type DeleteActionSetOK struct{}
 
+// DeleteResourceSetOK is response for DeleteResourceSet operation.
+type DeleteResourceSetOK struct{}
+
 // DeleteSchemaOK is response for DeleteSchema operation.
 type DeleteSchemaOK struct{}
 
 // PostActionSetOK is response for PostActionSet operation.
 type PostActionSetOK struct{}
 
+// PostResourceSetOK is response for PostResourceSet operation.
+type PostResourceSetOK struct{}
+
 // PostSchemaOK is response for PostSchema operation.
 type PostSchemaOK struct{}
+
+// Ref: #/components/schemas/ResourceRouteRegistration
+type ResourceRouteRegistration struct {
+	ResourceUid   string `json:"resourceUid"`
+	RouteTemplate string `json:"routeTemplate"`
+}
+
+// GetResourceUid returns the value of ResourceUid.
+func (s *ResourceRouteRegistration) GetResourceUid() string {
+	return s.ResourceUid
+}
+
+// GetRouteTemplate returns the value of RouteTemplate.
+func (s *ResourceRouteRegistration) GetRouteTemplate() string {
+	return s.RouteTemplate
+}
+
+// SetResourceUid sets the value of ResourceUid.
+func (s *ResourceRouteRegistration) SetResourceUid(val string) {
+	s.ResourceUid = val
+}
+
+// SetRouteTemplate sets the value of RouteTemplate.
+func (s *ResourceRouteRegistration) SetRouteTemplate(val string) {
+	s.RouteTemplate = val
+}
+
+// Ref: #/components/schemas/ResourceSetRegistration
+type ResourceSetRegistration struct {
+	Hostname string                      `json:"hostname"`
+	Routes   []ResourceRouteRegistration `json:"routes"`
+}
+
+// GetHostname returns the value of Hostname.
+func (s *ResourceSetRegistration) GetHostname() string {
+	return s.Hostname
+}
+
+// GetRoutes returns the value of Routes.
+func (s *ResourceSetRegistration) GetRoutes() []ResourceRouteRegistration {
+	return s.Routes
+}
+
+// SetHostname sets the value of Hostname.
+func (s *ResourceSetRegistration) SetHostname(val string) {
+	s.Hostname = val
+}
+
+// SetRoutes sets the value of Routes.
+func (s *ResourceSetRegistration) SetRoutes(val []ResourceRouteRegistration) {
+	s.Routes = val
+}

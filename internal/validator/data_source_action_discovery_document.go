@@ -46,7 +46,7 @@ func (dataSource *actionDiscoveryDocumentDataSource) Schema(_ context.Context, _
 	response.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Description: "The unique identifier of the identity provider.",
+				Description: "The unique identifier of the action discovery document.",
 				Required:    true,
 			},
 			"hostname": schema.StringAttribute{
@@ -90,7 +90,7 @@ func (dataSource *actionDiscoveryDocumentDataSource) Read(ctx context.Context, r
 	}
 	registration, err := dataSource.validatorClient.GetActionSet(ctx, validatorClient.GetActionSetParams{ID: configModel.ID.ValueString()})
 	if err != nil {
-		common.GenerateError(&response.Diagnostics, "Reading", "Action Set", err)
+		common.GenerateError(&response.Diagnostics, "Reading", "Resource Set", err)
 		return
 	}
 
@@ -101,7 +101,7 @@ func (dataSource *actionDiscoveryDocumentDataSource) Read(ctx context.Context, r
 	err = apiModel.From(registration).saveToState(ctx, &response.State, &response.Diagnostics)
 
 	if err != nil {
-		common.GenerateError(&response.Diagnostics, "Saving", "Action Set", err)
+		common.GenerateError(&response.Diagnostics, "Saving", "Resource Set", err)
 		return
 	}
 }

@@ -3,9 +3,7 @@ package validator
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"terraform-provider-boxer/internal/common"
@@ -17,60 +15,53 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource              = &actionDiscoveryDocumentResource{}
-	_ resource.ResourceWithConfigure = &actionDiscoveryDocumentResource{}
+	_ resource.Resource              = &resourceDiscoveryDocumentResource{}
+	_ resource.ResourceWithConfigure = &resourceDiscoveryDocumentResource{}
 )
 
-// NewActionDiscoveryDocumentResource is a helper function to simplify the provider implementation.
-func NewActionDiscoveryDocumentResource() resource.Resource {
-	return &actionDiscoveryDocumentResource{}
+// NewResourceDiscoveryDocumentResource is a helper function to simplify the provider implementation.
+func NewResourceDiscoveryDocumentResource() resource.Resource {
+	return &resourceDiscoveryDocumentResource{}
 }
 
-// actionDiscoveryDocumentResource is the resource implementation.
-type actionDiscoveryDocumentResource struct {
+// resourceDiscoveryDocumentResource is the resource implementation.
+type resourceDiscoveryDocumentResource struct {
 	validatorClient *validatorClient.Client
 }
 
-func (resource *actionDiscoveryDocumentResource) Configure(_ context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
+func (resource *resourceDiscoveryDocumentResource) Configure(_ context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
 	client := getResourceValidatorClient(request, response)
 	resource.validatorClient = client
 }
 
 // Metadata responds with the resource type name.
-func (resource *actionDiscoveryDocumentResource) Metadata(_ context.Context, request resource.MetadataRequest, response *resource.MetadataResponse) {
-	response.TypeName = request.ProviderTypeName + "_action_discovery_document"
+func (resource *resourceDiscoveryDocumentResource) Metadata(_ context.Context, request resource.MetadataRequest, response *resource.MetadataResponse) {
+	response.TypeName = request.ProviderTypeName + "_resource_discovery_document"
 }
 
 // Schema defines the schema for the resource.
-func (resource *actionDiscoveryDocumentResource) Schema(_ context.Context, _ resource.SchemaRequest, response *resource.SchemaResponse) {
+func (resource *resourceDiscoveryDocumentResource) Schema(_ context.Context, _ resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Description: "The unique identifier of the action discovery document.",
+				Description: "The unique identifier of the resource discovery document.",
 				Required:    true,
 			},
 			"hostname": schema.StringAttribute{
-				Description: "The hostname of the action discovery document.",
+				Description: "The hostname of the resource discovery document.",
 				Required:    true,
 			},
 			"routes": schema.ListNestedAttribute{
-				Description: "The list of routes for the action discovery document.",
+				Description: "The list of routes for the resource discovery document.",
 				Required:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"method": schema.StringAttribute{
-							Description: "The HTTP method for the route.",
-							Required:    true,
-							Validators: []validator.String{
-								stringvalidator.OneOf("GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"),
-							},
-						},
 						"path": schema.StringAttribute{
 							Description: "The path for the route.",
 							Required:    true,
 						},
-						"action": schema.StringAttribute{
-							Description: "The action to be performed for the route.",
+						"resource": schema.StringAttribute{
+							Description: "The resource associated with the route.",
 							Required:    true,
 						},
 					},
@@ -81,8 +72,8 @@ func (resource *actionDiscoveryDocumentResource) Schema(_ context.Context, _ res
 }
 
 // Create creates the resource and sets the initial Terraform state.
-func (resource *actionDiscoveryDocumentResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
-	var planModel actionDiscoveryDocumentResourceModel
+func (resource *resourceDiscoveryDocumentResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	var planModel resourceDiscoveryDocumentResourceModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the state, we can't proceed with the update.
@@ -91,7 +82,7 @@ func (resource *actionDiscoveryDocumentResource) Create(ctx context.Context, req
 		return
 	}
 
-	err = resource.validatorClient.PostActionSet(ctx, planModel.Into(), validatorClient.PostActionSetParams{ID: planModel.ID.ValueString()})
+	err = resource.validatorClient.PostResourceSet(ctx, planModel.Into(), validatorClient.PostResourceSetParams{ID: planModel.ID.ValueString()})
 
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Creating", "Resource Set", err)
@@ -108,8 +99,8 @@ func (resource *actionDiscoveryDocumentResource) Create(ctx context.Context, req
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (resource *actionDiscoveryDocumentResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
-	var stateModel actionDiscoveryDocumentResourceModel
+func (resource *resourceDiscoveryDocumentResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
+	var stateModel resourceDiscoveryDocumentResourceModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the stateModel, we can't proceed with the update.
@@ -122,13 +113,13 @@ func (resource *actionDiscoveryDocumentResource) Read(ctx context.Context, reque
 	// and if we use it, we will get a 'provider produced inconsistent result' error.
 	// Instead, we just check if the schema exists and save the stateModel.
 	// This will be updated in the future to use the read result.
-	registration, err := resource.validatorClient.GetActionSet(ctx, validatorClient.GetActionSetParams{ID: stateModel.ID.ValueString()})
+	registration, err := resource.validatorClient.GetResourceSet(ctx, validatorClient.GetResourceSetParams{ID: stateModel.ID.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Reading", "Resource Set", err)
 		return
 	}
 
-	apiModel := &actionDiscoveryDocumentResourceModel{
+	apiModel := &resourceDiscoveryDocumentResourceModel{
 		ID: stateModel.ID,
 	}
 
@@ -142,8 +133,8 @@ func (resource *actionDiscoveryDocumentResource) Read(ctx context.Context, reque
 }
 
 // Update updates the resource and sets the updated Terraform state on success.
-func (resource *actionDiscoveryDocumentResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
-	var planModel actionDiscoveryDocumentResourceModel
+func (resource *resourceDiscoveryDocumentResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	var planModel resourceDiscoveryDocumentResourceModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the planModel, we can't proceed with the update.
@@ -152,7 +143,7 @@ func (resource *actionDiscoveryDocumentResource) Update(ctx context.Context, req
 		return
 	}
 
-	err = resource.validatorClient.PostActionSet(ctx, planModel.Into(), validatorClient.PostActionSetParams{ID: planModel.ID.ValueString()})
+	err = resource.validatorClient.PostResourceSet(ctx, planModel.Into(), validatorClient.PostResourceSetParams{ID: planModel.ID.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Updating", "Resource Set", err)
 		return
@@ -168,8 +159,8 @@ func (resource *actionDiscoveryDocumentResource) Update(ctx context.Context, req
 }
 
 // Delete deletes the resource and removes the Terraform state on success.
-func (resource *actionDiscoveryDocumentResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
-	var stateModel actionDiscoveryDocumentResourceModel
+func (resource *resourceDiscoveryDocumentResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
+	var stateModel resourceDiscoveryDocumentResourceModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 	if err != nil {
 		// If we can't read the state, we can't proceed with the update.
@@ -177,26 +168,25 @@ func (resource *actionDiscoveryDocumentResource) Delete(ctx context.Context, req
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	err = resource.validatorClient.DeleteActionSet(ctx, validatorClient.DeleteActionSetParams{ID: stateModel.ID.ValueString()})
+	err = resource.validatorClient.DeleteResourceSet(ctx, validatorClient.DeleteResourceSetParams{ID: stateModel.ID.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Deleting", "Resource Set", err)
 		return
 	}
 }
 
-type resourceActionRouteModel struct {
-	Method types.String `tfsdk:"method"`
-	Path   types.String `tfsdk:"path"`
-	Action types.String `tfsdk:"action"`
+type resourceResourceRouteModel struct {
+	Path     types.String `tfsdk:"path"`
+	Resource types.String `tfsdk:"resource"`
 }
 
-type actionDiscoveryDocumentResourceModel struct {
-	ID       types.String               `tfsdk:"id"`
-	Hostname types.String               `tfsdk:"hostname"`
-	Routes   []resourceActionRouteModel `tfsdk:"routes"`
+type resourceDiscoveryDocumentResourceModel struct {
+	ID       types.String                 `tfsdk:"id"`
+	Hostname types.String                 `tfsdk:"hostname"`
+	Routes   []resourceResourceRouteModel `tfsdk:"routes"`
 }
 
-func (model *actionDiscoveryDocumentResourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
+func (model *resourceDiscoveryDocumentResourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
 	diags := state.Set(ctx, &model)
 	diagnostics.Append(diags...)
 	if diagnostics.HasError() {
@@ -205,31 +195,29 @@ func (model *actionDiscoveryDocumentResourceModel) saveToState(ctx context.Conte
 	return nil
 }
 
-func (model *actionDiscoveryDocumentResourceModel) Into() *validatorClient.ActionSetRegistration {
-	registration := validatorClient.ActionSetRegistration{
+func (model *resourceDiscoveryDocumentResourceModel) Into() *validatorClient.ResourceSetRegistration {
+	registration := validatorClient.ResourceSetRegistration{
 		Hostname: model.Hostname.ValueString(),
-		Routes:   make([]validatorClient.ActionRouteRegistration, len(model.Routes)),
+		Routes:   make([]validatorClient.ResourceRouteRegistration, len(model.Routes)),
 	}
 
 	for i, route := range model.Routes {
-		registration.Routes[i] = validatorClient.ActionRouteRegistration{
-			Method:        route.Method.ValueString(),
+		registration.Routes[i] = validatorClient.ResourceRouteRegistration{
 			RouteTemplate: route.Path.ValueString(),
-			ActionUid:     route.Action.ValueString(),
+			ResourceUid:   route.Resource.ValueString(),
 		}
 	}
 
 	return &registration
 }
 
-func (model *actionDiscoveryDocumentResourceModel) From(source *validatorClient.ActionSetRegistration) *actionDiscoveryDocumentResourceModel {
+func (model *resourceDiscoveryDocumentResourceModel) From(source *validatorClient.ResourceSetRegistration) *resourceDiscoveryDocumentResourceModel {
 	model.Hostname = types.StringValue(source.Hostname)
-	model.Routes = make([]resourceActionRouteModel, len(source.Routes))
+	model.Routes = make([]resourceResourceRouteModel, len(source.Routes))
 	for i, route := range source.Routes {
-		model.Routes[i] = resourceActionRouteModel{
-			Method: types.StringValue(route.Method),
-			Path:   types.StringValue(route.RouteTemplate),
-			Action: types.StringValue(route.ActionUid),
+		model.Routes[i] = resourceResourceRouteModel{
+			Path:     types.StringValue(route.RouteTemplate),
+			Resource: types.StringValue(route.ResourceUid),
 		}
 	}
 	return model

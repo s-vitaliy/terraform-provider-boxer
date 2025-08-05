@@ -26,6 +26,10 @@ type Invoker interface {
 	//
 	// DELETE /action_set/{id}
 	DeleteActionSet(ctx context.Context, params DeleteActionSetParams) error
+	// DeleteResourceSet invokes delete_resource_set operation.
+	//
+	// DELETE /resource_set/{id}
+	DeleteResourceSet(ctx context.Context, params DeleteResourceSetParams) error
 	// DeleteSchema invokes delete_schema operation.
 	//
 	// DELETE /schema/{id}
@@ -34,6 +38,10 @@ type Invoker interface {
 	//
 	// GET /action_set/{id}
 	GetActionSet(ctx context.Context, params GetActionSetParams) (*ActionSetRegistration, error)
+	// GetResourceSet invokes get_resource_set operation.
+	//
+	// GET /resource_set/{id}
+	GetResourceSet(ctx context.Context, params GetResourceSetParams) (*ResourceSetRegistration, error)
 	// GetSchema invokes get_schema operation.
 	//
 	// GET /schema/{id}
@@ -42,6 +50,10 @@ type Invoker interface {
 	//
 	// POST /action_set/{id}
 	PostActionSet(ctx context.Context, request *ActionSetRegistration, params PostActionSetParams) error
+	// PostResourceSet invokes post_resource_set operation.
+	//
+	// POST /resource_set/{id}
+	PostResourceSet(ctx context.Context, request *ResourceSetRegistration, params PostResourceSetParams) error
 	// PostSchema invokes post_schema operation.
 	//
 	// POST /schema/{id}
@@ -132,6 +144,58 @@ func (c *Client) sendDeleteActionSet(ctx context.Context, params DeleteActionSet
 	defer resp.Body.Close()
 
 	result, err := decodeDeleteActionSetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteResourceSet invokes delete_resource_set operation.
+//
+// DELETE /resource_set/{id}
+func (c *Client) DeleteResourceSet(ctx context.Context, params DeleteResourceSetParams) error {
+	_, err := c.sendDeleteResourceSet(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeleteResourceSet(ctx context.Context, params DeleteResourceSetParams) (res *DeleteResourceSetOK, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/resource_set/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeDeleteResourceSetResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -236,6 +300,58 @@ func (c *Client) sendGetActionSet(ctx context.Context, params GetActionSetParams
 	defer resp.Body.Close()
 
 	result, err := decodeGetActionSetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetResourceSet invokes get_resource_set operation.
+//
+// GET /resource_set/{id}
+func (c *Client) GetResourceSet(ctx context.Context, params GetResourceSetParams) (*ResourceSetRegistration, error) {
+	res, err := c.sendGetResourceSet(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetResourceSet(ctx context.Context, params GetResourceSetParams) (res *ResourceSetRegistration, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/resource_set/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeGetResourceSetResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -352,6 +468,70 @@ func (c *Client) sendPostActionSet(ctx context.Context, request *ActionSetRegist
 	defer resp.Body.Close()
 
 	result, err := decodePostActionSetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostResourceSet invokes post_resource_set operation.
+//
+// POST /resource_set/{id}
+func (c *Client) PostResourceSet(ctx context.Context, request *ResourceSetRegistration, params PostResourceSetParams) error {
+	_, err := c.sendPostResourceSet(ctx, request, params)
+	return err
+}
+
+func (c *Client) sendPostResourceSet(ctx context.Context, request *ResourceSetRegistration, params PostResourceSetParams) (res *PostResourceSetOK, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/resource_set/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostResourceSetRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodePostResourceSetResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

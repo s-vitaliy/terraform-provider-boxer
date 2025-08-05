@@ -7,6 +7,11 @@ type DeleteActionSetParams struct {
 	ID string
 }
 
+// DeleteResourceSetParams is parameters of delete_resource_set operation.
+type DeleteResourceSetParams struct {
+	ID string
+}
+
 // DeleteSchemaParams is parameters of delete_schema operation.
 type DeleteSchemaParams struct {
 	ID string
@@ -17,6 +22,11 @@ type GetActionSetParams struct {
 	ID string
 }
 
+// GetResourceSetParams is parameters of get_resource_set operation.
+type GetResourceSetParams struct {
+	ID string
+}
+
 // GetSchemaParams is parameters of get_schema operation.
 type GetSchemaParams struct {
 	ID string
@@ -24,6 +34,11 @@ type GetSchemaParams struct {
 
 // PostActionSetParams is parameters of post_action_set operation.
 type PostActionSetParams struct {
+	ID string
+}
+
+// PostResourceSetParams is parameters of post_resource_set operation.
+type PostResourceSetParams struct {
 	ID string
 }
 
