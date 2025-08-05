@@ -2,8 +2,77 @@
 
 package validatorClient
 
+// Ref: #/components/schemas/ActionRouteRegistration
+type ActionRouteRegistration struct {
+	ActionUid     string `json:"actionUid"`
+	Method        string `json:"method"`
+	RouteTemplate string `json:"routeTemplate"`
+}
+
+// GetActionUid returns the value of ActionUid.
+func (s *ActionRouteRegistration) GetActionUid() string {
+	return s.ActionUid
+}
+
+// GetMethod returns the value of Method.
+func (s *ActionRouteRegistration) GetMethod() string {
+	return s.Method
+}
+
+// GetRouteTemplate returns the value of RouteTemplate.
+func (s *ActionRouteRegistration) GetRouteTemplate() string {
+	return s.RouteTemplate
+}
+
+// SetActionUid sets the value of ActionUid.
+func (s *ActionRouteRegistration) SetActionUid(val string) {
+	s.ActionUid = val
+}
+
+// SetMethod sets the value of Method.
+func (s *ActionRouteRegistration) SetMethod(val string) {
+	s.Method = val
+}
+
+// SetRouteTemplate sets the value of RouteTemplate.
+func (s *ActionRouteRegistration) SetRouteTemplate(val string) {
+	s.RouteTemplate = val
+}
+
+// Ref: #/components/schemas/ActionSetRegistration
+type ActionSetRegistration struct {
+	Hostname string                    `json:"hostname"`
+	Routes   []ActionRouteRegistration `json:"routes"`
+}
+
+// GetHostname returns the value of Hostname.
+func (s *ActionSetRegistration) GetHostname() string {
+	return s.Hostname
+}
+
+// GetRoutes returns the value of Routes.
+func (s *ActionSetRegistration) GetRoutes() []ActionRouteRegistration {
+	return s.Routes
+}
+
+// SetHostname sets the value of Hostname.
+func (s *ActionSetRegistration) SetHostname(val string) {
+	s.Hostname = val
+}
+
+// SetRoutes sets the value of Routes.
+func (s *ActionSetRegistration) SetRoutes(val []ActionRouteRegistration) {
+	s.Routes = val
+}
+
+// DeleteActionSetOK is response for DeleteActionSet operation.
+type DeleteActionSetOK struct{}
+
 // DeleteSchemaOK is response for DeleteSchema operation.
 type DeleteSchemaOK struct{}
+
+// PostActionSetOK is response for PostActionSet operation.
+type PostActionSetOK struct{}
 
 // PostSchemaOK is response for PostSchema operation.
 type PostSchemaOK struct{}

@@ -6,7 +6,10 @@ package validatorClient
 type OperationName = string
 
 const (
-	DeleteSchemaOperation OperationName = "DeleteSchema"
-	GetSchemaOperation    OperationName = "GetSchema"
-	PostSchemaOperation   OperationName = "PostSchema"
+	DeleteActionSetOperation OperationName = "DeleteActionSet"
+	DeleteSchemaOperation    OperationName = "DeleteSchema"
+	GetActionSetOperation    OperationName = "GetActionSet"
+	GetSchemaOperation       OperationName = "GetSchema"
+	PostActionSetOperation   OperationName = "PostActionSet"
+	PostSchemaOperation      OperationName = "PostSchema"
 )

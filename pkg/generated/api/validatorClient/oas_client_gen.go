@@ -22,14 +22,26 @@ func trimTrailingSlashes(u *url.URL) {
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
+	// DeleteActionSet invokes delete_action_set operation.
+	//
+	// DELETE /action_set/{id}
+	DeleteActionSet(ctx context.Context, params DeleteActionSetParams) error
 	// DeleteSchema invokes delete_schema operation.
 	//
 	// DELETE /schema/{id}
 	DeleteSchema(ctx context.Context, params DeleteSchemaParams) error
+	// GetActionSet invokes get_action_set operation.
+	//
+	// GET /action_set/{id}
+	GetActionSet(ctx context.Context, params GetActionSetParams) (*ActionSetRegistration, error)
 	// GetSchema invokes get_schema operation.
 	//
 	// GET /schema/{id}
 	GetSchema(ctx context.Context, params GetSchemaParams) (jx.Raw, error)
+	// PostActionSet invokes post_action_set operation.
+	//
+	// POST /action_set/{id}
+	PostActionSet(ctx context.Context, request *ActionSetRegistration, params PostActionSetParams) error
 	// PostSchema invokes post_schema operation.
 	//
 	// POST /schema/{id}
@@ -73,6 +85,58 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 		return c.serverURL
 	}
 	return u
+}
+
+// DeleteActionSet invokes delete_action_set operation.
+//
+// DELETE /action_set/{id}
+func (c *Client) DeleteActionSet(ctx context.Context, params DeleteActionSetParams) error {
+	_, err := c.sendDeleteActionSet(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeleteActionSet(ctx context.Context, params DeleteActionSetParams) (res *DeleteActionSetOK, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/action_set/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeDeleteActionSetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
 }
 
 // DeleteSchema invokes delete_schema operation.
@@ -127,6 +191,58 @@ func (c *Client) sendDeleteSchema(ctx context.Context, params DeleteSchemaParams
 	return result, nil
 }
 
+// GetActionSet invokes get_action_set operation.
+//
+// GET /action_set/{id}
+func (c *Client) GetActionSet(ctx context.Context, params GetActionSetParams) (*ActionSetRegistration, error) {
+	res, err := c.sendGetActionSet(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetActionSet(ctx context.Context, params GetActionSetParams) (res *ActionSetRegistration, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/action_set/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeGetActionSetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetSchema invokes get_schema operation.
 //
 // GET /schema/{id}
@@ -172,6 +288,70 @@ func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res
 	defer resp.Body.Close()
 
 	result, err := decodeGetSchemaResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostActionSet invokes post_action_set operation.
+//
+// POST /action_set/{id}
+func (c *Client) PostActionSet(ctx context.Context, request *ActionSetRegistration, params PostActionSetParams) error {
+	_, err := c.sendPostActionSet(ctx, request, params)
+	return err
+}
+
+func (c *Client) sendPostActionSet(ctx context.Context, request *ActionSetRegistration, params PostActionSetParams) (res *PostActionSetOK, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/action_set/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostActionSetRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodePostActionSetResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
