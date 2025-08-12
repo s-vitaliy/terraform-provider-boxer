@@ -41,79 +41,84 @@ func (s *External) SetRoles(val []string) {
 }
 
 // Struct that represents an external identity.
-// Ref: #/components/schemas/ExternalIdentityResponse
-type ExternalIdentityResponse struct {
+// Ref: #/components/schemas/ExternalIdentityRegistration
+type ExternalIdentityRegistration struct {
+	// The user ID extracted from the external identity provider.
+	ID string `json:"id"`
 	// The name of the external identity provider.
 	IdentityProvider string `json:"identityProvider"`
-	// The user ID extracted from the external identity provider.
-	UserId string `json:"userId"`
+	// The principal ID associated with the external identity.
+	PrincipalId string `json:"principalId"`
+	// The schema of the principal associated with the external identity.
+	PrincipalSchema string `json:"principalSchema"`
+}
+
+// GetID returns the value of ID.
+func (s *ExternalIdentityRegistration) GetID() string {
+	return s.ID
 }
 
 // GetIdentityProvider returns the value of IdentityProvider.
-func (s *ExternalIdentityResponse) GetIdentityProvider() string {
+func (s *ExternalIdentityRegistration) GetIdentityProvider() string {
 	return s.IdentityProvider
 }
 
-// GetUserId returns the value of UserId.
-func (s *ExternalIdentityResponse) GetUserId() string {
-	return s.UserId
-}
-
-// SetIdentityProvider sets the value of IdentityProvider.
-func (s *ExternalIdentityResponse) SetIdentityProvider(val string) {
-	s.IdentityProvider = val
-}
-
-// SetUserId sets the value of UserId.
-func (s *ExternalIdentityResponse) SetUserId(val string) {
-	s.UserId = val
-}
-
-// Ref: #/components/schemas/IdentityAssociation
-type IdentityAssociation struct {
-	Identity         string `json:"identity"`
-	IdentityProvider string `json:"identity_provider"`
-	PrincipalID      string `json:"principal_id"`
-	PrincipalSchema  string `json:"principal_schema"`
-}
-
-// GetIdentity returns the value of Identity.
-func (s *IdentityAssociation) GetIdentity() string {
-	return s.Identity
-}
-
-// GetIdentityProvider returns the value of IdentityProvider.
-func (s *IdentityAssociation) GetIdentityProvider() string {
-	return s.IdentityProvider
-}
-
-// GetPrincipalID returns the value of PrincipalID.
-func (s *IdentityAssociation) GetPrincipalID() string {
-	return s.PrincipalID
+// GetPrincipalId returns the value of PrincipalId.
+func (s *ExternalIdentityRegistration) GetPrincipalId() string {
+	return s.PrincipalId
 }
 
 // GetPrincipalSchema returns the value of PrincipalSchema.
-func (s *IdentityAssociation) GetPrincipalSchema() string {
+func (s *ExternalIdentityRegistration) GetPrincipalSchema() string {
 	return s.PrincipalSchema
 }
 
-// SetIdentity sets the value of Identity.
-func (s *IdentityAssociation) SetIdentity(val string) {
-	s.Identity = val
+// SetID sets the value of ID.
+func (s *ExternalIdentityRegistration) SetID(val string) {
+	s.ID = val
 }
 
 // SetIdentityProvider sets the value of IdentityProvider.
-func (s *IdentityAssociation) SetIdentityProvider(val string) {
+func (s *ExternalIdentityRegistration) SetIdentityProvider(val string) {
 	s.IdentityProvider = val
 }
 
-// SetPrincipalID sets the value of PrincipalID.
-func (s *IdentityAssociation) SetPrincipalID(val string) {
-	s.PrincipalID = val
+// SetPrincipalId sets the value of PrincipalId.
+func (s *ExternalIdentityRegistration) SetPrincipalId(val string) {
+	s.PrincipalId = val
 }
 
 // SetPrincipalSchema sets the value of PrincipalSchema.
-func (s *IdentityAssociation) SetPrincipalSchema(val string) {
+func (s *ExternalIdentityRegistration) SetPrincipalSchema(val string) {
+	s.PrincipalSchema = val
+}
+
+// Struct that represents an external identity.
+// Ref: #/components/schemas/ExternalIdentityRegistrationRequest
+type ExternalIdentityRegistrationRequest struct {
+	// The principal ID associated with the external identity.
+	PrincipalId string `json:"principalId"`
+	// The schema of the principal associated with the external identity.
+	PrincipalSchema string `json:"principalSchema"`
+}
+
+// GetPrincipalId returns the value of PrincipalId.
+func (s *ExternalIdentityRegistrationRequest) GetPrincipalId() string {
+	return s.PrincipalId
+}
+
+// GetPrincipalSchema returns the value of PrincipalSchema.
+func (s *ExternalIdentityRegistrationRequest) GetPrincipalSchema() string {
+	return s.PrincipalSchema
+}
+
+// SetPrincipalId sets the value of PrincipalId.
+func (s *ExternalIdentityRegistrationRequest) SetPrincipalId(val string) {
+	s.PrincipalId = val
+}
+
+// SetPrincipalSchema sets the value of PrincipalSchema.
+func (s *ExternalIdentityRegistrationRequest) SetPrincipalSchema(val string) {
 	s.PrincipalSchema = val
 }
 
@@ -164,9 +169,6 @@ func (s *OidcIdentityProviderRegistration) SetIssuers(val []string) {
 func (s *OidcIdentityProviderRegistration) SetUserIdClaim(val string) {
 	s.UserIdClaim = val
 }
-
-// PostAssociationOK is response for PostAssociation operation.
-type PostAssociationOK struct{}
 
 // PostIdentityOK is response for PostIdentity operation.
 type PostIdentityOK struct{}

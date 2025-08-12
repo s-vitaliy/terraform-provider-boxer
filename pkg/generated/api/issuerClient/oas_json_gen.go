@@ -13,40 +13,62 @@ import (
 )
 
 // Encode implements json.Marshaler.
-func (s *ExternalIdentityResponse) Encode(e *jx.Encoder) {
+func (s *ExternalIdentityRegistration) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *ExternalIdentityResponse) encodeFields(e *jx.Encoder) {
+func (s *ExternalIdentityRegistration) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		e.Str(s.ID)
+	}
 	{
 		e.FieldStart("identityProvider")
 		e.Str(s.IdentityProvider)
 	}
 	{
-		e.FieldStart("userId")
-		e.Str(s.UserId)
+		e.FieldStart("principalId")
+		e.Str(s.PrincipalId)
+	}
+	{
+		e.FieldStart("principalSchema")
+		e.Str(s.PrincipalSchema)
 	}
 }
 
-var jsonFieldsNameOfExternalIdentityResponse = [2]string{
-	0: "identityProvider",
-	1: "userId",
+var jsonFieldsNameOfExternalIdentityRegistration = [4]string{
+	0: "id",
+	1: "identityProvider",
+	2: "principalId",
+	3: "principalSchema",
 }
 
-// Decode decodes ExternalIdentityResponse from json.
-func (s *ExternalIdentityResponse) Decode(d *jx.Decoder) error {
+// Decode decodes ExternalIdentityRegistration from json.
+func (s *ExternalIdentityRegistration) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode ExternalIdentityResponse to nil")
+		return errors.New("invalid: unable to decode ExternalIdentityRegistration to nil")
 	}
 	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "identityProvider":
+		case "id":
 			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.ID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "identityProvider":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.IdentityProvider = string(v)
@@ -57,154 +79,19 @@ func (s *ExternalIdentityResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"identityProvider\"")
 			}
-		case "userId":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.UserId = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"userId\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode ExternalIdentityResponse")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfExternalIdentityResponse) {
-					name = jsonFieldsNameOfExternalIdentityResponse[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *ExternalIdentityResponse) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *ExternalIdentityResponse) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *IdentityAssociation) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *IdentityAssociation) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("identity")
-		e.Str(s.Identity)
-	}
-	{
-		e.FieldStart("identity_provider")
-		e.Str(s.IdentityProvider)
-	}
-	{
-		e.FieldStart("principal_id")
-		e.Str(s.PrincipalID)
-	}
-	{
-		e.FieldStart("principal_schema")
-		e.Str(s.PrincipalSchema)
-	}
-}
-
-var jsonFieldsNameOfIdentityAssociation = [4]string{
-	0: "identity",
-	1: "identity_provider",
-	2: "principal_id",
-	3: "principal_schema",
-}
-
-// Decode decodes IdentityAssociation from json.
-func (s *IdentityAssociation) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode IdentityAssociation to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "identity":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.Identity = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"identity\"")
-			}
-		case "identity_provider":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.IdentityProvider = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"identity_provider\"")
-			}
-		case "principal_id":
+		case "principalId":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
-				s.PrincipalID = string(v)
+				s.PrincipalId = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"principal_id\"")
+				return errors.Wrap(err, "decode field \"principalId\"")
 			}
-		case "principal_schema":
+		case "principalSchema":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
@@ -214,14 +101,14 @@ func (s *IdentityAssociation) Decode(d *jx.Decoder) error {
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"principal_schema\"")
+				return errors.Wrap(err, "decode field \"principalSchema\"")
 			}
 		default:
 			return d.Skip()
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode IdentityAssociation")
+		return errors.Wrap(err, "decode ExternalIdentityRegistration")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -238,8 +125,8 @@ func (s *IdentityAssociation) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfIdentityAssociation) {
-					name = jsonFieldsNameOfIdentityAssociation[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfExternalIdentityRegistration) {
+					name = jsonFieldsNameOfExternalIdentityRegistration[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -260,14 +147,127 @@ func (s *IdentityAssociation) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *IdentityAssociation) MarshalJSON() ([]byte, error) {
+func (s *ExternalIdentityRegistration) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *IdentityAssociation) UnmarshalJSON(data []byte) error {
+func (s *ExternalIdentityRegistration) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ExternalIdentityRegistrationRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ExternalIdentityRegistrationRequest) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("principalId")
+		e.Str(s.PrincipalId)
+	}
+	{
+		e.FieldStart("principalSchema")
+		e.Str(s.PrincipalSchema)
+	}
+}
+
+var jsonFieldsNameOfExternalIdentityRegistrationRequest = [2]string{
+	0: "principalId",
+	1: "principalSchema",
+}
+
+// Decode decodes ExternalIdentityRegistrationRequest from json.
+func (s *ExternalIdentityRegistrationRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ExternalIdentityRegistrationRequest to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "principalId":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.PrincipalId = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"principalId\"")
+			}
+		case "principalSchema":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.PrincipalSchema = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"principalSchema\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ExternalIdentityRegistrationRequest")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfExternalIdentityRegistrationRequest) {
+					name = jsonFieldsNameOfExternalIdentityRegistrationRequest[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ExternalIdentityRegistrationRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ExternalIdentityRegistrationRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -18,12 +18,6 @@ type DeleteSchemaParams struct {
 	ID string
 }
 
-// GetAssociationParams is parameters of get_association operation.
-type GetAssociationParams struct {
-	IdentityProvider string
-	ID               string
-}
-
 // GetIdentityParams is parameters of get_identity operation.
 type GetIdentityParams struct {
 	IdentityProvider string

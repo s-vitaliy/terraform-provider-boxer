@@ -42,7 +42,7 @@ func decodeDeleteSchemaResponse(resp *http.Response) (res *DeleteSchemaOK, _ err
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeGetAssociationResponse(resp *http.Response) (res *IdentityAssociation, _ error) {
+func decodeGetIdentityResponse(resp *http.Response) (res *ExternalIdentityRegistration, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -58,48 +58,7 @@ func decodeGetAssociationResponse(resp *http.Response) (res *IdentityAssociation
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response IdentityAssociation
-			if err := func() error {
-				if err := response.Decode(d); err != nil {
-					return err
-				}
-				if err := d.Skip(); err != io.EOF {
-					return errors.New("unexpected trailing data")
-				}
-				return nil
-			}(); err != nil {
-				err = &ogenerrors.DecodeBodyError{
-					ContentType: ct,
-					Body:        buf,
-					Err:         err,
-				}
-				return res, err
-			}
-			return &response, nil
-		default:
-			return res, validate.InvalidContentType(ct)
-		}
-	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
-}
-
-func decodeGetIdentityResponse(resp *http.Response) (res *ExternalIdentityResponse, _ error) {
-	switch resp.StatusCode {
-	case 200:
-		// Code 200.
-		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
-		if err != nil {
-			return res, errors.Wrap(err, "parse media type")
-		}
-		switch {
-		case ct == "application/json":
-			buf, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return res, err
-			}
-			d := jx.DecodeBytes(buf)
-
-			var response ExternalIdentityResponse
+			var response ExternalIdentityRegistration
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -256,15 +215,6 @@ func decodeGetSchemaResponse(resp *http.Response) (res jx.Raw, _ error) {
 		default:
 			return res, validate.InvalidContentType(ct)
 		}
-	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
-}
-
-func decodePostAssociationResponse(resp *http.Response) (res *PostAssociationOK, _ error) {
-	switch resp.StatusCode {
-	case 200:
-		// Code 200.
-		return &PostAssociationOK{}, nil
 	}
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }

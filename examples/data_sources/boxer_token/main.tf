@@ -8,9 +8,10 @@ terraform {
 
 provider "boxer" {
   issuer_host = "http://localhost:8888/"
+  validator_host = "http://localhost:8081/"
 }
 
-resource "boxer_cedar_schema" "example"  {
+resource "boxer_issuer_cedar_schema" "example"  {
   id = "example"
   data_json = <<EOT
   {
@@ -54,7 +55,7 @@ EOT
 }
 
 resource "boxer_principal" "example" {
-  schema_id = boxer_cedar_schema.example.id
+  schema_id = boxer_issuer_cedar_schema.example.id
   data_json = <<EOT
 {
     "uid": {
@@ -98,12 +99,15 @@ resource "boxer_external_identity" "example" {
   identity_provider = "provider"
   id                   = "test_user"
   principal = {
-    schema_id = boxer_cedar_schema.example.id
+    schema_id = boxer_issuer_cedar_schema.example.id
     principal_id = boxer_principal.example.id
   }
 }
 
 data boxer_token "example" {
+  depends_on = [
+    boxer_external_identity.example
+  ]
   identity_provider = boxer_identity_provider.example.name
   auth = {
     # For testing purposes, provide the bearer token value manually

@@ -57,7 +57,6 @@ func (dataSource *boxerTokenDataSource) Schema(_ context.Context, _ datasource.S
 				Description: "The identity provider that the external identity belongs to.",
 				Required:    true,
 			},
-
 			"auth": schema.SingleNestedAttribute{
 				Description: "The authentication details for the external identity.",
 				Required:    true,

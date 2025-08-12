@@ -87,21 +87,9 @@ func (dataSource *boxerExternalIdentityDataSource) Read(ctx context.Context, req
 		return
 	}
 
-	externalIdentityAssociation, err := dataSource.issuerClient.GetAssociation(ctx, issuerClient.GetAssociationParams{
-		ID:               configModel.ID.ValueString(),
-		IdentityProvider: configModel.IdentityProvider.ValueString(),
-	})
-	if err != nil {
-		common.GenerateError(&response.Diagnostics, "Reading", "External Identity association", err)
-		return
-	}
 	model := boxerExternalIdentityModel{
-		ID:               types.StringValue(externalIdentity.UserId),
+		ID:               types.StringValue(externalIdentity.ID),
 		IdentityProvider: types.StringValue(externalIdentity.IdentityProvider),
-		Principal: boxerPrincipalAssociationModel{
-			PrincipalId: types.StringValue(externalIdentityAssociation.PrincipalID),
-			SchemaId:    types.StringValue(externalIdentityAssociation.PrincipalSchema),
-		},
 	}
 
 	diag := response.State.Set(ctx, &model)

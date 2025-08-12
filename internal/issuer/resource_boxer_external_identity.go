@@ -96,25 +96,16 @@ func (resource *boxerExternalIdentity) Create(ctx context.Context, request resou
 		return
 	}
 
-	params := issuer.PostIdentityParams{
+	createRequest := issuer.ExternalIdentityRegistrationRequest{
+		PrincipalId:     planModel.Principal.PrincipalId.ValueString(),
+		PrincipalSchema: planModel.Principal.SchemaId.ValueString(),
+	}
+	err = resource.issuerClient.PostIdentity(ctx, &createRequest, issuer.PostIdentityParams{
 		IdentityProvider: planModel.IdentityProvider.ValueString(),
 		ID:               planModel.ID.ValueString(),
-	}
-	err = resource.issuerClient.PostIdentity(ctx, params)
+	})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Creating", "External Identity", err)
-		return
-	}
-
-	associationRequest := issuer.IdentityAssociation{
-		IdentityProvider: planModel.IdentityProvider.ValueString(),
-		Identity:         planModel.ID.ValueString(),
-		PrincipalID:      associationPlanModel.PrincipalId.ValueString(),
-		PrincipalSchema:  associationPlanModel.SchemaId.ValueString(),
-	}
-	err = resource.issuerClient.PostAssociation(ctx, &associationRequest)
-	if err != nil {
-		common.GenerateError(&response.Diagnostics, "Creating", "External Identity to Principal Association", err)
 		return
 	}
 
@@ -152,21 +143,12 @@ func (resource *boxerExternalIdentity) Read(ctx context.Context, request resourc
 		return
 	}
 
-	association, err := resource.issuerClient.GetAssociation(ctx, issuer.GetAssociationParams{
-		IdentityProvider: stateModel.IdentityProvider.ValueString(),
-		ID:               stateModel.ID.ValueString(),
-	})
-	if err != nil {
-		common.GenerateError(&response.Diagnostics, "Reading", "External Identity association", err)
-		return
-	}
-
 	model := boxerExternalIdentityModel{
-		ID:               types.StringValue(externalId.UserId),
+		ID:               types.StringValue(externalId.ID),
 		IdentityProvider: types.StringValue(externalId.IdentityProvider),
 		Principal: boxerPrincipalAssociationModel{
-			PrincipalId: types.StringValue(association.PrincipalID),
-			SchemaId:    types.StringValue(association.PrincipalSchema),
+			PrincipalId: types.StringValue(externalId.PrincipalId),
+			SchemaId:    types.StringValue(externalId.PrincipalSchema),
 		},
 	}
 
@@ -189,33 +171,16 @@ func (resource *boxerExternalIdentity) Update(ctx context.Context, request resou
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	err = resource.issuerClient.PostIdentity(ctx, issuer.PostIdentityParams{
+	updateRequest := issuer.ExternalIdentityRegistrationRequest{
+		PrincipalId:     planModel.Principal.PrincipalId.ValueString(),
+		PrincipalSchema: planModel.Principal.SchemaId.ValueString(),
+	}
+	err = resource.issuerClient.PostIdentity(ctx, &updateRequest, issuer.PostIdentityParams{
 		IdentityProvider: planModel.IdentityProvider.ValueString(),
 		ID:               planModel.ID.ValueString(),
 	})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Updating", "External Identity", err)
-		return
-	}
-
-	var associationPlanModel boxerPrincipalAssociationModel
-	diags := request.Config.GetAttribute(ctx, path.Root("principal"), &associationPlanModel)
-	response.Diagnostics.Append(diags...)
-	if diags.HasError() {
-		// If we can't read the principal association model, we can't proceed.
-		// so we return early.
-		// The error will be handled by the framework and returned to the user.
-		return
-	}
-
-	err = resource.issuerClient.PostAssociation(ctx, &issuer.IdentityAssociation{
-		IdentityProvider: planModel.IdentityProvider.ValueString(),
-		Identity:         planModel.ID.ValueString(),
-		PrincipalID:      associationPlanModel.PrincipalId.ValueString(),
-		PrincipalSchema:  associationPlanModel.SchemaId.ValueString(),
-	})
-	if err != nil {
-		common.GenerateError(&response.Diagnostics, "Updating", "External Identity association", err)
 		return
 	}
 

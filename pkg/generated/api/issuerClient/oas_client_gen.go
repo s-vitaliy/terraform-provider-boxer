@@ -35,14 +35,10 @@ type Invoker interface {
 	//
 	// DELETE /schema/{id}
 	DeleteSchema(ctx context.Context, params DeleteSchemaParams) error
-	// GetAssociation invokes get_association operation.
-	//
-	// GET /association/identities/{identity_provider}/{id}
-	GetAssociation(ctx context.Context, params GetAssociationParams) (*IdentityAssociation, error)
 	// GetIdentity invokes get_identity operation.
 	//
 	// GET /identity/{identity_provider}/{id}
-	GetIdentity(ctx context.Context, params GetIdentityParams) (*ExternalIdentityResponse, error)
+	GetIdentity(ctx context.Context, params GetIdentityParams) (*ExternalIdentityRegistration, error)
 	// GetPrincipal invokes get_principal operation.
 	//
 	// GET /principal/{schema}/{id}
@@ -55,14 +51,10 @@ type Invoker interface {
 	//
 	// GET /schema/{id}
 	GetSchema(ctx context.Context, params GetSchemaParams) (jx.Raw, error)
-	// PostAssociation invokes post_association operation.
-	//
-	// POST /association/
-	PostAssociation(ctx context.Context, request *IdentityAssociation) error
 	// PostIdentity invokes post_identity operation.
 	//
 	// POST /identity/{identity_provider}/{id}
-	PostIdentity(ctx context.Context, params PostIdentityParams) error
+	PostIdentity(ctx context.Context, request *ExternalIdentityRegistrationRequest, params PostIdentityParams) error
 	// PostPrincipal invokes post_principal operation.
 	//
 	// POST /principal/{schema}
@@ -297,86 +289,15 @@ func (c *Client) sendDeleteSchema(ctx context.Context, params DeleteSchemaParams
 	return result, nil
 }
 
-// GetAssociation invokes get_association operation.
-//
-// GET /association/identities/{identity_provider}/{id}
-func (c *Client) GetAssociation(ctx context.Context, params GetAssociationParams) (*IdentityAssociation, error) {
-	res, err := c.sendGetAssociation(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendGetAssociation(ctx context.Context, params GetAssociationParams) (res *IdentityAssociation, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [4]string
-	pathParts[0] = "/association/identities/"
-	{
-		// Encode "identity_provider" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "identity_provider",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.IdentityProvider))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/"
-	{
-		// Encode "id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.ID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[3] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	result, err := decodeGetAssociationResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // GetIdentity invokes get_identity operation.
 //
 // GET /identity/{identity_provider}/{id}
-func (c *Client) GetIdentity(ctx context.Context, params GetIdentityParams) (*ExternalIdentityResponse, error) {
+func (c *Client) GetIdentity(ctx context.Context, params GetIdentityParams) (*ExternalIdentityRegistration, error) {
 	res, err := c.sendGetIdentity(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetIdentity(ctx context.Context, params GetIdentityParams) (res *ExternalIdentityResponse, err error) {
+func (c *Client) sendGetIdentity(ctx context.Context, params GetIdentityParams) (res *ExternalIdentityRegistration, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
@@ -614,52 +535,15 @@ func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res
 	return result, nil
 }
 
-// PostAssociation invokes post_association operation.
-//
-// POST /association/
-func (c *Client) PostAssociation(ctx context.Context, request *IdentityAssociation) error {
-	_, err := c.sendPostAssociation(ctx, request)
-	return err
-}
-
-func (c *Client) sendPostAssociation(ctx context.Context, request *IdentityAssociation) (res *PostAssociationOK, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/association/"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	r, err := ht.NewRequest(ctx, "POST", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodePostAssociationRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	result, err := decodePostAssociationResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // PostIdentity invokes post_identity operation.
 //
 // POST /identity/{identity_provider}/{id}
-func (c *Client) PostIdentity(ctx context.Context, params PostIdentityParams) error {
-	_, err := c.sendPostIdentity(ctx, params)
+func (c *Client) PostIdentity(ctx context.Context, request *ExternalIdentityRegistrationRequest, params PostIdentityParams) error {
+	_, err := c.sendPostIdentity(ctx, request, params)
 	return err
 }
 
-func (c *Client) sendPostIdentity(ctx context.Context, params PostIdentityParams) (res *PostIdentityOK, err error) {
+func (c *Client) sendPostIdentity(ctx context.Context, request *ExternalIdentityRegistrationRequest, params PostIdentityParams) (res *PostIdentityOK, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
@@ -706,6 +590,9 @@ func (c *Client) sendPostIdentity(ctx context.Context, params PostIdentityParams
 	r, err := ht.NewRequest(ctx, "POST", u)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostIdentityRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
 	}
 
 	resp, err := c.cfg.Client.Do(r)
