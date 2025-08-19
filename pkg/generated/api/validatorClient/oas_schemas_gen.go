@@ -155,3 +155,6 @@ func (s *ResourceSetRegistration) SetHostname(val string) {
 func (s *ResourceSetRegistration) SetRoutes(val []ResourceRouteRegistration) {
 	s.Routes = val
 }
+
+// TokenReviewOK is response for TokenReview operation.
+type TokenReviewOK struct{}

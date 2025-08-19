@@ -52,6 +52,10 @@ func (dataSource *resourceDiscoveryDocumentDataSource) Schema(_ context.Context,
 				Description: "The hostname of the resource discovery document.",
 				Computed:    true,
 			},
+			"schema": schema.StringAttribute{
+				Description: "The schema that the action discovery document belongs to.",
+				Computed:    true, // TODO: fix here and in other files
+			},
 			"routes": schema.ListNestedAttribute{
 				Description: "The list of routes for the resource discovery document.",
 				Computed:    true,
@@ -82,14 +86,18 @@ func (dataSource *resourceDiscoveryDocumentDataSource) Read(ctx context.Context,
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	registration, err := dataSource.validatorClient.GetResourceSet(ctx, validatorClient.GetResourceSetParams{ID: configModel.ID.ValueString()})
+	registration, err := dataSource.validatorClient.GetResourceSet(ctx, validatorClient.GetResourceSetParams{
+		ID:     configModel.ID.ValueString(),
+		Schema: configModel.Schema.ValueString(),
+	})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Reading", "Resource Set", err)
 		return
 	}
 
 	apiModel := &resourceDiscoveryDocumentDataSourceModel{
-		ID: configModel.ID,
+		ID:     configModel.ID,
+		Schema: configModel.Schema,
 	}
 
 	err = apiModel.From(registration).saveToState(ctx, &response.State, &response.Diagnostics)
@@ -109,6 +117,7 @@ type resourceDiscoveryDocumentDataSourceModel struct {
 	ID       types.String                   `tfsdk:"id"`
 	Hostname types.String                   `tfsdk:"hostname"`
 	Routes   []resourceDataSourceRouteModel `tfsdk:"routes"`
+	Schema   types.String                   `tfsdk:"schema"`
 }
 
 // resourceDiscoveryDocumentDataSource is the data source implementation.

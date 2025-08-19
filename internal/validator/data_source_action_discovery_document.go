@@ -53,6 +53,10 @@ func (dataSource *actionDiscoveryDocumentDataSource) Schema(_ context.Context, _
 				Description: "The hostname of the action discovery document.",
 				Computed:    true,
 			},
+			"schema": schema.StringAttribute{
+				Description: "The schema that the action discovery document belongs to.",
+				Computed:    true,
+			},
 			"routes": schema.ListNestedAttribute{
 				Description: "The list of routes for the action discovery document.",
 				Computed:    true,
@@ -88,14 +92,18 @@ func (dataSource *actionDiscoveryDocumentDataSource) Read(ctx context.Context, r
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	registration, err := dataSource.validatorClient.GetActionSet(ctx, validatorClient.GetActionSetParams{ID: configModel.ID.ValueString()})
+	registration, err := dataSource.validatorClient.GetActionSet(ctx, validatorClient.GetActionSetParams{
+		ID:     configModel.ID.ValueString(),
+		Schema: configModel.Schema.ValueString(),
+	})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Reading", "Resource Set", err)
 		return
 	}
 
 	apiModel := &actionDiscoveryDocumentDataSourceModel{
-		ID: configModel.ID,
+		ID:     configModel.ID,
+		Schema: configModel.Schema,
 	}
 
 	err = apiModel.From(registration).saveToState(ctx, &response.State, &response.Diagnostics)
@@ -116,6 +124,7 @@ type actionDiscoveryDocumentDataSourceModel struct {
 	ID       types.String           `tfsdk:"id"`
 	Hostname types.String           `tfsdk:"hostname"`
 	Routes   []dataSourceRouteModel `tfsdk:"routes"`
+	Schema   types.String           `tfsdk:"schema"`
 }
 
 // actionDiscoveryDocumentDataSource is the data source implementation.

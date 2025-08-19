@@ -64,6 +64,10 @@ func (r *policySetResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				Description: "The unique identifier of the policy set.",
 				Required:    true,
 			},
+			"schema": schema.StringAttribute{
+				Description: "The schema that the policy set conforms to.",
+				Computed:    true,
+			},
 			"data_cedar": schema.StringAttribute{
 				Description: "The Cedar schema data in Cedar format.",
 				Optional:    true,
@@ -95,7 +99,10 @@ func (r *policySetResource) Create(ctx context.Context, request resource.CreateR
 		return
 	}
 
-	err = r.validatorClient.PostPolicySet(ctx, planModel.Into(), validatorClient.PostPolicySetParams{ID: planModel.ID.ValueString()})
+	err = r.validatorClient.PostPolicySet(ctx, planModel.Into(), validatorClient.PostPolicySetParams{
+		ID:     planModel.ID.ValueString(),
+		Schema: planModel.Schema.ValueString(),
+	})
 
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Creating", "Policy Set", err)
@@ -131,14 +138,18 @@ func (r *policySetResource) Read(ctx context.Context, request resource.ReadReque
 	// and if we use it, we will get a 'provider produced inconsistent result' error.
 	// Instead, we just check if the schema exists and save the stateModel.
 	// This will be updated in the future to use the read result.
-	registration, err := r.validatorClient.GetPolicySet(ctx, validatorClient.GetPolicySetParams{ID: stateModel.ID.ValueString()})
+	registration, err := r.validatorClient.GetPolicySet(ctx, validatorClient.GetPolicySetParams{
+		ID:     stateModel.ID.ValueString(),
+		Schema: stateModel.Schema.ValueString(),
+	})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Reading", "Policy Set", err)
 		return
 	}
 
 	apiModel := &policySetResourceModel{
-		ID: stateModel.ID,
+		ID:     stateModel.ID,
+		Schema: stateModel.Schema,
 	}
 
 	apiModel, err = apiModel.From(registration)
@@ -169,7 +180,11 @@ func (r *policySetResource) Update(ctx context.Context, request resource.UpdateR
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Normalizing", "Policy Set", err)
 	}
-	err = r.validatorClient.PostPolicySet(ctx, planModel.Into(), validatorClient.PostPolicySetParams{ID: planModel.ID.ValueString()})
+
+	err = r.validatorClient.PostPolicySet(ctx, planModel.Into(), validatorClient.PostPolicySetParams{
+		ID:     planModel.ID.ValueString(),
+		Schema: planModel.Schema.ValueString(),
+	})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Updating", "Policy Set", err)
 		return
@@ -194,7 +209,11 @@ func (r *policySetResource) Delete(ctx context.Context, request resource.DeleteR
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	err = r.validatorClient.DeletePolicySet(ctx, validatorClient.DeletePolicySetParams{ID: stateModel.ID.ValueString()})
+
+	err = r.validatorClient.DeletePolicySet(ctx, validatorClient.DeletePolicySetParams{
+		ID:     stateModel.ID.ValueString(),
+		Schema: stateModel.Schema.ValueString(),
+	})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Deleting", "Policy Set", err)
 		return
@@ -205,6 +224,7 @@ type policySetResourceModel struct {
 	ID        types.String `tfsdk:"id"`
 	DataCedar types.String `tfsdk:"data_cedar"`
 	DataJson  types.String `tfsdk:"data_json"`
+	Schema    types.String `tfsdk:"schema"`
 }
 
 func (model *policySetResourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {

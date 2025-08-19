@@ -53,6 +53,10 @@ func (resource *actionDiscoveryDocumentResource) Schema(_ context.Context, _ res
 				Description: "The hostname of the action discovery document.",
 				Required:    true,
 			},
+			"schema": schema.StringAttribute{
+				Description: "The schema that the action discovery document belongs to.",
+				Computed:    true,
+			},
 			"routes": schema.ListNestedAttribute{
 				Description: "The list of routes for the action discovery document.",
 				Required:    true,
@@ -91,7 +95,10 @@ func (resource *actionDiscoveryDocumentResource) Create(ctx context.Context, req
 		return
 	}
 
-	err = resource.validatorClient.PostActionSet(ctx, planModel.Into(), validatorClient.PostActionSetParams{ID: planModel.ID.ValueString()})
+	err = resource.validatorClient.PostActionSet(ctx, planModel.Into(), validatorClient.PostActionSetParams{
+		ID:     planModel.ID.ValueString(),
+		Schema: planModel.Schema.ValueString(),
+	})
 
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Creating", "Resource Set", err)
@@ -122,14 +129,19 @@ func (resource *actionDiscoveryDocumentResource) Read(ctx context.Context, reque
 	// and if we use it, we will get a 'provider produced inconsistent result' error.
 	// Instead, we just check if the schema exists and save the stateModel.
 	// This will be updated in the future to use the read result.
-	registration, err := resource.validatorClient.GetActionSet(ctx, validatorClient.GetActionSetParams{ID: stateModel.ID.ValueString()})
+	registration, err := resource.validatorClient.GetActionSet(ctx, validatorClient.GetActionSetParams{
+		ID:     stateModel.ID.ValueString(),
+		Schema: stateModel.Schema.ValueString(),
+	})
+
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Reading", "Resource Set", err)
 		return
 	}
 
 	apiModel := &actionDiscoveryDocumentResourceModel{
-		ID: stateModel.ID,
+		ID:     stateModel.ID,
+		Schema: stateModel.Schema,
 	}
 
 	err = apiModel.From(registration).saveToState(ctx, &response.State, &response.Diagnostics)
@@ -152,7 +164,10 @@ func (resource *actionDiscoveryDocumentResource) Update(ctx context.Context, req
 		return
 	}
 
-	err = resource.validatorClient.PostActionSet(ctx, planModel.Into(), validatorClient.PostActionSetParams{ID: planModel.ID.ValueString()})
+	err = resource.validatorClient.PostActionSet(ctx, planModel.Into(), validatorClient.PostActionSetParams{
+		ID:     planModel.ID.ValueString(),
+		Schema: planModel.Schema.ValueString(),
+	})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Updating", "Resource Set", err)
 		return
@@ -171,13 +186,19 @@ func (resource *actionDiscoveryDocumentResource) Update(ctx context.Context, req
 func (resource *actionDiscoveryDocumentResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
 	var stateModel actionDiscoveryDocumentResourceModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
+
 	if err != nil {
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	err = resource.validatorClient.DeleteActionSet(ctx, validatorClient.DeleteActionSetParams{ID: stateModel.ID.ValueString()})
+
+	err = resource.validatorClient.DeleteActionSet(ctx, validatorClient.DeleteActionSetParams{
+		ID:     stateModel.ID.ValueString(),
+		Schema: stateModel.Schema.ValueString(),
+	})
+
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Deleting", "Resource Set", err)
 		return
@@ -194,6 +215,7 @@ type actionDiscoveryDocumentResourceModel struct {
 	ID       types.String               `tfsdk:"id"`
 	Hostname types.String               `tfsdk:"hostname"`
 	Routes   []resourceActionRouteModel `tfsdk:"routes"`
+	Schema   types.String               `tfsdk:"schema"`
 }
 
 func (model *actionDiscoveryDocumentResourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {

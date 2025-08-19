@@ -269,3 +269,12 @@ func decodePostSchemaResponse(resp *http.Response) (res *PostSchemaOK, _ error) 
 	}
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
+
+func decodeTokenReviewResponse(resp *http.Response) (res *TokenReviewOK, _ error) {
+	switch resp.StatusCode {
+	case 200:
+		// Code 200.
+		return &TokenReviewOK{}, nil
+	}
+	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+}

@@ -4,17 +4,20 @@ package validatorClient
 
 // DeleteActionSetParams is parameters of delete_action_set operation.
 type DeleteActionSetParams struct {
-	ID string
+	Schema string
+	ID     string
 }
 
 // DeletePolicySetParams is parameters of delete_policy_set operation.
 type DeletePolicySetParams struct {
-	ID string
+	Schema string
+	ID     string
 }
 
 // DeleteResourceSetParams is parameters of delete_resource_set operation.
 type DeleteResourceSetParams struct {
-	ID string
+	Schema string
+	ID     string
 }
 
 // DeleteSchemaParams is parameters of delete_schema operation.
@@ -24,17 +27,20 @@ type DeleteSchemaParams struct {
 
 // GetActionSetParams is parameters of get_action_set operation.
 type GetActionSetParams struct {
-	ID string
+	Schema string
+	ID     string
 }
 
 // GetPolicySetParams is parameters of get_policy_set operation.
 type GetPolicySetParams struct {
-	ID string
+	Schema string
+	ID     string
 }
 
 // GetResourceSetParams is parameters of get_resource_set operation.
 type GetResourceSetParams struct {
-	ID string
+	Schema string
+	ID     string
 }
 
 // GetSchemaParams is parameters of get_schema operation.
@@ -44,17 +50,20 @@ type GetSchemaParams struct {
 
 // PostActionSetParams is parameters of post_action_set operation.
 type PostActionSetParams struct {
-	ID string
+	Schema string
+	ID     string
 }
 
 // PostPolicySetParams is parameters of post_policy_set operation.
 type PostPolicySetParams struct {
-	ID string
+	Schema string
+	ID     string
 }
 
 // PostResourceSetParams is parameters of post_resource_set operation.
 type PostResourceSetParams struct {
-	ID string
+	Schema string
+	ID     string
 }
 
 // PostSchemaParams is parameters of post_schema operation.

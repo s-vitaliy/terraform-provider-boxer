@@ -24,15 +24,15 @@ func trimTrailingSlashes(u *url.URL) {
 type Invoker interface {
 	// DeleteActionSet invokes delete_action_set operation.
 	//
-	// DELETE /action_set/{id}
+	// DELETE /action_set/{schema}/{id}
 	DeleteActionSet(ctx context.Context, params DeleteActionSetParams) error
 	// DeletePolicySet invokes delete_policy_set operation.
 	//
-	// DELETE /policy_set/{id}
+	// DELETE /policy_set/{schema}/{id}
 	DeletePolicySet(ctx context.Context, params DeletePolicySetParams) error
 	// DeleteResourceSet invokes delete_resource_set operation.
 	//
-	// DELETE /resource_set/{id}
+	// DELETE /resource_set/{schema}/{id}
 	DeleteResourceSet(ctx context.Context, params DeleteResourceSetParams) error
 	// DeleteSchema invokes delete_schema operation.
 	//
@@ -40,15 +40,15 @@ type Invoker interface {
 	DeleteSchema(ctx context.Context, params DeleteSchemaParams) error
 	// GetActionSet invokes get_action_set operation.
 	//
-	// GET /action_set/{id}
+	// GET /action_set/{schema}/{id}
 	GetActionSet(ctx context.Context, params GetActionSetParams) (*ActionSetRegistration, error)
 	// GetPolicySet invokes get_policy_set operation.
 	//
-	// GET /policy_set/{id}
+	// GET /policy_set/{schema}/{id}
 	GetPolicySet(ctx context.Context, params GetPolicySetParams) (*PolicySetRegistration, error)
 	// GetResourceSet invokes get_resource_set operation.
 	//
-	// GET /resource_set/{id}
+	// GET /resource_set/{schema}/{id}
 	GetResourceSet(ctx context.Context, params GetResourceSetParams) (*ResourceSetRegistration, error)
 	// GetSchema invokes get_schema operation.
 	//
@@ -56,20 +56,24 @@ type Invoker interface {
 	GetSchema(ctx context.Context, params GetSchemaParams) (jx.Raw, error)
 	// PostActionSet invokes post_action_set operation.
 	//
-	// POST /action_set/{id}
+	// POST /action_set/{schema}/{id}
 	PostActionSet(ctx context.Context, request *ActionSetRegistration, params PostActionSetParams) error
 	// PostPolicySet invokes post_policy_set operation.
 	//
-	// POST /policy_set/{id}
+	// POST /policy_set/{schema}/{id}
 	PostPolicySet(ctx context.Context, request *PolicySetRegistration, params PostPolicySetParams) error
 	// PostResourceSet invokes post_resource_set operation.
 	//
-	// POST /resource_set/{id}
+	// POST /resource_set/{schema}/{id}
 	PostResourceSet(ctx context.Context, request *ResourceSetRegistration, params PostResourceSetParams) error
 	// PostSchema invokes post_schema operation.
 	//
 	// POST /schema/{id}
 	PostSchema(ctx context.Context, request jx.Raw, params PostSchemaParams) error
+	// TokenReview invokes token_review operation.
+	//
+	// GET /review
+	TokenReview(ctx context.Context) error
 }
 
 // Client implements OAS client.
@@ -113,7 +117,7 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 
 // DeleteActionSet invokes delete_action_set operation.
 //
-// DELETE /action_set/{id}
+// DELETE /action_set/{schema}/{id}
 func (c *Client) DeleteActionSet(ctx context.Context, params DeleteActionSetParams) error {
 	_, err := c.sendDeleteActionSet(ctx, params)
 	return err
@@ -122,8 +126,27 @@ func (c *Client) DeleteActionSet(ctx context.Context, params DeleteActionSetPara
 func (c *Client) sendDeleteActionSet(ctx context.Context, params DeleteActionSetParams) (res *DeleteActionSetOK, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
+	var pathParts [4]string
 	pathParts[0] = "/action_set/"
+	{
+		// Encode "schema" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "schema",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Schema))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -140,7 +163,7 @@ func (c *Client) sendDeleteActionSet(ctx context.Context, params DeleteActionSet
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[1] = encoded
+		pathParts[3] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -165,7 +188,7 @@ func (c *Client) sendDeleteActionSet(ctx context.Context, params DeleteActionSet
 
 // DeletePolicySet invokes delete_policy_set operation.
 //
-// DELETE /policy_set/{id}
+// DELETE /policy_set/{schema}/{id}
 func (c *Client) DeletePolicySet(ctx context.Context, params DeletePolicySetParams) error {
 	_, err := c.sendDeletePolicySet(ctx, params)
 	return err
@@ -174,8 +197,27 @@ func (c *Client) DeletePolicySet(ctx context.Context, params DeletePolicySetPara
 func (c *Client) sendDeletePolicySet(ctx context.Context, params DeletePolicySetParams) (res *DeletePolicySetOK, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
+	var pathParts [4]string
 	pathParts[0] = "/policy_set/"
+	{
+		// Encode "schema" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "schema",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Schema))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -192,7 +234,7 @@ func (c *Client) sendDeletePolicySet(ctx context.Context, params DeletePolicySet
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[1] = encoded
+		pathParts[3] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -217,7 +259,7 @@ func (c *Client) sendDeletePolicySet(ctx context.Context, params DeletePolicySet
 
 // DeleteResourceSet invokes delete_resource_set operation.
 //
-// DELETE /resource_set/{id}
+// DELETE /resource_set/{schema}/{id}
 func (c *Client) DeleteResourceSet(ctx context.Context, params DeleteResourceSetParams) error {
 	_, err := c.sendDeleteResourceSet(ctx, params)
 	return err
@@ -226,8 +268,27 @@ func (c *Client) DeleteResourceSet(ctx context.Context, params DeleteResourceSet
 func (c *Client) sendDeleteResourceSet(ctx context.Context, params DeleteResourceSetParams) (res *DeleteResourceSetOK, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
+	var pathParts [4]string
 	pathParts[0] = "/resource_set/"
+	{
+		// Encode "schema" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "schema",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Schema))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -244,7 +305,7 @@ func (c *Client) sendDeleteResourceSet(ctx context.Context, params DeleteResourc
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[1] = encoded
+		pathParts[3] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -321,7 +382,7 @@ func (c *Client) sendDeleteSchema(ctx context.Context, params DeleteSchemaParams
 
 // GetActionSet invokes get_action_set operation.
 //
-// GET /action_set/{id}
+// GET /action_set/{schema}/{id}
 func (c *Client) GetActionSet(ctx context.Context, params GetActionSetParams) (*ActionSetRegistration, error) {
 	res, err := c.sendGetActionSet(ctx, params)
 	return res, err
@@ -330,8 +391,27 @@ func (c *Client) GetActionSet(ctx context.Context, params GetActionSetParams) (*
 func (c *Client) sendGetActionSet(ctx context.Context, params GetActionSetParams) (res *ActionSetRegistration, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
+	var pathParts [4]string
 	pathParts[0] = "/action_set/"
+	{
+		// Encode "schema" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "schema",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Schema))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -348,7 +428,7 @@ func (c *Client) sendGetActionSet(ctx context.Context, params GetActionSetParams
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[1] = encoded
+		pathParts[3] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -373,7 +453,7 @@ func (c *Client) sendGetActionSet(ctx context.Context, params GetActionSetParams
 
 // GetPolicySet invokes get_policy_set operation.
 //
-// GET /policy_set/{id}
+// GET /policy_set/{schema}/{id}
 func (c *Client) GetPolicySet(ctx context.Context, params GetPolicySetParams) (*PolicySetRegistration, error) {
 	res, err := c.sendGetPolicySet(ctx, params)
 	return res, err
@@ -382,8 +462,27 @@ func (c *Client) GetPolicySet(ctx context.Context, params GetPolicySetParams) (*
 func (c *Client) sendGetPolicySet(ctx context.Context, params GetPolicySetParams) (res *PolicySetRegistration, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
+	var pathParts [4]string
 	pathParts[0] = "/policy_set/"
+	{
+		// Encode "schema" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "schema",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Schema))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -400,7 +499,7 @@ func (c *Client) sendGetPolicySet(ctx context.Context, params GetPolicySetParams
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[1] = encoded
+		pathParts[3] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -425,7 +524,7 @@ func (c *Client) sendGetPolicySet(ctx context.Context, params GetPolicySetParams
 
 // GetResourceSet invokes get_resource_set operation.
 //
-// GET /resource_set/{id}
+// GET /resource_set/{schema}/{id}
 func (c *Client) GetResourceSet(ctx context.Context, params GetResourceSetParams) (*ResourceSetRegistration, error) {
 	res, err := c.sendGetResourceSet(ctx, params)
 	return res, err
@@ -434,8 +533,27 @@ func (c *Client) GetResourceSet(ctx context.Context, params GetResourceSetParams
 func (c *Client) sendGetResourceSet(ctx context.Context, params GetResourceSetParams) (res *ResourceSetRegistration, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
+	var pathParts [4]string
 	pathParts[0] = "/resource_set/"
+	{
+		// Encode "schema" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "schema",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Schema))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -452,7 +570,7 @@ func (c *Client) sendGetResourceSet(ctx context.Context, params GetResourceSetPa
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[1] = encoded
+		pathParts[3] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -529,7 +647,7 @@ func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res
 
 // PostActionSet invokes post_action_set operation.
 //
-// POST /action_set/{id}
+// POST /action_set/{schema}/{id}
 func (c *Client) PostActionSet(ctx context.Context, request *ActionSetRegistration, params PostActionSetParams) error {
 	_, err := c.sendPostActionSet(ctx, request, params)
 	return err
@@ -547,8 +665,27 @@ func (c *Client) sendPostActionSet(ctx context.Context, request *ActionSetRegist
 	}
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
+	var pathParts [4]string
 	pathParts[0] = "/action_set/"
+	{
+		// Encode "schema" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "schema",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Schema))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -565,7 +702,7 @@ func (c *Client) sendPostActionSet(ctx context.Context, request *ActionSetRegist
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[1] = encoded
+		pathParts[3] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -593,7 +730,7 @@ func (c *Client) sendPostActionSet(ctx context.Context, request *ActionSetRegist
 
 // PostPolicySet invokes post_policy_set operation.
 //
-// POST /policy_set/{id}
+// POST /policy_set/{schema}/{id}
 func (c *Client) PostPolicySet(ctx context.Context, request *PolicySetRegistration, params PostPolicySetParams) error {
 	_, err := c.sendPostPolicySet(ctx, request, params)
 	return err
@@ -602,8 +739,27 @@ func (c *Client) PostPolicySet(ctx context.Context, request *PolicySetRegistrati
 func (c *Client) sendPostPolicySet(ctx context.Context, request *PolicySetRegistration, params PostPolicySetParams) (res *PostPolicySetOK, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
+	var pathParts [4]string
 	pathParts[0] = "/policy_set/"
+	{
+		// Encode "schema" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "schema",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Schema))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -620,7 +776,7 @@ func (c *Client) sendPostPolicySet(ctx context.Context, request *PolicySetRegist
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[1] = encoded
+		pathParts[3] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -648,7 +804,7 @@ func (c *Client) sendPostPolicySet(ctx context.Context, request *PolicySetRegist
 
 // PostResourceSet invokes post_resource_set operation.
 //
-// POST /resource_set/{id}
+// POST /resource_set/{schema}/{id}
 func (c *Client) PostResourceSet(ctx context.Context, request *ResourceSetRegistration, params PostResourceSetParams) error {
 	_, err := c.sendPostResourceSet(ctx, request, params)
 	return err
@@ -666,8 +822,27 @@ func (c *Client) sendPostResourceSet(ctx context.Context, request *ResourceSetRe
 	}
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
+	var pathParts [4]string
 	pathParts[0] = "/resource_set/"
+	{
+		// Encode "schema" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "schema",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Schema))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -684,7 +859,7 @@ func (c *Client) sendPostResourceSet(ctx context.Context, request *ResourceSetRe
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[1] = encoded
+		pathParts[3] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -758,6 +933,40 @@ func (c *Client) sendPostSchema(ctx context.Context, request jx.Raw, params Post
 	defer resp.Body.Close()
 
 	result, err := decodePostSchemaResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// TokenReview invokes token_review operation.
+//
+// GET /review
+func (c *Client) TokenReview(ctx context.Context) error {
+	_, err := c.sendTokenReview(ctx)
+	return err
+}
+
+func (c *Client) sendTokenReview(ctx context.Context) (res *TokenReviewOK, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/review"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeTokenReviewResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

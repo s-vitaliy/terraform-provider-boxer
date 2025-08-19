@@ -49,6 +49,10 @@ func (dataSource *policySetDataSource) Schema(_ context.Context, _ datasource.Sc
 				Description: "The unique identifier of the policy set.",
 				Required:    true,
 			},
+			"schema": schema.StringAttribute{
+				Description: "The schema that the policy set conforms to.",
+				Computed:    true,
+			},
 			"data_cedar": schema.StringAttribute{
 				Description: "The Cedar schema data in Cedar format.",
 				Computed:    true,
@@ -71,14 +75,18 @@ func (dataSource *policySetDataSource) Read(ctx context.Context, request datasou
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	registration, err := dataSource.validatorClient.GetPolicySet(ctx, validatorClient.GetPolicySetParams{ID: configModel.ID.ValueString()})
+	registration, err := dataSource.validatorClient.GetPolicySet(ctx, validatorClient.GetPolicySetParams{
+		ID:     configModel.ID.ValueString(),
+		Schema: configModel.Schema.ValueString(),
+	})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Reading", "Resource Set", err)
 		return
 	}
 
 	apiModel := &policySetDataSourceModel{
-		ID: configModel.ID,
+		ID:     configModel.ID,
+		Schema: configModel.Schema,
 	}
 
 	apiModel, err = apiModel.From(registration)
@@ -98,6 +106,7 @@ type policySetDataSourceModel struct {
 	ID        types.String `tfsdk:"id"`
 	DataCedar types.String `tfsdk:"data_cedar"`
 	DataJson  types.String `tfsdk:"data_json"`
+	Schema    types.String `tfsdk:"schema"`
 }
 
 // policySetDataSource is the data source implementation.

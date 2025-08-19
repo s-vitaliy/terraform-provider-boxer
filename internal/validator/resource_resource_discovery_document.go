@@ -51,6 +51,10 @@ func (resource *resourceDiscoveryDocumentResource) Schema(_ context.Context, _ r
 				Description: "The hostname of the resource discovery document.",
 				Required:    true,
 			},
+			"schema": schema.StringAttribute{
+				Description: "The schema that the action discovery document belongs to.",
+				Computed:    true,
+			},
 			"routes": schema.ListNestedAttribute{
 				Description: "The list of routes for the resource discovery document.",
 				Required:    true,
@@ -82,8 +86,10 @@ func (resource *resourceDiscoveryDocumentResource) Create(ctx context.Context, r
 		return
 	}
 
-	err = resource.validatorClient.PostResourceSet(ctx, planModel.Into(), validatorClient.PostResourceSetParams{ID: planModel.ID.ValueString()})
-
+	err = resource.validatorClient.PostResourceSet(ctx, planModel.Into(), validatorClient.PostResourceSetParams{
+		ID:     planModel.ID.ValueString(),
+		Schema: planModel.Schema.ValueString(),
+	})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Creating", "Resource Set", err)
 		return
@@ -113,14 +119,18 @@ func (resource *resourceDiscoveryDocumentResource) Read(ctx context.Context, req
 	// and if we use it, we will get a 'provider produced inconsistent result' error.
 	// Instead, we just check if the schema exists and save the stateModel.
 	// This will be updated in the future to use the read result.
-	registration, err := resource.validatorClient.GetResourceSet(ctx, validatorClient.GetResourceSetParams{ID: stateModel.ID.ValueString()})
+	registration, err := resource.validatorClient.GetResourceSet(ctx, validatorClient.GetResourceSetParams{
+		ID:     stateModel.ID.ValueString(),
+		Schema: stateModel.Schema.ValueString(),
+	})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Reading", "Resource Set", err)
 		return
 	}
 
 	apiModel := &resourceDiscoveryDocumentResourceModel{
-		ID: stateModel.ID,
+		ID:     stateModel.ID,
+		Schema: stateModel.Schema,
 	}
 
 	err = apiModel.From(registration).saveToState(ctx, &response.State, &response.Diagnostics)
@@ -143,7 +153,10 @@ func (resource *resourceDiscoveryDocumentResource) Update(ctx context.Context, r
 		return
 	}
 
-	err = resource.validatorClient.PostResourceSet(ctx, planModel.Into(), validatorClient.PostResourceSetParams{ID: planModel.ID.ValueString()})
+	err = resource.validatorClient.PostResourceSet(ctx, planModel.Into(), validatorClient.PostResourceSetParams{
+		ID:     planModel.ID.ValueString(),
+		Schema: planModel.Schema.ValueString(),
+	})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Updating", "Resource Set", err)
 		return
@@ -168,7 +181,11 @@ func (resource *resourceDiscoveryDocumentResource) Delete(ctx context.Context, r
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	err = resource.validatorClient.DeleteResourceSet(ctx, validatorClient.DeleteResourceSetParams{ID: stateModel.ID.ValueString()})
+
+	err = resource.validatorClient.DeleteResourceSet(ctx, validatorClient.DeleteResourceSetParams{
+		ID:     stateModel.ID.ValueString(),
+		Schema: stateModel.Schema.ValueString(),
+	})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Deleting", "Resource Set", err)
 		return
@@ -184,6 +201,7 @@ type resourceDiscoveryDocumentResourceModel struct {
 	ID       types.String                 `tfsdk:"id"`
 	Hostname types.String                 `tfsdk:"hostname"`
 	Routes   []resourceResourceRouteModel `tfsdk:"routes"`
+	Schema   types.String                 `tfsdk:"schema"`
 }
 
 func (model *resourceDiscoveryDocumentResourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {

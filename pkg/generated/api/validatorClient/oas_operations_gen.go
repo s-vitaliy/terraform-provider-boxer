@@ -18,4 +18,5 @@ const (
 	PostPolicySetOperation     OperationName = "PostPolicySet"
 	PostResourceSetOperation   OperationName = "PostResourceSet"
 	PostSchemaOperation        OperationName = "PostSchema"
+	TokenReviewOperation       OperationName = "TokenReview"
 )
