@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-boxer/internal/common"
 	"terraform-provider-boxer/pkg/generated/api/validatorClient"
 
@@ -86,7 +87,7 @@ func (dataSource *resourceDiscoveryDocumentDataSource) Read(ctx context.Context,
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	registration, err := dataSource.validatorClient.GetResourceSet(ctx, validatorClient.GetResourceSetParams{
+	apiData, err := dataSource.validatorClient.GetResourceSet(ctx, validatorClient.GetResourceSetParams{
 		ID:     configModel.ID.ValueString(),
 		Schema: configModel.Schema.ValueString(),
 	})
@@ -100,12 +101,27 @@ func (dataSource *resourceDiscoveryDocumentDataSource) Read(ctx context.Context,
 		Schema: configModel.Schema,
 	}
 
-	err = apiModel.From(registration).saveToState(ctx, &response.State, &response.Diagnostics)
+	switch apiResponse := apiData.(type) {
+	case *validatorClient.ResourceSetRegistration:
+		err = apiModel.From(apiResponse).saveToState(ctx, &response.State, &response.Diagnostics)
+		if err != nil {
+			common.GenerateError(&response.Diagnostics, "Saving", "Resource Set", err)
+			return
+		}
 
-	if err != nil {
-		common.GenerateError(&response.Diagnostics, "Saving", "Resource Set", err)
+	case *validatorClient.GetResourceSetNotFound:
+		// If the resource set is not found, we remove the resource from the state.
+		tflog.Debug(ctx, "Resource set not found, setting state to empty")
+		response.State.RemoveResource(ctx)
+		return
+	default:
+		common.GenerateError(&response.Diagnostics,
+			"Reading",
+			"Resource Set",
+			common.ErrUnexpectedResponseType(apiResponse))
 		return
 	}
+
 }
 
 type resourceDataSourceRouteModel struct {

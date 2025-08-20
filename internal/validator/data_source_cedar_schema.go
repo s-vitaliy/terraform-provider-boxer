@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"github.com/go-faster/jx"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-boxer/internal/common"
@@ -70,11 +71,19 @@ func (dataSource *cedarSchemaDataSource) Read(ctx context.Context, request datas
 		common.GenerateError(&response.Diagnostics, "Reading", "Cedar Schema", err)
 		return
 	}
-	configModel.DataJson = types.StringValue(apiData.String())
-
-	diag := response.State.Set(ctx, &configModel)
-	response.Diagnostics.Append(diag...)
-	if response.Diagnostics.HasError() {
+	switch apiResponse := apiData.(type) {
+	case *validatorClient.GetSchemaOKApplicationJSON:
+		configModel.DataJson = types.StringValue(jx.Raw(*apiResponse).String())
+		diag := response.State.Set(ctx, &configModel)
+		response.Diagnostics.Append(diag...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+	case *validatorClient.GetSchemaNotFound:
+		response.State.RemoveResource(ctx)
+		return
+	default:
+		common.GenerateError(&response.Diagnostics, "Reading", "Cedar Schema", common.ErrUnexpectedResponseType(apiData))
 		return
 	}
 }

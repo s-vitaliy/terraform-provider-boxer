@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-boxer/internal/common"
 	"terraform-provider-boxer/pkg/generated/api/validatorClient"
 
@@ -55,7 +56,7 @@ func (resource *actionDiscoveryDocumentResource) Schema(_ context.Context, _ res
 			},
 			"schema": schema.StringAttribute{
 				Description: "The schema that the action discovery document belongs to.",
-				Computed:    true,
+				Required:    true,
 			},
 			"routes": schema.ListNestedAttribute{
 				Description: "The list of routes for the action discovery document.",
@@ -129,7 +130,7 @@ func (resource *actionDiscoveryDocumentResource) Read(ctx context.Context, reque
 	// and if we use it, we will get a 'provider produced inconsistent result' error.
 	// Instead, we just check if the schema exists and save the stateModel.
 	// This will be updated in the future to use the read result.
-	registration, err := resource.validatorClient.GetActionSet(ctx, validatorClient.GetActionSetParams{
+	apiData, err := resource.validatorClient.GetActionSet(ctx, validatorClient.GetActionSetParams{
 		ID:     stateModel.ID.ValueString(),
 		Schema: stateModel.Schema.ValueString(),
 	})
@@ -144,11 +145,24 @@ func (resource *actionDiscoveryDocumentResource) Read(ctx context.Context, reque
 		Schema: stateModel.Schema,
 	}
 
-	err = apiModel.From(registration).saveToState(ctx, &response.State, &response.Diagnostics)
-	// If we can't save the stateModel, we can't proceed with the update.
-	// so we return early.
-	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	switch apiResponse := apiData.(type) {
+	case *validatorClient.ActionSetRegistration:
+		err = apiModel.From(apiResponse).saveToState(ctx, &response.State, &response.Diagnostics)
+		// If we can't save the stateModel, we can't proceed with the update.
+		// so we return early.
+		// The error will be handled by the framework and returned to the user.
+		if err != nil {
+			return
+		}
+	case *validatorClient.GetActionSetNotFound:
+		tflog.Debug(ctx, "Action set not found, setting state to empty")
+		response.State.RemoveResource(ctx)
+		return
+	default:
+		common.GenerateError(&response.Diagnostics,
+			"Reading",
+			"Action Set",
+			common.ErrUnexpectedResponseType(apiResponse))
 		return
 	}
 }

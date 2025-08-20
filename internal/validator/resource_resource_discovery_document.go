@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-boxer/internal/common"
 	"terraform-provider-boxer/pkg/generated/api/validatorClient"
 
@@ -47,13 +48,13 @@ func (resource *resourceDiscoveryDocumentResource) Schema(_ context.Context, _ r
 				Description: "The unique identifier of the resource discovery document.",
 				Required:    true,
 			},
+			"schema": schema.StringAttribute{
+				Description: "The schema that the action discovery document belongs to.",
+				Required:    true,
+			},
 			"hostname": schema.StringAttribute{
 				Description: "The hostname of the resource discovery document.",
 				Required:    true,
-			},
-			"schema": schema.StringAttribute{
-				Description: "The schema that the action discovery document belongs to.",
-				Computed:    true,
 			},
 			"routes": schema.ListNestedAttribute{
 				Description: "The list of routes for the resource discovery document.",
@@ -119,7 +120,7 @@ func (resource *resourceDiscoveryDocumentResource) Read(ctx context.Context, req
 	// and if we use it, we will get a 'provider produced inconsistent result' error.
 	// Instead, we just check if the schema exists and save the stateModel.
 	// This will be updated in the future to use the read result.
-	registration, err := resource.validatorClient.GetResourceSet(ctx, validatorClient.GetResourceSetParams{
+	apiData, err := resource.validatorClient.GetResourceSet(ctx, validatorClient.GetResourceSetParams{
 		ID:     stateModel.ID.ValueString(),
 		Schema: stateModel.Schema.ValueString(),
 	})
@@ -132,12 +133,26 @@ func (resource *resourceDiscoveryDocumentResource) Read(ctx context.Context, req
 		ID:     stateModel.ID,
 		Schema: stateModel.Schema,
 	}
-
-	err = apiModel.From(registration).saveToState(ctx, &response.State, &response.Diagnostics)
-	// If we can't save the stateModel, we can't proceed with the update.
-	// so we return early.
-	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	switch apiResponse := apiData.(type) {
+	case *validatorClient.ResourceSetRegistration:
+		err = apiModel.From(apiResponse).saveToState(ctx, &response.State, &response.Diagnostics)
+		// If we can't save the stateModel, we can't proceed with the update.
+		// so we return early.
+		// The error will be handled by the framework and returned to the user.
+		if err != nil {
+			return
+		}
+		return
+	case *validatorClient.GetResourceSetNotFound:
+		// If the resource set is not found, we remove the resource from the state.
+		tflog.Debug(ctx, "Resource set not found, setting state to empty")
+		response.State.RemoveResource(ctx)
+		return
+	default:
+		common.GenerateError(&response.Diagnostics,
+			"Reading",
+			"Resource Set",
+			common.ErrUnexpectedResponseType(apiResponse))
 		return
 	}
 }
@@ -205,7 +220,7 @@ type resourceDiscoveryDocumentResourceModel struct {
 }
 
 func (model *resourceDiscoveryDocumentResourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
-	diags := state.Set(ctx, &model)
+	diags := state.Set(ctx, model)
 	diagnostics.Append(diags...)
 	if diagnostics.HasError() {
 		return fmt.Errorf("error getting plan")

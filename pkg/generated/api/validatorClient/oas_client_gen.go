@@ -41,19 +41,19 @@ type Invoker interface {
 	// GetActionSet invokes get_action_set operation.
 	//
 	// GET /action_set/{schema}/{id}
-	GetActionSet(ctx context.Context, params GetActionSetParams) (*ActionSetRegistration, error)
+	GetActionSet(ctx context.Context, params GetActionSetParams) (GetActionSetRes, error)
 	// GetPolicySet invokes get_policy_set operation.
 	//
 	// GET /policy_set/{schema}/{id}
-	GetPolicySet(ctx context.Context, params GetPolicySetParams) (*PolicySetRegistration, error)
+	GetPolicySet(ctx context.Context, params GetPolicySetParams) (GetPolicySetRes, error)
 	// GetResourceSet invokes get_resource_set operation.
 	//
 	// GET /resource_set/{schema}/{id}
-	GetResourceSet(ctx context.Context, params GetResourceSetParams) (*ResourceSetRegistration, error)
+	GetResourceSet(ctx context.Context, params GetResourceSetParams) (GetResourceSetRes, error)
 	// GetSchema invokes get_schema operation.
 	//
 	// GET /schema/{id}
-	GetSchema(ctx context.Context, params GetSchemaParams) (jx.Raw, error)
+	GetSchema(ctx context.Context, params GetSchemaParams) (GetSchemaRes, error)
 	// PostActionSet invokes post_action_set operation.
 	//
 	// POST /action_set/{schema}/{id}
@@ -383,12 +383,12 @@ func (c *Client) sendDeleteSchema(ctx context.Context, params DeleteSchemaParams
 // GetActionSet invokes get_action_set operation.
 //
 // GET /action_set/{schema}/{id}
-func (c *Client) GetActionSet(ctx context.Context, params GetActionSetParams) (*ActionSetRegistration, error) {
+func (c *Client) GetActionSet(ctx context.Context, params GetActionSetParams) (GetActionSetRes, error) {
 	res, err := c.sendGetActionSet(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetActionSet(ctx context.Context, params GetActionSetParams) (res *ActionSetRegistration, err error) {
+func (c *Client) sendGetActionSet(ctx context.Context, params GetActionSetParams) (res GetActionSetRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
@@ -454,12 +454,12 @@ func (c *Client) sendGetActionSet(ctx context.Context, params GetActionSetParams
 // GetPolicySet invokes get_policy_set operation.
 //
 // GET /policy_set/{schema}/{id}
-func (c *Client) GetPolicySet(ctx context.Context, params GetPolicySetParams) (*PolicySetRegistration, error) {
+func (c *Client) GetPolicySet(ctx context.Context, params GetPolicySetParams) (GetPolicySetRes, error) {
 	res, err := c.sendGetPolicySet(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetPolicySet(ctx context.Context, params GetPolicySetParams) (res *PolicySetRegistration, err error) {
+func (c *Client) sendGetPolicySet(ctx context.Context, params GetPolicySetParams) (res GetPolicySetRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
@@ -525,12 +525,12 @@ func (c *Client) sendGetPolicySet(ctx context.Context, params GetPolicySetParams
 // GetResourceSet invokes get_resource_set operation.
 //
 // GET /resource_set/{schema}/{id}
-func (c *Client) GetResourceSet(ctx context.Context, params GetResourceSetParams) (*ResourceSetRegistration, error) {
+func (c *Client) GetResourceSet(ctx context.Context, params GetResourceSetParams) (GetResourceSetRes, error) {
 	res, err := c.sendGetResourceSet(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetResourceSet(ctx context.Context, params GetResourceSetParams) (res *ResourceSetRegistration, err error) {
+func (c *Client) sendGetResourceSet(ctx context.Context, params GetResourceSetParams) (res GetResourceSetRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
@@ -596,12 +596,12 @@ func (c *Client) sendGetResourceSet(ctx context.Context, params GetResourceSetPa
 // GetSchema invokes get_schema operation.
 //
 // GET /schema/{id}
-func (c *Client) GetSchema(ctx context.Context, params GetSchemaParams) (jx.Raw, error) {
+func (c *Client) GetSchema(ctx context.Context, params GetSchemaParams) (GetSchemaRes, error) {
 	res, err := c.sendGetSchema(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res jx.Raw, err error) {
+func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res GetSchemaRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string

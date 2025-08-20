@@ -2,12 +2,15 @@ package issuer
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-boxer/internal/common"
-	"terraform-provider-boxer/pkg/generated/api/issuerClient"
-
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"terraform-provider-boxer/internal/common"
+	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -78,7 +81,7 @@ func (dataSource *boxerExternalIdentityDataSource) Read(ctx context.Context, req
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	externalIdentity, err := dataSource.issuerClient.GetIdentity(ctx, issuerClient.GetIdentityParams{
+	apiData, err := dataSource.issuerClient.GetIdentity(ctx, issuerClient.GetIdentityParams{
 		ID:               configModel.ID.ValueString(),
 		IdentityProvider: configModel.IdentityProvider.ValueString(),
 	})
@@ -87,22 +90,59 @@ func (dataSource *boxerExternalIdentityDataSource) Read(ctx context.Context, req
 		return
 	}
 
-	model := boxerExternalIdentityModel{
-		ID:               types.StringValue(externalIdentity.ID),
-		IdentityProvider: types.StringValue(externalIdentity.IdentityProvider),
+	apiModel := &boxerExternalIdentityDataSourceModel{
+		ID:               configModel.ID,
+		IdentityProvider: configModel.IdentityProvider,
 	}
 
-	diag := response.State.Set(ctx, &model)
-	response.Diagnostics.Append(diag...)
-	if response.Diagnostics.HasError() {
+	switch apiResponse := apiData.(type) {
+	case *issuerClient.ExternalIdentityRegistration:
+		tflog.Debug(ctx, "External identity found, updating state")
+		err = apiModel.From(apiResponse).saveToState(ctx, &response.State, &response.Diagnostics)
+		if err != nil {
+			common.GenerateError(&response.Diagnostics, "Saving", "Resource Set", err)
+			return
+		}
+	case *issuerClient.GetIdentityNotFound:
+		tflog.Debug(ctx, "External identity not found, setting state to empty")
+		response.State.RemoveResource(ctx)
+		return
+	default:
+		common.GenerateError(&response.Diagnostics,
+			"Reading",
+			"External Identity",
+			common.ErrUnexpectedResponseType(apiResponse))
 		return
 	}
+
+}
+
+func (model *boxerExternalIdentityDataSourceModel) From(source *issuerClient.ExternalIdentityRegistration) *boxerExternalIdentityDataSourceModel {
+	model.Principal = &boxerPrincipalAssociationDataSourceModel{
+		SchemaId:    types.StringValue(source.PrincipalSchema),
+		PrincipalId: types.StringValue(source.PrincipalId),
+	}
+	return model
+}
+
+func (model *boxerExternalIdentityDataSourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
+	diags := state.Set(ctx, model)
+	diagnostics.Append(diags...)
+	if diagnostics.HasError() {
+		return fmt.Errorf("error getting plan")
+	}
+	return nil
+}
+
+type boxerPrincipalAssociationDataSourceModel struct {
+	PrincipalId types.String `tfsdk:"principal_id"`
+	SchemaId    types.String `tfsdk:"schema_id"`
 }
 
 type boxerExternalIdentityDataSourceModel struct {
-	ID               types.String                    `tfsdk:"id"`
-	IdentityProvider types.String                    `tfsdk:"identity_provider"`
-	Principal        *boxerPrincipalAssociationModel `tfsdk:"principal"`
+	ID               types.String                              `tfsdk:"id"`
+	IdentityProvider types.String                              `tfsdk:"identity_provider"`
+	Principal        *boxerPrincipalAssociationDataSourceModel `tfsdk:"principal"`
 }
 
 // boxerExternalIdentityDataSource is the data source implementation.

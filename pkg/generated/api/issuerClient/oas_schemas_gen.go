@@ -4,6 +4,8 @@ package issuerClient
 
 import (
 	"io"
+
+	"github.com/go-faster/jx"
 )
 
 // DeleteIdentityOK is response for DeleteIdentity operation.
@@ -93,6 +95,8 @@ func (s *ExternalIdentityRegistration) SetPrincipalSchema(val string) {
 	s.PrincipalSchema = val
 }
 
+func (*ExternalIdentityRegistration) getIdentityRes() {}
+
 // Struct that represents an external identity.
 // Ref: #/components/schemas/ExternalIdentityRegistrationRequest
 type ExternalIdentityRegistrationRequest struct {
@@ -121,6 +125,34 @@ func (s *ExternalIdentityRegistrationRequest) SetPrincipalId(val string) {
 func (s *ExternalIdentityRegistrationRequest) SetPrincipalSchema(val string) {
 	s.PrincipalSchema = val
 }
+
+// GetIdentityNotFound is response for GetIdentity operation.
+type GetIdentityNotFound struct{}
+
+func (*GetIdentityNotFound) getIdentityRes() {}
+
+// GetPrincipalNotFound is response for GetPrincipal operation.
+type GetPrincipalNotFound struct{}
+
+func (*GetPrincipalNotFound) getPrincipalRes() {}
+
+type GetPrincipalOKApplicationJSON jx.Raw
+
+func (*GetPrincipalOKApplicationJSON) getPrincipalRes() {}
+
+// GetProviderNotFound is response for GetProvider operation.
+type GetProviderNotFound struct{}
+
+func (*GetProviderNotFound) getProviderRes() {}
+
+// GetSchemaNotFound is response for GetSchema operation.
+type GetSchemaNotFound struct{}
+
+func (*GetSchemaNotFound) getSchemaRes() {}
+
+type GetSchemaOKApplicationJSON jx.Raw
+
+func (*GetSchemaOKApplicationJSON) getSchemaRes() {}
 
 // Ref: #/components/schemas/OidcIdentityProviderRegistration
 type OidcIdentityProviderRegistration struct {
@@ -169,6 +201,8 @@ func (s *OidcIdentityProviderRegistration) SetIssuers(val []string) {
 func (s *OidcIdentityProviderRegistration) SetUserIdClaim(val string) {
 	s.UserIdClaim = val
 }
+
+func (*OidcIdentityProviderRegistration) getProviderRes() {}
 
 // PostIdentityOK is response for PostIdentity operation.
 type PostIdentityOK struct{}

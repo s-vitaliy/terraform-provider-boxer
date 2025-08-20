@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-boxer/internal/common"
 	"terraform-provider-boxer/pkg/generated/api/validatorClient"
 
@@ -51,7 +52,7 @@ func (dataSource *policySetDataSource) Schema(_ context.Context, _ datasource.Sc
 			},
 			"schema": schema.StringAttribute{
 				Description: "The schema that the policy set conforms to.",
-				Computed:    true,
+				Required:    true,
 			},
 			"data_cedar": schema.StringAttribute{
 				Description: "The Cedar schema data in Cedar format.",
@@ -75,7 +76,7 @@ func (dataSource *policySetDataSource) Read(ctx context.Context, request datasou
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	registration, err := dataSource.validatorClient.GetPolicySet(ctx, validatorClient.GetPolicySetParams{
+	apiData, err := dataSource.validatorClient.GetPolicySet(ctx, validatorClient.GetPolicySetParams{
 		ID:     configModel.ID.ValueString(),
 		Schema: configModel.Schema.ValueString(),
 	})
@@ -88,18 +89,29 @@ func (dataSource *policySetDataSource) Read(ctx context.Context, request datasou
 		ID:     configModel.ID,
 		Schema: configModel.Schema,
 	}
+	switch apiResponse := apiData.(type) {
+	case *validatorClient.PolicySetRegistration:
+		apiModel, err = apiModel.From(apiResponse)
+		if err != nil {
+			common.GenerateError(&response.Diagnostics, "Converting", "Resource Set", err)
+			return
+		}
 
-	apiModel, err = apiModel.From(registration)
-	if err != nil {
-		common.GenerateError(&response.Diagnostics, "Converting", "Resource Set", err)
+		err = apiModel.saveToState(ctx, &response.State, &response.Diagnostics)
+		if err != nil {
+			common.GenerateError(&response.Diagnostics, "Saving", "Resource Set", err)
+			return
+		}
+		return
+	case *validatorClient.GetPolicySetNotFound:
+		tflog.Debug(ctx, "Policy set not found, setting state to empty")
+		response.State.RemoveResource(ctx)
+		return
+	default:
+		common.GenerateError(&response.Diagnostics, "Reading", "Policy Set", common.ErrUnexpectedResponseType(apiResponse))
 		return
 	}
 
-	err = apiModel.saveToState(ctx, &response.State, &response.Diagnostics)
-	if err != nil {
-		common.GenerateError(&response.Diagnostics, "Saving", "Resource Set", err)
-		return
-	}
 }
 
 type policySetDataSourceModel struct {

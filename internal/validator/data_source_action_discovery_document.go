@@ -49,12 +49,12 @@ func (dataSource *actionDiscoveryDocumentDataSource) Schema(_ context.Context, _
 				Description: "The unique identifier of the action discovery document.",
 				Required:    true,
 			},
-			"hostname": schema.StringAttribute{
-				Description: "The hostname of the action discovery document.",
-				Computed:    true,
-			},
 			"schema": schema.StringAttribute{
 				Description: "The schema that the action discovery document belongs to.",
+				Required:    true,
+			},
+			"hostname": schema.StringAttribute{
+				Description: "The hostname of the action discovery document.",
 				Computed:    true,
 			},
 			"routes": schema.ListNestedAttribute{
@@ -92,7 +92,7 @@ func (dataSource *actionDiscoveryDocumentDataSource) Read(ctx context.Context, r
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
-	registration, err := dataSource.validatorClient.GetActionSet(ctx, validatorClient.GetActionSetParams{
+	apiData, err := dataSource.validatorClient.GetActionSet(ctx, validatorClient.GetActionSetParams{
 		ID:     configModel.ID.ValueString(),
 		Schema: configModel.Schema.ValueString(),
 	})
@@ -106,10 +106,20 @@ func (dataSource *actionDiscoveryDocumentDataSource) Read(ctx context.Context, r
 		Schema: configModel.Schema,
 	}
 
-	err = apiModel.From(registration).saveToState(ctx, &response.State, &response.Diagnostics)
-
-	if err != nil {
-		common.GenerateError(&response.Diagnostics, "Saving", "Resource Set", err)
+	switch apiResponse := apiData.(type) {
+	case *validatorClient.ActionSetRegistration:
+		tflog.Debug(ctx, "Action set found, updating state")
+		err = apiModel.From(apiResponse).saveToState(ctx, &response.State, &response.Diagnostics)
+		if err != nil {
+			common.GenerateError(&response.Diagnostics, "Saving", "Resource Set", err)
+			return
+		}
+	case *validatorClient.GetActionSetNotFound:
+		tflog.Debug(ctx, "Action set not found, setting state to empty")
+		response.State.RemoveResource(ctx)
+		return
+	default:
+		common.GenerateError(&response.Diagnostics, "Reading", "Action Set", common.ErrUnexpectedResponseType(apiResponse))
 		return
 	}
 }

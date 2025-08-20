@@ -134,7 +134,7 @@ func (resource *boxerExternalIdentity) Read(ctx context.Context, request resourc
 	// Instead, we just check if the schema exists and save the stateModel.
 	// This will be updated in the future to use the read result.
 	tflog.Info(ctx, "Getting external identity by ID", map[string]any{"principalId": stateModel.ID.ValueString()})
-	externalId, err := resource.issuerClient.GetIdentity(ctx, issuer.GetIdentityParams{
+	apiData, err := resource.issuerClient.GetIdentity(ctx, issuer.GetIdentityParams{
 		IdentityProvider: stateModel.IdentityProvider.ValueString(),
 		ID:               stateModel.ID.ValueString(),
 	})
@@ -143,20 +143,29 @@ func (resource *boxerExternalIdentity) Read(ctx context.Context, request resourc
 		return
 	}
 
-	model := boxerExternalIdentityModel{
-		ID:               types.StringValue(externalId.ID),
-		IdentityProvider: types.StringValue(externalId.IdentityProvider),
-		Principal: boxerPrincipalAssociationModel{
-			PrincipalId: types.StringValue(externalId.PrincipalId),
-			SchemaId:    types.StringValue(externalId.PrincipalSchema),
-		},
+	apiModel := boxerExternalIdentityModel{
+		ID:               stateModel.ID,
+		IdentityProvider: stateModel.IdentityProvider,
 	}
 
-	err = saveNewExternalIdentityState(ctx, &model, &response.State, &response.Diagnostics)
-	if err != nil {
-		// If we can't save the stateModel, we can't proceed with the update.
-		// so we return early.
-		// The error will be handled by the framework and returned to the user.
+	switch apiResponse := apiData.(type) {
+	case *issuer.ExternalIdentityRegistration:
+		tflog.Debug(ctx, "External identity found, updating state")
+		err = apiModel.From(apiResponse).saveToState(ctx, &response.State, &response.Diagnostics)
+		if err != nil {
+			common.GenerateError(&response.Diagnostics, "Saving", "External Identity", err)
+			return
+		}
+	case *issuer.GetIdentityNotFound:
+		tflog.Debug(ctx, "Identity provider not found, setting state to empty")
+		response.State.RemoveResource(ctx)
+		return
+
+	default:
+		common.GenerateError(&response.Diagnostics,
+			"Reading",
+			"External Identity",
+			common.ErrUnexpectedResponseType(apiResponse))
 		return
 	}
 }
@@ -228,6 +237,23 @@ type boxerPrincipalAssociationModel struct {
 
 func saveNewExternalIdentityState(ctx context.Context, newState *boxerExternalIdentityModel, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
 	diags := state.Set(ctx, newState)
+	diagnostics.Append(diags...)
+	if diagnostics.HasError() {
+		return fmt.Errorf("error getting plan")
+	}
+	return nil
+}
+
+func (model *boxerExternalIdentityModel) From(source *issuer.ExternalIdentityRegistration) *boxerExternalIdentityModel {
+	model.Principal = boxerPrincipalAssociationModel{
+		PrincipalId: types.StringValue(source.PrincipalId),
+		SchemaId:    types.StringValue(source.PrincipalSchema),
+	}
+	return model
+}
+
+func (model *boxerExternalIdentityModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
+	diags := state.Set(ctx, model)
 	diagnostics.Append(diags...)
 	if diagnostics.HasError() {
 		return fmt.Errorf("error getting plan")

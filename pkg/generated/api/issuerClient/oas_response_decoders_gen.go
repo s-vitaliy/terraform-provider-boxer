@@ -42,7 +42,7 @@ func decodeDeleteSchemaResponse(resp *http.Response) (res *DeleteSchemaOK, _ err
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeGetIdentityResponse(resp *http.Response) (res *ExternalIdentityRegistration, _ error) {
+func decodeGetIdentityResponse(resp *http.Response) (res GetIdentityRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -79,11 +79,14 @@ func decodeGetIdentityResponse(resp *http.Response) (res *ExternalIdentityRegist
 		default:
 			return res, validate.InvalidContentType(ct)
 		}
+	case 404:
+		// Code 404.
+		return &GetIdentityNotFound{}, nil
 	}
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeGetPrincipalResponse(resp *http.Response) (res jx.Raw, _ error) {
+func decodeGetPrincipalResponse(resp *http.Response) (res GetPrincipalRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -99,11 +102,9 @@ func decodeGetPrincipalResponse(resp *http.Response) (res jx.Raw, _ error) {
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response jx.Raw
+			var response GetPrincipalOKApplicationJSON
 			if err := func() error {
-				v, err := d.RawAppend(nil)
-				response = jx.Raw(v)
-				if err != nil {
+				if err := response.Decode(d); err != nil {
 					return err
 				}
 				if err := d.Skip(); err != io.EOF {
@@ -118,15 +119,18 @@ func decodeGetPrincipalResponse(resp *http.Response) (res jx.Raw, _ error) {
 				}
 				return res, err
 			}
-			return response, nil
+			return &response, nil
 		default:
 			return res, validate.InvalidContentType(ct)
 		}
+	case 404:
+		// Code 404.
+		return &GetPrincipalNotFound{}, nil
 	}
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeGetProviderResponse(resp *http.Response) (res *OidcIdentityProviderRegistration, _ error) {
+func decodeGetProviderResponse(resp *http.Response) (res GetProviderRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -172,11 +176,14 @@ func decodeGetProviderResponse(resp *http.Response) (res *OidcIdentityProviderRe
 		default:
 			return res, validate.InvalidContentType(ct)
 		}
+	case 404:
+		// Code 404.
+		return &GetProviderNotFound{}, nil
 	}
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeGetSchemaResponse(resp *http.Response) (res jx.Raw, _ error) {
+func decodeGetSchemaResponse(resp *http.Response) (res GetSchemaRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -192,11 +199,9 @@ func decodeGetSchemaResponse(resp *http.Response) (res jx.Raw, _ error) {
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response jx.Raw
+			var response GetSchemaOKApplicationJSON
 			if err := func() error {
-				v, err := d.RawAppend(nil)
-				response = jx.Raw(v)
-				if err != nil {
+				if err := response.Decode(d); err != nil {
 					return err
 				}
 				if err := d.Skip(); err != io.EOF {
@@ -211,10 +216,13 @@ func decodeGetSchemaResponse(resp *http.Response) (res jx.Raw, _ error) {
 				}
 				return res, err
 			}
-			return response, nil
+			return &response, nil
 		default:
 			return res, validate.InvalidContentType(ct)
 		}
+	case 404:
+		// Code 404.
+		return &GetSchemaNotFound{}, nil
 	}
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }

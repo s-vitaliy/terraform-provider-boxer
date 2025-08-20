@@ -75,12 +75,23 @@ func (dataSource *identityProviderDataSource) Read(ctx context.Context, request 
 		common.GenerateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
 	}
-	configModel.DiscoveryUrl = types.StringValue(apiData.GetDiscoveryUrl())
-	configModel.UserIdClaim = types.StringValue(apiData.GetUserIdClaim())
 
-	diag := response.State.Set(ctx, &configModel)
-	response.Diagnostics.Append(diag...)
-	if response.Diagnostics.HasError() {
+	switch apiResponse := apiData.(type) {
+	case *issuerClient.OidcIdentityProviderRegistration:
+		tflog.Debug(ctx, "Identity provider found, updating state")
+		configModel.DiscoveryUrl = types.StringValue(apiResponse.GetDiscoveryUrl())
+		configModel.UserIdClaim = types.StringValue(apiResponse.GetUserIdClaim())
+		diag := response.State.Set(ctx, &configModel)
+		response.Diagnostics.Append(diag...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+	case *issuerClient.GetProviderNotFound:
+		tflog.Debug(ctx, "Identity provider not found, setting state to empty")
+		response.State.RemoveResource(ctx)
+		return
+	default:
+		common.GenerateError(&response.Diagnostics, "Reading", "Identity Provider", common.ErrUnexpectedResponseType(apiResponse))
 		return
 	}
 }

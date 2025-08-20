@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-boxer/internal/common"
 	"terraform-provider-boxer/pkg/generated/api/validatorClient"
 
@@ -66,7 +67,7 @@ func (r *policySetResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 			},
 			"schema": schema.StringAttribute{
 				Description: "The schema that the policy set conforms to.",
-				Computed:    true,
+				Required:    true,
 			},
 			"data_cedar": schema.StringAttribute{
 				Description: "The Cedar schema data in Cedar format.",
@@ -138,7 +139,7 @@ func (r *policySetResource) Read(ctx context.Context, request resource.ReadReque
 	// and if we use it, we will get a 'provider produced inconsistent result' error.
 	// Instead, we just check if the schema exists and save the stateModel.
 	// This will be updated in the future to use the read result.
-	registration, err := r.validatorClient.GetPolicySet(ctx, validatorClient.GetPolicySetParams{
+	apiData, err := r.validatorClient.GetPolicySet(ctx, validatorClient.GetPolicySetParams{
 		ID:     stateModel.ID.ValueString(),
 		Schema: stateModel.Schema.ValueString(),
 	})
@@ -152,15 +153,29 @@ func (r *policySetResource) Read(ctx context.Context, request resource.ReadReque
 		Schema: stateModel.Schema,
 	}
 
-	apiModel, err = apiModel.From(registration)
-	if err != nil {
-		common.GenerateError(&response.Diagnostics, "Converting", "Policy Set", err)
-	}
-	err = apiModel.saveToState(ctx, &response.State, &response.Diagnostics)
-	// If we can't save the stateModel, we can't proceed with the update.
-	// so we return early.
-	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	switch apiResponse := apiData.(type) {
+	case *validatorClient.PolicySetRegistration:
+		apiModel, err = apiModel.From(apiResponse)
+		if err != nil {
+			common.GenerateError(&response.Diagnostics, "Converting", "Policy Set", err)
+		}
+		err = apiModel.saveToState(ctx, &response.State, &response.Diagnostics)
+		// If we can't save the stateModel, we can't proceed with the update.
+		// so we return early.
+		// The error will be handled by the framework and returned to the user.
+		if err != nil {
+			return
+		}
+	case *validatorClient.GetPolicySetNotFound:
+		// If the policy set is not found, we remove the resource from the state.
+		tflog.Debug(ctx, "Policy set not found, setting state to empty")
+		response.State.RemoveResource(ctx)
+		return
+	default:
+		common.GenerateError(&response.Diagnostics,
+			"Reading",
+			"Policy Set",
+			common.ErrUnexpectedResponseType(apiResponse))
 		return
 	}
 }

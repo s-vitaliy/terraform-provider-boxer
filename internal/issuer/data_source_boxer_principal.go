@@ -2,6 +2,7 @@ package issuer
 
 import (
 	"context"
+	"github.com/go-faster/jx"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"terraform-provider-boxer/internal/common"
 	"terraform-provider-boxer/pkg/generated/api/issuerClient"
@@ -71,16 +72,30 @@ func (dataSource *boxerPrincipalDataSource) Read(ctx context.Context, request da
 		ID:     configModel.ID.ValueString(),
 		Schema: configModel.SchemaId.ValueString(),
 	}
+
 	apiData, err := dataSource.issuerClient.GetPrincipal(ctx, params)
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Reading", "Boxer Principal", err)
 		return
 	}
-	configModel.DataJson = types.StringValue(apiData.String())
 
-	diag := response.State.Set(ctx, &configModel)
-	response.Diagnostics.Append(diag...)
-	if response.Diagnostics.HasError() {
+	switch apiResponse := apiData.(type) {
+	case *issuerClient.GetPrincipalOKApplicationJSON:
+		configModel.DataJson = types.StringValue(jx.Raw(*apiResponse).String())
+		diag := response.State.Set(ctx, &configModel)
+		response.Diagnostics.Append(diag...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		return
+	case *issuerClient.GetPrincipalNotFound:
+		response.State.RemoveResource(ctx)
+		return
+	default:
+		common.GenerateError(&response.Diagnostics,
+			"Reading",
+			"Boxer Principal",
+			common.ErrUnexpectedResponseType(apiData))
 		return
 	}
 }

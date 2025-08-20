@@ -2,6 +2,10 @@
 
 package validatorClient
 
+import (
+	"github.com/go-faster/jx"
+)
+
 // Ref: #/components/schemas/ActionRouteRegistration
 type ActionRouteRegistration struct {
 	ActionUid     string `json:"actionUid"`
@@ -65,6 +69,8 @@ func (s *ActionSetRegistration) SetRoutes(val []ActionRouteRegistration) {
 	s.Routes = val
 }
 
+func (*ActionSetRegistration) getActionSetRes() {}
+
 // DeleteActionSetOK is response for DeleteActionSet operation.
 type DeleteActionSetOK struct{}
 
@@ -76,6 +82,30 @@ type DeleteResourceSetOK struct{}
 
 // DeleteSchemaOK is response for DeleteSchema operation.
 type DeleteSchemaOK struct{}
+
+// GetActionSetNotFound is response for GetActionSet operation.
+type GetActionSetNotFound struct{}
+
+func (*GetActionSetNotFound) getActionSetRes() {}
+
+// GetPolicySetNotFound is response for GetPolicySet operation.
+type GetPolicySetNotFound struct{}
+
+func (*GetPolicySetNotFound) getPolicySetRes() {}
+
+// GetResourceSetNotFound is response for GetResourceSet operation.
+type GetResourceSetNotFound struct{}
+
+func (*GetResourceSetNotFound) getResourceSetRes() {}
+
+// GetSchemaNotFound is response for GetSchema operation.
+type GetSchemaNotFound struct{}
+
+func (*GetSchemaNotFound) getSchemaRes() {}
+
+type GetSchemaOKApplicationJSON jx.Raw
+
+func (*GetSchemaOKApplicationJSON) getSchemaRes() {}
 
 // Ref: #/components/schemas/PolicySetRegistration
 type PolicySetRegistration struct {
@@ -91,6 +121,8 @@ func (s *PolicySetRegistration) GetPolicy() string {
 func (s *PolicySetRegistration) SetPolicy(val string) {
 	s.Policy = val
 }
+
+func (*PolicySetRegistration) getPolicySetRes() {}
 
 // PostActionSetOK is response for PostActionSet operation.
 type PostActionSetOK struct{}
@@ -155,6 +187,8 @@ func (s *ResourceSetRegistration) SetHostname(val string) {
 func (s *ResourceSetRegistration) SetRoutes(val []ResourceRouteRegistration) {
 	s.Routes = val
 }
+
+func (*ResourceSetRegistration) getResourceSetRes() {}
 
 // TokenReviewOK is response for TokenReview operation.
 type TokenReviewOK struct{}

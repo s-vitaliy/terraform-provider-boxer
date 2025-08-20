@@ -2,13 +2,13 @@ package issuer
 
 import (
 	"context"
+	"github.com/go-faster/jx"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-boxer/internal/common"
 	"terraform-provider-boxer/pkg/generated/api/issuerClient"
-
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -70,11 +70,20 @@ func (dataSource *cedarSchemaDataSource) Read(ctx context.Context, request datas
 		common.GenerateError(&response.Diagnostics, "Reading", "Cedar Schema", err)
 		return
 	}
-	configModel.DataJson = types.StringValue(apiData.String())
 
-	diag := response.State.Set(ctx, &configModel)
-	response.Diagnostics.Append(diag...)
-	if response.Diagnostics.HasError() {
+	switch apiResponse := apiData.(type) {
+	case *issuerClient.GetSchemaOKApplicationJSON:
+		configModel.DataJson = types.StringValue(jx.Raw(*apiResponse).String())
+		diag := response.State.Set(ctx, &configModel)
+		response.Diagnostics.Append(diag...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+	case *issuerClient.GetSchemaNotFound:
+		response.State.RemoveResource(ctx)
+		return
+	default:
+		common.GenerateError(&response.Diagnostics, "Reading", "Cedar Schema", common.ErrUnexpectedResponseType(apiData))
 		return
 	}
 }

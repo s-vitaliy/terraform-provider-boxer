@@ -38,19 +38,19 @@ type Invoker interface {
 	// GetIdentity invokes get_identity operation.
 	//
 	// GET /identity/{identity_provider}/{id}
-	GetIdentity(ctx context.Context, params GetIdentityParams) (*ExternalIdentityRegistration, error)
+	GetIdentity(ctx context.Context, params GetIdentityParams) (GetIdentityRes, error)
 	// GetPrincipal invokes get_principal operation.
 	//
 	// GET /principal/{schema}/{id}
-	GetPrincipal(ctx context.Context, params GetPrincipalParams) (jx.Raw, error)
+	GetPrincipal(ctx context.Context, params GetPrincipalParams) (GetPrincipalRes, error)
 	// GetProvider invokes get_provider operation.
 	//
 	// GET /identity_provider/oidc/{id}
-	GetProvider(ctx context.Context, params GetProviderParams) (*OidcIdentityProviderRegistration, error)
+	GetProvider(ctx context.Context, params GetProviderParams) (GetProviderRes, error)
 	// GetSchema invokes get_schema operation.
 	//
 	// GET /schema/{id}
-	GetSchema(ctx context.Context, params GetSchemaParams) (jx.Raw, error)
+	GetSchema(ctx context.Context, params GetSchemaParams) (GetSchemaRes, error)
 	// PostIdentity invokes post_identity operation.
 	//
 	// POST /identity/{identity_provider}/{id}
@@ -292,12 +292,12 @@ func (c *Client) sendDeleteSchema(ctx context.Context, params DeleteSchemaParams
 // GetIdentity invokes get_identity operation.
 //
 // GET /identity/{identity_provider}/{id}
-func (c *Client) GetIdentity(ctx context.Context, params GetIdentityParams) (*ExternalIdentityRegistration, error) {
+func (c *Client) GetIdentity(ctx context.Context, params GetIdentityParams) (GetIdentityRes, error) {
 	res, err := c.sendGetIdentity(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetIdentity(ctx context.Context, params GetIdentityParams) (res *ExternalIdentityRegistration, err error) {
+func (c *Client) sendGetIdentity(ctx context.Context, params GetIdentityParams) (res GetIdentityRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
@@ -363,12 +363,12 @@ func (c *Client) sendGetIdentity(ctx context.Context, params GetIdentityParams) 
 // GetPrincipal invokes get_principal operation.
 //
 // GET /principal/{schema}/{id}
-func (c *Client) GetPrincipal(ctx context.Context, params GetPrincipalParams) (jx.Raw, error) {
+func (c *Client) GetPrincipal(ctx context.Context, params GetPrincipalParams) (GetPrincipalRes, error) {
 	res, err := c.sendGetPrincipal(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetPrincipal(ctx context.Context, params GetPrincipalParams) (res jx.Raw, err error) {
+func (c *Client) sendGetPrincipal(ctx context.Context, params GetPrincipalParams) (res GetPrincipalRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
@@ -434,12 +434,12 @@ func (c *Client) sendGetPrincipal(ctx context.Context, params GetPrincipalParams
 // GetProvider invokes get_provider operation.
 //
 // GET /identity_provider/oidc/{id}
-func (c *Client) GetProvider(ctx context.Context, params GetProviderParams) (*OidcIdentityProviderRegistration, error) {
+func (c *Client) GetProvider(ctx context.Context, params GetProviderParams) (GetProviderRes, error) {
 	res, err := c.sendGetProvider(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetProvider(ctx context.Context, params GetProviderParams) (res *OidcIdentityProviderRegistration, err error) {
+func (c *Client) sendGetProvider(ctx context.Context, params GetProviderParams) (res GetProviderRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
@@ -486,12 +486,12 @@ func (c *Client) sendGetProvider(ctx context.Context, params GetProviderParams) 
 // GetSchema invokes get_schema operation.
 //
 // GET /schema/{id}
-func (c *Client) GetSchema(ctx context.Context, params GetSchemaParams) (jx.Raw, error) {
+func (c *Client) GetSchema(ctx context.Context, params GetSchemaParams) (GetSchemaRes, error) {
 	res, err := c.sendGetSchema(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res jx.Raw, err error) {
+func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res GetSchemaRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string

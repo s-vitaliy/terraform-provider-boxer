@@ -2,8 +2,10 @@ package issuer
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"terraform-provider-boxer/internal/common"
 	"terraform-provider-boxer/pkg/generated/api/issuerClient"
@@ -79,11 +81,13 @@ func (resource *identityProviderResource) Create(ctx context.Context, request re
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
+
 	registration, diags := toBoxerIssuerModel(ctx, &planModel)
 	if diags.HasError() {
 		response.Diagnostics.Append(diags...)
 		return
 	}
+
 	err = resource.issuerClient.PostProvider(ctx, registration, issuerClient.PostProviderParams{ID: planModel.Name.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Creating", "Identity Provider", err)
@@ -107,15 +111,21 @@ func (resource *identityProviderResource) Read(ctx context.Context, request reso
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
+
 	apiData, err := resource.issuerClient.GetProvider(ctx, issuerClient.GetProviderParams{ID: stateModel.Name.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
 	}
-	newState := fromBoxerIssuerModel(stateModel.ID.ValueString(), apiData)
-	diags := response.State.Set(ctx, &newState)
-	response.Diagnostics.Append(diags...)
-	if response.Diagnostics.HasError() {
+
+	newStateModel := &identityProviderResourceModel{
+		ID: stateModel.ID,
+	}
+	err = newStateModel.handleReadApiResponse(ctx, apiData, &response.State, &response.Diagnostics)
+	if err != nil {
+		// If we can't handle the API response, we can't proceed with the update.
+		// so we return early.
+		// The error will be handled by the framework and returned to the user.
 		return
 	}
 }
@@ -145,6 +155,7 @@ func (resource *identityProviderResource) Update(ctx context.Context, request re
 		response.Diagnostics.Append(diags...)
 		return
 	}
+
 	err = resource.issuerClient.PostProvider(ctx, registration, issuerClient.PostProviderParams{ID: stateModel.Name.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Updating", "Identity Provider", err)
@@ -155,10 +166,15 @@ func (resource *identityProviderResource) Update(ctx context.Context, request re
 		common.GenerateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
 	}
-	newState := fromBoxerIssuerModel(stateModel.Name.ValueString(), apiData)
-	diags = response.State.Set(ctx, newState)
-	response.Diagnostics.Append(diags...)
-	if response.Diagnostics.HasError() {
+
+	newStateModel := &identityProviderResourceModel{
+		ID: stateModel.ID,
+	}
+	err = newStateModel.handleReadApiResponse(ctx, apiData, &response.State, &response.Diagnostics)
+	if err != nil {
+		// If we can't handle the API response, we can't proceed with the update.
+		// so we return early.
+		// The error will be handled by the framework and returned to the user.
 		return
 	}
 }
@@ -208,15 +224,49 @@ func toBoxerIssuerModel(ctx context.Context, plan *identityProviderResourceModel
 	return &registration, nil
 }
 
-func fromBoxerIssuerModel(id string, apiData *issuerClient.OidcIdentityProviderRegistration) identityProviderResourceModel {
-	return identityProviderResourceModel{
-		ID:           types.StringValue(id),
-		Name:         types.StringValue(id),
-		DiscoveryUrl: types.StringValue(apiData.GetDiscoveryUrl()),
-		UserIdClaim:  types.StringValue(apiData.GetUserIdClaim()),
-		Audiences:    types.ListValueMust(types.StringType, encode(apiData.GetAudiences())),
-		Issuers:      types.ListValueMust(types.StringType, encode(apiData.GetIssuers())),
+func (model *identityProviderResourceModel) From(apiData *issuerClient.OidcIdentityProviderRegistration) *identityProviderResourceModel {
+	model.Name = model.ID
+	model.DiscoveryUrl = types.StringValue(apiData.GetDiscoveryUrl())
+	model.UserIdClaim = types.StringValue(apiData.GetUserIdClaim())
+	model.Audiences = types.ListValueMust(types.StringType, encode(apiData.GetAudiences()))
+	model.Issuers = types.ListValueMust(types.StringType, encode(apiData.GetIssuers()))
+	return model
+}
+
+func (model *identityProviderResourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
+	diags := state.Set(ctx, model)
+	diagnostics.Append(diags...)
+	if diagnostics.HasError() {
+		return fmt.Errorf("error getting plan")
 	}
+	return nil
+}
+
+func (model *identityProviderResourceModel) handleReadApiResponse(ctx context.Context, apiData issuerClient.GetProviderRes, state *tfsdk.State, diags *diag.Diagnostics) error {
+	switch apiResponse := apiData.(type) {
+	case *issuerClient.OidcIdentityProviderRegistration:
+		// This is the expected type, we can proceed.
+		err := model.From(apiResponse).saveToState(ctx, state, diags)
+		if err != nil {
+			// If we can't save the state, we can't proceed with the update.
+			// so we return early.
+			// The error will be handled by the framework and returned to the user.
+			common.GenerateError(diags, "Saving", "Identity Provider State", err)
+			return err
+		}
+	case *issuerClient.GetProviderNotFound:
+		// If the API returns a not found error, we remove the resource from the state.
+		state.RemoveResource(ctx)
+		return nil
+	default:
+		// If the API returns an unexpected type, we generate an error.
+		common.GenerateError(diags,
+			"Reading",
+			"Identity Provider",
+			fmt.Errorf("unexpected type %T", apiData))
+		return nil
+	}
+	return nil
 }
 
 type identityProviderResourceModel struct {

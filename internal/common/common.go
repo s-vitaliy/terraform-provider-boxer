@@ -11,7 +11,7 @@ import (
 func GenerateError(diagnostics *diag.Diagnostics, operation string, object string, err error) {
 	diagnostics.AddError(
 		fmt.Sprintf("Error %s %s", operation, object),
-		fmt.Sprintf("An error occurred while %s %s the identity provider: %s", strings.ToLower(operation), object, err.Error()),
+		fmt.Sprintf("An error occurred while %s %s: %s", strings.ToLower(operation), object, err.Error()),
 	)
 }
 
@@ -40,4 +40,8 @@ func ReadFromConfig(ctx context.Context, target interface{}, baseState tfsdk.Con
 		return fmt.Errorf("error getting config")
 	}
 	return nil
+}
+
+func ErrUnexpectedResponseType(response any) error {
+	return fmt.Errorf("unexpected response type: %T", response)
 }
