@@ -53,6 +53,8 @@ type ExternalIdentityRegistration struct {
 	PrincipalId string `json:"principalId"`
 	// The schema of the principal associated with the external identity.
 	PrincipalSchema string `json:"principalSchema"`
+	// The schema of the validator associated with the external identity.
+	ValidatorSchema string `json:"validatorSchema"`
 }
 
 // GetID returns the value of ID.
@@ -75,6 +77,11 @@ func (s *ExternalIdentityRegistration) GetPrincipalSchema() string {
 	return s.PrincipalSchema
 }
 
+// GetValidatorSchema returns the value of ValidatorSchema.
+func (s *ExternalIdentityRegistration) GetValidatorSchema() string {
+	return s.ValidatorSchema
+}
+
 // SetID sets the value of ID.
 func (s *ExternalIdentityRegistration) SetID(val string) {
 	s.ID = val
@@ -95,6 +102,11 @@ func (s *ExternalIdentityRegistration) SetPrincipalSchema(val string) {
 	s.PrincipalSchema = val
 }
 
+// SetValidatorSchema sets the value of ValidatorSchema.
+func (s *ExternalIdentityRegistration) SetValidatorSchema(val string) {
+	s.ValidatorSchema = val
+}
+
 func (*ExternalIdentityRegistration) getIdentityRes() {}
 
 // Struct that represents an external identity.
@@ -104,6 +116,8 @@ type ExternalIdentityRegistrationRequest struct {
 	PrincipalId string `json:"principalId"`
 	// The schema of the principal associated with the external identity.
 	PrincipalSchema string `json:"principalSchema"`
+	// The schema ID used fot token validation.
+	ValidatorSchema string `json:"validatorSchema"`
 }
 
 // GetPrincipalId returns the value of PrincipalId.
@@ -116,6 +130,11 @@ func (s *ExternalIdentityRegistrationRequest) GetPrincipalSchema() string {
 	return s.PrincipalSchema
 }
 
+// GetValidatorSchema returns the value of ValidatorSchema.
+func (s *ExternalIdentityRegistrationRequest) GetValidatorSchema() string {
+	return s.ValidatorSchema
+}
+
 // SetPrincipalId sets the value of PrincipalId.
 func (s *ExternalIdentityRegistrationRequest) SetPrincipalId(val string) {
 	s.PrincipalId = val
@@ -124,6 +143,11 @@ func (s *ExternalIdentityRegistrationRequest) SetPrincipalId(val string) {
 // SetPrincipalSchema sets the value of PrincipalSchema.
 func (s *ExternalIdentityRegistrationRequest) SetPrincipalSchema(val string) {
 	s.PrincipalSchema = val
+}
+
+// SetValidatorSchema sets the value of ValidatorSchema.
+func (s *ExternalIdentityRegistrationRequest) SetValidatorSchema(val string) {
+	s.ValidatorSchema = val
 }
 
 // GetIdentityNotFound is response for GetIdentity operation.

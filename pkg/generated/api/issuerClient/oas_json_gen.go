@@ -37,13 +37,18 @@ func (s *ExternalIdentityRegistration) encodeFields(e *jx.Encoder) {
 		e.FieldStart("principalSchema")
 		e.Str(s.PrincipalSchema)
 	}
+	{
+		e.FieldStart("validatorSchema")
+		e.Str(s.ValidatorSchema)
+	}
 }
 
-var jsonFieldsNameOfExternalIdentityRegistration = [4]string{
+var jsonFieldsNameOfExternalIdentityRegistration = [5]string{
 	0: "id",
 	1: "identityProvider",
 	2: "principalId",
 	3: "principalSchema",
+	4: "validatorSchema",
 }
 
 // Decode decodes ExternalIdentityRegistration from json.
@@ -103,6 +108,18 @@ func (s *ExternalIdentityRegistration) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"principalSchema\"")
 			}
+		case "validatorSchema":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Str()
+				s.ValidatorSchema = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"validatorSchema\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -113,7 +130,7 @@ func (s *ExternalIdentityRegistration) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -176,11 +193,16 @@ func (s *ExternalIdentityRegistrationRequest) encodeFields(e *jx.Encoder) {
 		e.FieldStart("principalSchema")
 		e.Str(s.PrincipalSchema)
 	}
+	{
+		e.FieldStart("validatorSchema")
+		e.Str(s.ValidatorSchema)
+	}
 }
 
-var jsonFieldsNameOfExternalIdentityRegistrationRequest = [2]string{
+var jsonFieldsNameOfExternalIdentityRegistrationRequest = [3]string{
 	0: "principalId",
 	1: "principalSchema",
+	2: "validatorSchema",
 }
 
 // Decode decodes ExternalIdentityRegistrationRequest from json.
@@ -216,6 +238,18 @@ func (s *ExternalIdentityRegistrationRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"principalSchema\"")
 			}
+		case "validatorSchema":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.ValidatorSchema = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"validatorSchema\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -226,7 +260,7 @@ func (s *ExternalIdentityRegistrationRequest) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

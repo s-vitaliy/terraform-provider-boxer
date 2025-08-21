@@ -57,6 +57,10 @@ func (resource *boxerExternalIdentity) Schema(_ context.Context, _ resource.Sche
 				Required:      true,
 				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
+			"validator_schema_id": schema.StringAttribute{
+				Description: "The schema ID of the validator associated with the external identity.",
+				Required:    true,
+			},
 			"principal": schema.SingleNestedAttribute{
 				Description: "The principal ID associated to the external identity.",
 				Required:    true,
@@ -99,6 +103,7 @@ func (resource *boxerExternalIdentity) Create(ctx context.Context, request resou
 	createRequest := issuer.ExternalIdentityRegistrationRequest{
 		PrincipalId:     planModel.Principal.PrincipalId.ValueString(),
 		PrincipalSchema: planModel.Principal.SchemaId.ValueString(),
+		ValidatorSchema: planModel.ValidatorSchemaId.ValueString(),
 	}
 	err = resource.issuerClient.PostIdentity(ctx, &createRequest, issuer.PostIdentityParams{
 		IdentityProvider: planModel.IdentityProvider.ValueString(),
@@ -183,6 +188,7 @@ func (resource *boxerExternalIdentity) Update(ctx context.Context, request resou
 	updateRequest := issuer.ExternalIdentityRegistrationRequest{
 		PrincipalId:     planModel.Principal.PrincipalId.ValueString(),
 		PrincipalSchema: planModel.Principal.SchemaId.ValueString(),
+		ValidatorSchema: planModel.ValidatorSchemaId.ValueString(),
 	}
 	err = resource.issuerClient.PostIdentity(ctx, &updateRequest, issuer.PostIdentityParams{
 		IdentityProvider: planModel.IdentityProvider.ValueString(),
@@ -225,9 +231,10 @@ func (resource *boxerExternalIdentity) Delete(ctx context.Context, request resou
 }
 
 type boxerExternalIdentityModel struct {
-	ID               types.String                   `tfsdk:"id"`
-	IdentityProvider types.String                   `tfsdk:"identity_provider"`
-	Principal        boxerPrincipalAssociationModel `tfsdk:"principal"`
+	ID                types.String                   `tfsdk:"id"`
+	IdentityProvider  types.String                   `tfsdk:"identity_provider"`
+	Principal         boxerPrincipalAssociationModel `tfsdk:"principal"`
+	ValidatorSchemaId types.String                   `tfsdk:"validator_schema_id"`
 }
 
 type boxerPrincipalAssociationModel struct {
@@ -249,6 +256,7 @@ func (model *boxerExternalIdentityModel) From(source *issuer.ExternalIdentityReg
 		PrincipalId: types.StringValue(source.PrincipalId),
 		SchemaId:    types.StringValue(source.PrincipalSchema),
 	}
+	model.ValidatorSchemaId = types.StringValue(source.ValidatorSchema)
 	return model
 }
 

@@ -52,7 +52,10 @@ func (dataSource *boxerExternalIdentityDataSource) Schema(_ context.Context, _ d
 				Description: "The identity provider that the external identity belongs to.",
 				Required:    true,
 			},
-
+			"validator_schema_id": schema.StringAttribute{
+				Description: "The identity provider that the external identity belongs to.",
+				Computed:    true,
+			},
 			"principal": schema.SingleNestedAttribute{
 				Description: "The principal ID associated to the external identity.",
 				Computed:    true,
@@ -122,6 +125,7 @@ func (model *boxerExternalIdentityDataSourceModel) From(source *issuerClient.Ext
 		SchemaId:    types.StringValue(source.PrincipalSchema),
 		PrincipalId: types.StringValue(source.PrincipalId),
 	}
+	model.ValidatorSchemaId = types.StringValue(source.ValidatorSchema)
 	return model
 }
 
@@ -140,9 +144,10 @@ type boxerPrincipalAssociationDataSourceModel struct {
 }
 
 type boxerExternalIdentityDataSourceModel struct {
-	ID               types.String                              `tfsdk:"id"`
-	IdentityProvider types.String                              `tfsdk:"identity_provider"`
-	Principal        *boxerPrincipalAssociationDataSourceModel `tfsdk:"principal"`
+	ID                types.String                              `tfsdk:"id"`
+	IdentityProvider  types.String                              `tfsdk:"identity_provider"`
+	Principal         *boxerPrincipalAssociationDataSourceModel `tfsdk:"principal"`
+	ValidatorSchemaId types.String                              `tfsdk:"validator_schema_id"`
 }
 
 // boxerExternalIdentityDataSource is the data source implementation.
