@@ -7,12 +7,12 @@ terraform {
 }
 
 provider "boxer" {
-  issuer_host = "http://localhost:8888/"
+  issuer_host    = "http://localhost:8888/"
   validator_host = "http://localhost:8081/"
 }
 
-resource "boxer_issuer_cedar_schema" "example"  {
-  id = "example"
+resource "boxer_issuer_cedar_schema" "example" {
+  id        = "example"
   data_json = <<EOT
   {
     "PhotoApp": {
@@ -83,8 +83,8 @@ resource "boxer_principal" "example" {
 EOT
 }
 
-resource "boxer_identity_provider" "example"  {
-  name = "provider"
+resource "boxer_identity_provider" "example" {
+  name          = "provider"
   user_id_claim = "preferred_username"
   discovery_url = "http://localhost:8080/realms/master/"
   issuers = [
@@ -97,14 +97,14 @@ resource "boxer_identity_provider" "example"  {
 
 resource "boxer_external_identity" "example" {
   identity_provider = "provider"
-  id                   = "test_user"
+  id                = "test_user"
   principal = {
-    schema_id = boxer_issuer_cedar_schema.example.id
+    schema_id    = boxer_issuer_cedar_schema.example.id
     principal_id = boxer_principal.example.id
   }
 }
 
-data boxer_token "example" {
+data "boxer_token" "example" {
   depends_on = [
     boxer_external_identity.example
   ]

@@ -12,7 +12,7 @@ provider "boxer" {
 }
 
 resource "boxer_policy_set" "example" {
-  id       = "example"
+  id         = "example"
   data_cedar = <<EOT
   permit (
       principal == PhotoApp::User::"alice",

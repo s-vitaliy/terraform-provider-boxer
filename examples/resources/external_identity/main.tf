@@ -10,8 +10,8 @@ provider "boxer" {
   issuer_host = "http://localhost:8888/"
 }
 
-resource "boxer_cedar_schema" "example"  {
-  id = "example"
+resource "boxer_cedar_schema" "example" {
+  id        = "example"
   data_json = <<EOT
   {
     "PhotoApp": {
@@ -82,8 +82,8 @@ resource "boxer_principal" "example" {
 EOT
 }
 
-resource "boxer_identity_provider" "example"  {
-  name = "provider"
+resource "boxer_identity_provider" "example" {
+  name          = "provider"
   user_id_claim = "preferred_username"
   discovery_url = "http://localhost:8080/realms/master/"
   issuers = [
@@ -96,9 +96,9 @@ resource "boxer_identity_provider" "example"  {
 
 resource "boxer_external_identity" "example" {
   identity_provider = "provider"
-  id                   = "test-user"
+  id                = "test-user"
   principal = {
-    schema_id = boxer_cedar_schema.example.id
+    schema_id    = boxer_cedar_schema.example.id
     principal_id = boxer_principal.example.id
   }
 }

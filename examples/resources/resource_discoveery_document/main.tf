@@ -16,15 +16,15 @@ resource "boxer_resource_discovery_document" "example" {
   hostname = "www.example.com"
   routes = [
     {
-      path   = "/api/v1/resources"
+      path     = "/api/v1/resources"
       resource = "resourceManager::ResourceList"
     },
     {
-      path   = "/api/v1/resources/{id}"
+      path     = "/api/v1/resources/{id}"
       resource = "resourceManager::ResourceDetails"
     },
     {
-      path   = "/api/v1/users"
+      path     = "/api/v1/users"
       resource = "identityService::UserList"
     },
   ]
