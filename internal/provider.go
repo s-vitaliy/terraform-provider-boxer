@@ -45,13 +45,41 @@ func (b BoxerProvider) Schema(_ context.Context, _ provider.SchemaRequest, respo
 				Description: "The host of the Boxer Issuer API.",
 				Required:    true,
 			},
+			"external_auth": schema.SingleNestedAttribute{
+				Description: "Configuration for external authentication",
+				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					"security_token": schema.StringAttribute{
+						Description: "An external security token to use for Boxer Issuer API calls. " +
+							"If not set, the BOXER_EXTERNAL_SECURITY_TOKEN environment variable will be used if set.",
+						Optional:  true,
+						Sensitive: true,
+					},
+					"identity_provider_id": schema.StringAttribute{
+						Description: "The ID of the external identity provider to use for authentication.",
+						Required:    true,
+						Sensitive:   false,
+					},
+					"internal_token_provider_endpoint": schema.StringAttribute{
+						Description: "The token endpoint of the external identity provider.",
+						Required:    true,
+					},
+				},
+			},
 		},
 	}
 }
 
+type externalAuthModel struct {
+	SecurityToken                 types.String `tfsdk:"security_token"`
+	IdentityProviderID            types.String `tfsdk:"identity_provider_id"`
+	InternalTokenProviderEndpoint types.String `tfsdk:"internal_token_provider_endpoint"`
+}
+
 type boxerProviderModel struct {
-	IssuerHost    types.String `tfsdk:"issuer_host"`
-	ValidatorHost types.String `tfsdk:"validator_host"`
+	IssuerHost    types.String      `tfsdk:"issuer_host"`
+	ValidatorHost types.String      `tfsdk:"validator_host"`
+	ExternalAuth  externalAuthModel `tfsdk:"external_auth"`
 }
 
 func (b BoxerProvider) Configure(ctx context.Context, request provider.ConfigureRequest, response *provider.ConfigureResponse) {
@@ -106,7 +134,34 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 		return
 	}
 
-	issuerApiClient, err := issuerClient.NewClient(issuerHost, security.NewEmptySecuritySource())
+	if config.ExternalAuth.SecurityToken.IsNull() {
+		token, ok := os.LookupEnv("BOXER_EXTERNAL_SECURITY_TOKEN")
+		if !ok {
+			response.Diagnostics.AddAttributeError(
+				path.Root("external_security_token"),
+				"Missing Boxer Issuer externalSecurityToken",
+				"The external_security_token parameter is required if the BOXER_EXTERNAL_SECURITY_TOKEN environment variable is not set."+
+					"Either set the value statically in the configuration, or use the BOXER_EXTERNAL_SECURITY_TOKEN environment variable.",
+			)
+			return
+		}
+		config.ExternalAuth.SecurityToken = types.StringValue(token)
+	}
+
+	tokenEndpoint := config.ExternalAuth.InternalTokenProviderEndpoint.ValueString()
+	externalSecuritySource := security.IssuerStaticSecuritySource(config.ExternalAuth.SecurityToken.ValueString())
+	externalAuthIssuerClient, err := issuerClient.NewClient(tokenEndpoint, externalSecuritySource)
+	if err != nil {
+		response.Diagnostics.AddError(
+			"Failed to initialize Self-authorization client",
+			"An unexpected error occurred when creating the Boxer Issuer client: "+err.Error(),
+		)
+		return
+	}
+
+	internalTokenReader := security.NewInternalTokenReader(externalAuthIssuerClient, config.ExternalAuth.IdentityProviderID.ValueString())
+
+	issuerApiClient, err := issuerClient.NewClient(issuerHost, security.NewIssuerInternalSecuritySource(internalTokenReader))
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Failed to initialize Boxer Issuer Client",
@@ -115,7 +170,7 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 		return
 	}
 
-	validatorApiClient, err := validatorClient.NewClient(validatorHost)
+	validatorApiClient, err := validatorClient.NewClient(validatorHost, security.NewValidatorInternalSecuritySource(internalTokenReader))
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Failed to initialize Boxer Validator Client",

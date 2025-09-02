@@ -33,7 +33,7 @@ func (dataSource *boxerTokenDataSource) Configure(_ context.Context, request dat
 		// so we can safely return here without setting the issuerHost.
 		return
 	}
-	client, err := issuerClient.NewClient(issuerHost, security.NewSecuritySourceFromContext(TokenContextKey))
+	client, err := issuerClient.NewClient(issuerHost, security.NewIssuerContextSecuritySource(TokenContextKey))
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Invalid Issuer Client",

@@ -178,6 +178,31 @@ type GetSchemaOKApplicationJSON jx.Raw
 
 func (*GetSchemaOKApplicationJSON) getSchemaRes() {}
 
+type Internal struct {
+	Token string
+	Roles []string
+}
+
+// GetToken returns the value of Token.
+func (s *Internal) GetToken() string {
+	return s.Token
+}
+
+// GetRoles returns the value of Roles.
+func (s *Internal) GetRoles() []string {
+	return s.Roles
+}
+
+// SetToken sets the value of Token.
+func (s *Internal) SetToken(val string) {
+	s.Token = val
+}
+
+// SetRoles sets the value of Roles.
+func (s *Internal) SetRoles(val []string) {
+	s.Roles = val
+}
+
 // Ref: #/components/schemas/OidcIdentityProviderRegistration
 type OidcIdentityProviderRegistration struct {
 	Audiences    []string `json:"audiences"`
