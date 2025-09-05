@@ -47,7 +47,7 @@ func (b BoxerProvider) Schema(_ context.Context, _ provider.SchemaRequest, respo
 			},
 			"external_auth": schema.SingleNestedAttribute{
 				Description: "Configuration for external authentication",
-				Optional:    false,
+				Required:    true,
 				Attributes: map[string]schema.Attribute{
 					"security_token": schema.StringAttribute{
 						Description: "An external security token to use for Boxer Issuer API calls. " +

@@ -25,51 +25,51 @@ func trimTrailingSlashes(u *url.URL) {
 type Invoker interface {
 	// DeleteIdentity invokes delete_identity operation.
 	//
-	// DELETE /identity/{identity_provider}/{id}
+	// DELETE /api/v1/identity/{identity_provider}/{id}
 	DeleteIdentity(ctx context.Context, params DeleteIdentityParams) error
 	// DeleteProvider invokes delete_provider operation.
 	//
-	// DELETE /identity_provider/oidc/{id}
+	// DELETE /api/v1/identity_provider/oidc/{id}
 	DeleteProvider(ctx context.Context, params DeleteProviderParams) error
 	// DeleteSchema invokes delete_schema operation.
 	//
-	// DELETE /schema/{id}
+	// DELETE /api/v1/schema/{id}
 	DeleteSchema(ctx context.Context, params DeleteSchemaParams) error
 	// GetIdentity invokes get_identity operation.
 	//
-	// GET /identity/{identity_provider}/{id}
+	// GET /api/v1/identity/{identity_provider}/{id}
 	GetIdentity(ctx context.Context, params GetIdentityParams) (GetIdentityRes, error)
 	// GetPrincipal invokes get_principal operation.
 	//
-	// GET /principal/{schema}/{id}
+	// GET /api/v1/principal/{schema}/{id}
 	GetPrincipal(ctx context.Context, params GetPrincipalParams) (GetPrincipalRes, error)
 	// GetProvider invokes get_provider operation.
 	//
-	// GET /identity_provider/oidc/{id}
+	// GET /api/v1/identity_provider/oidc/{id}
 	GetProvider(ctx context.Context, params GetProviderParams) (GetProviderRes, error)
 	// GetSchema invokes get_schema operation.
 	//
-	// GET /schema/{id}
+	// GET /api/v1/schema/{id}
 	GetSchema(ctx context.Context, params GetSchemaParams) (GetSchemaRes, error)
 	// PostIdentity invokes post_identity operation.
 	//
-	// POST /identity/{identity_provider}/{id}
+	// POST /api/v1/identity/{identity_provider}/{id}
 	PostIdentity(ctx context.Context, request *ExternalIdentityRegistrationRequest, params PostIdentityParams) error
 	// PostPrincipal invokes post_principal operation.
 	//
-	// POST /principal/{schema}
+	// POST /api/v1/principal/{schema}
 	PostPrincipal(ctx context.Context, request jx.Raw, params PostPrincipalParams) (*PrincipalCreateResponse, error)
 	// PostProvider invokes post_provider operation.
 	//
-	// POST /identity_provider/oidc/{id}
+	// POST /api/v1/identity_provider/oidc/{id}
 	PostProvider(ctx context.Context, request *OidcIdentityProviderRegistration, params PostProviderParams) error
 	// PostSchema invokes post_schema operation.
 	//
-	// POST /schema/{id}
+	// POST /api/v1/schema/{id}
 	PostSchema(ctx context.Context, request jx.Raw, params PostSchemaParams) error
 	// Token invokes token operation.
 	//
-	// GET /token/{identity_provider}
+	// GET /api/v1/token/{identity_provider}
 	Token(ctx context.Context, params TokenParams) (TokenOK, error)
 }
 
@@ -116,7 +116,7 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 
 // DeleteIdentity invokes delete_identity operation.
 //
-// DELETE /identity/{identity_provider}/{id}
+// DELETE /api/v1/identity/{identity_provider}/{id}
 func (c *Client) DeleteIdentity(ctx context.Context, params DeleteIdentityParams) error {
 	_, err := c.sendDeleteIdentity(ctx, params)
 	return err
@@ -126,7 +126,7 @@ func (c *Client) sendDeleteIdentity(ctx context.Context, params DeleteIdentityPa
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/identity/"
+	pathParts[0] = "/api/v1/identity/"
 	{
 		// Encode "identity_provider" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -220,7 +220,7 @@ func (c *Client) sendDeleteIdentity(ctx context.Context, params DeleteIdentityPa
 
 // DeleteProvider invokes delete_provider operation.
 //
-// DELETE /identity_provider/oidc/{id}
+// DELETE /api/v1/identity_provider/oidc/{id}
 func (c *Client) DeleteProvider(ctx context.Context, params DeleteProviderParams) error {
 	_, err := c.sendDeleteProvider(ctx, params)
 	return err
@@ -230,7 +230,7 @@ func (c *Client) sendDeleteProvider(ctx context.Context, params DeleteProviderPa
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/identity_provider/oidc/"
+	pathParts[0] = "/api/v1/identity_provider/oidc/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -305,7 +305,7 @@ func (c *Client) sendDeleteProvider(ctx context.Context, params DeleteProviderPa
 
 // DeleteSchema invokes delete_schema operation.
 //
-// DELETE /schema/{id}
+// DELETE /api/v1/schema/{id}
 func (c *Client) DeleteSchema(ctx context.Context, params DeleteSchemaParams) error {
 	_, err := c.sendDeleteSchema(ctx, params)
 	return err
@@ -315,7 +315,7 @@ func (c *Client) sendDeleteSchema(ctx context.Context, params DeleteSchemaParams
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/schema/"
+	pathParts[0] = "/api/v1/schema/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -390,7 +390,7 @@ func (c *Client) sendDeleteSchema(ctx context.Context, params DeleteSchemaParams
 
 // GetIdentity invokes get_identity operation.
 //
-// GET /identity/{identity_provider}/{id}
+// GET /api/v1/identity/{identity_provider}/{id}
 func (c *Client) GetIdentity(ctx context.Context, params GetIdentityParams) (GetIdentityRes, error) {
 	res, err := c.sendGetIdentity(ctx, params)
 	return res, err
@@ -400,7 +400,7 @@ func (c *Client) sendGetIdentity(ctx context.Context, params GetIdentityParams) 
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/identity/"
+	pathParts[0] = "/api/v1/identity/"
 	{
 		// Encode "identity_provider" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -494,7 +494,7 @@ func (c *Client) sendGetIdentity(ctx context.Context, params GetIdentityParams) 
 
 // GetPrincipal invokes get_principal operation.
 //
-// GET /principal/{schema}/{id}
+// GET /api/v1/principal/{schema}/{id}
 func (c *Client) GetPrincipal(ctx context.Context, params GetPrincipalParams) (GetPrincipalRes, error) {
 	res, err := c.sendGetPrincipal(ctx, params)
 	return res, err
@@ -504,7 +504,7 @@ func (c *Client) sendGetPrincipal(ctx context.Context, params GetPrincipalParams
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/principal/"
+	pathParts[0] = "/api/v1/principal/"
 	{
 		// Encode "schema" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -598,7 +598,7 @@ func (c *Client) sendGetPrincipal(ctx context.Context, params GetPrincipalParams
 
 // GetProvider invokes get_provider operation.
 //
-// GET /identity_provider/oidc/{id}
+// GET /api/v1/identity_provider/oidc/{id}
 func (c *Client) GetProvider(ctx context.Context, params GetProviderParams) (GetProviderRes, error) {
 	res, err := c.sendGetProvider(ctx, params)
 	return res, err
@@ -608,7 +608,7 @@ func (c *Client) sendGetProvider(ctx context.Context, params GetProviderParams) 
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/identity_provider/oidc/"
+	pathParts[0] = "/api/v1/identity_provider/oidc/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -683,7 +683,7 @@ func (c *Client) sendGetProvider(ctx context.Context, params GetProviderParams) 
 
 // GetSchema invokes get_schema operation.
 //
-// GET /schema/{id}
+// GET /api/v1/schema/{id}
 func (c *Client) GetSchema(ctx context.Context, params GetSchemaParams) (GetSchemaRes, error) {
 	res, err := c.sendGetSchema(ctx, params)
 	return res, err
@@ -693,7 +693,7 @@ func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/schema/"
+	pathParts[0] = "/api/v1/schema/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -768,7 +768,7 @@ func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res
 
 // PostIdentity invokes post_identity operation.
 //
-// POST /identity/{identity_provider}/{id}
+// POST /api/v1/identity/{identity_provider}/{id}
 func (c *Client) PostIdentity(ctx context.Context, request *ExternalIdentityRegistrationRequest, params PostIdentityParams) error {
 	_, err := c.sendPostIdentity(ctx, request, params)
 	return err
@@ -778,7 +778,7 @@ func (c *Client) sendPostIdentity(ctx context.Context, request *ExternalIdentity
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/identity/"
+	pathParts[0] = "/api/v1/identity/"
 	{
 		// Encode "identity_provider" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -875,7 +875,7 @@ func (c *Client) sendPostIdentity(ctx context.Context, request *ExternalIdentity
 
 // PostPrincipal invokes post_principal operation.
 //
-// POST /principal/{schema}
+// POST /api/v1/principal/{schema}
 func (c *Client) PostPrincipal(ctx context.Context, request jx.Raw, params PostPrincipalParams) (*PrincipalCreateResponse, error) {
 	res, err := c.sendPostPrincipal(ctx, request, params)
 	return res, err
@@ -885,7 +885,7 @@ func (c *Client) sendPostPrincipal(ctx context.Context, request jx.Raw, params P
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/principal/"
+	pathParts[0] = "/api/v1/principal/"
 	{
 		// Encode "schema" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -963,7 +963,7 @@ func (c *Client) sendPostPrincipal(ctx context.Context, request jx.Raw, params P
 
 // PostProvider invokes post_provider operation.
 //
-// POST /identity_provider/oidc/{id}
+// POST /api/v1/identity_provider/oidc/{id}
 func (c *Client) PostProvider(ctx context.Context, request *OidcIdentityProviderRegistration, params PostProviderParams) error {
 	_, err := c.sendPostProvider(ctx, request, params)
 	return err
@@ -982,7 +982,7 @@ func (c *Client) sendPostProvider(ctx context.Context, request *OidcIdentityProv
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/identity_provider/oidc/"
+	pathParts[0] = "/api/v1/identity_provider/oidc/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -1060,7 +1060,7 @@ func (c *Client) sendPostProvider(ctx context.Context, request *OidcIdentityProv
 
 // PostSchema invokes post_schema operation.
 //
-// POST /schema/{id}
+// POST /api/v1/schema/{id}
 func (c *Client) PostSchema(ctx context.Context, request jx.Raw, params PostSchemaParams) error {
 	_, err := c.sendPostSchema(ctx, request, params)
 	return err
@@ -1070,7 +1070,7 @@ func (c *Client) sendPostSchema(ctx context.Context, request jx.Raw, params Post
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/schema/"
+	pathParts[0] = "/api/v1/schema/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -1148,7 +1148,7 @@ func (c *Client) sendPostSchema(ctx context.Context, request jx.Raw, params Post
 
 // Token invokes token operation.
 //
-// GET /token/{identity_provider}
+// GET /api/v1/token/{identity_provider}
 func (c *Client) Token(ctx context.Context, params TokenParams) (TokenOK, error) {
 	res, err := c.sendToken(ctx, params)
 	return res, err
@@ -1158,7 +1158,7 @@ func (c *Client) sendToken(ctx context.Context, params TokenParams) (res TokenOK
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/token/"
+	pathParts[0] = "/api/v1/token/"
 	{
 		// Encode "identity_provider" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{

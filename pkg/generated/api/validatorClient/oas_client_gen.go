@@ -25,55 +25,55 @@ func trimTrailingSlashes(u *url.URL) {
 type Invoker interface {
 	// DeleteActionSet invokes delete_action_set operation.
 	//
-	// DELETE /action_set/{schema}/{id}
+	// DELETE /api/v1/action_set/{schema}/{id}
 	DeleteActionSet(ctx context.Context, params DeleteActionSetParams) error
 	// DeletePolicySet invokes delete_policy_set operation.
 	//
-	// DELETE /policy_set/{schema}/{id}
+	// DELETE /api/v1/policy_set/{schema}/{id}
 	DeletePolicySet(ctx context.Context, params DeletePolicySetParams) error
 	// DeleteResourceSet invokes delete_resource_set operation.
 	//
-	// DELETE /resource_set/{schema}/{id}
+	// DELETE /api/v1/resource_set/{schema}/{id}
 	DeleteResourceSet(ctx context.Context, params DeleteResourceSetParams) error
 	// DeleteSchema invokes delete_schema operation.
 	//
-	// DELETE /schema/{id}
+	// DELETE /api/v1/schema/{id}
 	DeleteSchema(ctx context.Context, params DeleteSchemaParams) error
 	// GetActionSet invokes get_action_set operation.
 	//
-	// GET /action_set/{schema}/{id}
+	// GET /api/v1/action_set/{schema}/{id}
 	GetActionSet(ctx context.Context, params GetActionSetParams) (GetActionSetRes, error)
 	// GetPolicySet invokes get_policy_set operation.
 	//
-	// GET /policy_set/{schema}/{id}
+	// GET /api/v1/policy_set/{schema}/{id}
 	GetPolicySet(ctx context.Context, params GetPolicySetParams) (GetPolicySetRes, error)
 	// GetResourceSet invokes get_resource_set operation.
 	//
-	// GET /resource_set/{schema}/{id}
+	// GET /api/v1/resource_set/{schema}/{id}
 	GetResourceSet(ctx context.Context, params GetResourceSetParams) (GetResourceSetRes, error)
 	// GetSchema invokes get_schema operation.
 	//
-	// GET /schema/{id}
+	// GET /api/v1/schema/{id}
 	GetSchema(ctx context.Context, params GetSchemaParams) (GetSchemaRes, error)
 	// PostActionSet invokes post_action_set operation.
 	//
-	// POST /action_set/{schema}/{id}
+	// POST /api/v1/action_set/{schema}/{id}
 	PostActionSet(ctx context.Context, request *ActionSetRegistration, params PostActionSetParams) error
 	// PostPolicySet invokes post_policy_set operation.
 	//
-	// POST /policy_set/{schema}/{id}
+	// POST /api/v1/policy_set/{schema}/{id}
 	PostPolicySet(ctx context.Context, request *PolicySetRegistration, params PostPolicySetParams) error
 	// PostResourceSet invokes post_resource_set operation.
 	//
-	// POST /resource_set/{schema}/{id}
+	// POST /api/v1/resource_set/{schema}/{id}
 	PostResourceSet(ctx context.Context, request *ResourceSetRegistration, params PostResourceSetParams) error
 	// PostSchema invokes post_schema operation.
 	//
-	// POST /schema/{id}
+	// POST /api/v1/schema/{id}
 	PostSchema(ctx context.Context, request jx.Raw, params PostSchemaParams) error
 	// TokenReview invokes token_review operation.
 	//
-	// GET /review
+	// GET /api/v1/review
 	TokenReview(ctx context.Context) error
 }
 
@@ -120,7 +120,7 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 
 // DeleteActionSet invokes delete_action_set operation.
 //
-// DELETE /action_set/{schema}/{id}
+// DELETE /api/v1/action_set/{schema}/{id}
 func (c *Client) DeleteActionSet(ctx context.Context, params DeleteActionSetParams) error {
 	_, err := c.sendDeleteActionSet(ctx, params)
 	return err
@@ -130,7 +130,7 @@ func (c *Client) sendDeleteActionSet(ctx context.Context, params DeleteActionSet
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/action_set/"
+	pathParts[0] = "/api/v1/action_set/"
 	{
 		// Encode "schema" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -224,7 +224,7 @@ func (c *Client) sendDeleteActionSet(ctx context.Context, params DeleteActionSet
 
 // DeletePolicySet invokes delete_policy_set operation.
 //
-// DELETE /policy_set/{schema}/{id}
+// DELETE /api/v1/policy_set/{schema}/{id}
 func (c *Client) DeletePolicySet(ctx context.Context, params DeletePolicySetParams) error {
 	_, err := c.sendDeletePolicySet(ctx, params)
 	return err
@@ -234,7 +234,7 @@ func (c *Client) sendDeletePolicySet(ctx context.Context, params DeletePolicySet
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/policy_set/"
+	pathParts[0] = "/api/v1/policy_set/"
 	{
 		// Encode "schema" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -328,7 +328,7 @@ func (c *Client) sendDeletePolicySet(ctx context.Context, params DeletePolicySet
 
 // DeleteResourceSet invokes delete_resource_set operation.
 //
-// DELETE /resource_set/{schema}/{id}
+// DELETE /api/v1/resource_set/{schema}/{id}
 func (c *Client) DeleteResourceSet(ctx context.Context, params DeleteResourceSetParams) error {
 	_, err := c.sendDeleteResourceSet(ctx, params)
 	return err
@@ -338,7 +338,7 @@ func (c *Client) sendDeleteResourceSet(ctx context.Context, params DeleteResourc
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/resource_set/"
+	pathParts[0] = "/api/v1/resource_set/"
 	{
 		// Encode "schema" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -432,7 +432,7 @@ func (c *Client) sendDeleteResourceSet(ctx context.Context, params DeleteResourc
 
 // DeleteSchema invokes delete_schema operation.
 //
-// DELETE /schema/{id}
+// DELETE /api/v1/schema/{id}
 func (c *Client) DeleteSchema(ctx context.Context, params DeleteSchemaParams) error {
 	_, err := c.sendDeleteSchema(ctx, params)
 	return err
@@ -442,7 +442,7 @@ func (c *Client) sendDeleteSchema(ctx context.Context, params DeleteSchemaParams
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/schema/"
+	pathParts[0] = "/api/v1/schema/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -517,7 +517,7 @@ func (c *Client) sendDeleteSchema(ctx context.Context, params DeleteSchemaParams
 
 // GetActionSet invokes get_action_set operation.
 //
-// GET /action_set/{schema}/{id}
+// GET /api/v1/action_set/{schema}/{id}
 func (c *Client) GetActionSet(ctx context.Context, params GetActionSetParams) (GetActionSetRes, error) {
 	res, err := c.sendGetActionSet(ctx, params)
 	return res, err
@@ -527,7 +527,7 @@ func (c *Client) sendGetActionSet(ctx context.Context, params GetActionSetParams
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/action_set/"
+	pathParts[0] = "/api/v1/action_set/"
 	{
 		// Encode "schema" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -621,7 +621,7 @@ func (c *Client) sendGetActionSet(ctx context.Context, params GetActionSetParams
 
 // GetPolicySet invokes get_policy_set operation.
 //
-// GET /policy_set/{schema}/{id}
+// GET /api/v1/policy_set/{schema}/{id}
 func (c *Client) GetPolicySet(ctx context.Context, params GetPolicySetParams) (GetPolicySetRes, error) {
 	res, err := c.sendGetPolicySet(ctx, params)
 	return res, err
@@ -631,7 +631,7 @@ func (c *Client) sendGetPolicySet(ctx context.Context, params GetPolicySetParams
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/policy_set/"
+	pathParts[0] = "/api/v1/policy_set/"
 	{
 		// Encode "schema" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -725,7 +725,7 @@ func (c *Client) sendGetPolicySet(ctx context.Context, params GetPolicySetParams
 
 // GetResourceSet invokes get_resource_set operation.
 //
-// GET /resource_set/{schema}/{id}
+// GET /api/v1/resource_set/{schema}/{id}
 func (c *Client) GetResourceSet(ctx context.Context, params GetResourceSetParams) (GetResourceSetRes, error) {
 	res, err := c.sendGetResourceSet(ctx, params)
 	return res, err
@@ -735,7 +735,7 @@ func (c *Client) sendGetResourceSet(ctx context.Context, params GetResourceSetPa
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/resource_set/"
+	pathParts[0] = "/api/v1/resource_set/"
 	{
 		// Encode "schema" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -829,7 +829,7 @@ func (c *Client) sendGetResourceSet(ctx context.Context, params GetResourceSetPa
 
 // GetSchema invokes get_schema operation.
 //
-// GET /schema/{id}
+// GET /api/v1/schema/{id}
 func (c *Client) GetSchema(ctx context.Context, params GetSchemaParams) (GetSchemaRes, error) {
 	res, err := c.sendGetSchema(ctx, params)
 	return res, err
@@ -839,7 +839,7 @@ func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/schema/"
+	pathParts[0] = "/api/v1/schema/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -914,7 +914,7 @@ func (c *Client) sendGetSchema(ctx context.Context, params GetSchemaParams) (res
 
 // PostActionSet invokes post_action_set operation.
 //
-// POST /action_set/{schema}/{id}
+// POST /api/v1/action_set/{schema}/{id}
 func (c *Client) PostActionSet(ctx context.Context, request *ActionSetRegistration, params PostActionSetParams) error {
 	_, err := c.sendPostActionSet(ctx, request, params)
 	return err
@@ -933,7 +933,7 @@ func (c *Client) sendPostActionSet(ctx context.Context, request *ActionSetRegist
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/action_set/"
+	pathParts[0] = "/api/v1/action_set/"
 	{
 		// Encode "schema" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -1030,7 +1030,7 @@ func (c *Client) sendPostActionSet(ctx context.Context, request *ActionSetRegist
 
 // PostPolicySet invokes post_policy_set operation.
 //
-// POST /policy_set/{schema}/{id}
+// POST /api/v1/policy_set/{schema}/{id}
 func (c *Client) PostPolicySet(ctx context.Context, request *PolicySetRegistration, params PostPolicySetParams) error {
 	_, err := c.sendPostPolicySet(ctx, request, params)
 	return err
@@ -1040,7 +1040,7 @@ func (c *Client) sendPostPolicySet(ctx context.Context, request *PolicySetRegist
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/policy_set/"
+	pathParts[0] = "/api/v1/policy_set/"
 	{
 		// Encode "schema" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -1137,7 +1137,7 @@ func (c *Client) sendPostPolicySet(ctx context.Context, request *PolicySetRegist
 
 // PostResourceSet invokes post_resource_set operation.
 //
-// POST /resource_set/{schema}/{id}
+// POST /api/v1/resource_set/{schema}/{id}
 func (c *Client) PostResourceSet(ctx context.Context, request *ResourceSetRegistration, params PostResourceSetParams) error {
 	_, err := c.sendPostResourceSet(ctx, request, params)
 	return err
@@ -1156,7 +1156,7 @@ func (c *Client) sendPostResourceSet(ctx context.Context, request *ResourceSetRe
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/resource_set/"
+	pathParts[0] = "/api/v1/resource_set/"
 	{
 		// Encode "schema" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -1253,7 +1253,7 @@ func (c *Client) sendPostResourceSet(ctx context.Context, request *ResourceSetRe
 
 // PostSchema invokes post_schema operation.
 //
-// POST /schema/{id}
+// POST /api/v1/schema/{id}
 func (c *Client) PostSchema(ctx context.Context, request jx.Raw, params PostSchemaParams) error {
 	_, err := c.sendPostSchema(ctx, request, params)
 	return err
@@ -1263,7 +1263,7 @@ func (c *Client) sendPostSchema(ctx context.Context, request jx.Raw, params Post
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/schema/"
+	pathParts[0] = "/api/v1/schema/"
 	{
 		// Encode "id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -1341,7 +1341,7 @@ func (c *Client) sendPostSchema(ctx context.Context, request jx.Raw, params Post
 
 // TokenReview invokes token_review operation.
 //
-// GET /review
+// GET /api/v1/review
 func (c *Client) TokenReview(ctx context.Context) error {
 	_, err := c.sendTokenReview(ctx)
 	return err
@@ -1351,7 +1351,7 @@ func (c *Client) sendTokenReview(ctx context.Context) (res *TokenReviewOK, err e
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/review"
+	pathParts[0] = "/api/v1/review"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "GET", u)
