@@ -35,7 +35,7 @@ func (dataSource *cedarSchemaDataSource) Configure(_ context.Context, request da
 
 // Metadata responds with the data source type name.
 func (dataSource *cedarSchemaDataSource) Metadata(_ context.Context, request datasource.MetadataRequest, response *datasource.MetadataResponse) {
-	response.TypeName = request.ProviderTypeName + "_cedar_schema"
+	response.TypeName = request.ProviderTypeName + "_issuer_cedar_schema"
 }
 
 // Schema defines the schema for the data source.
