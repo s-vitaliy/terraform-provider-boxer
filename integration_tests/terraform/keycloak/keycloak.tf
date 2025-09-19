@@ -18,17 +18,6 @@ data "keycloak_realm" "master" {
   realm = "master"
 }
 
-resource "keycloak_user" "user_with_initial_password" {
-  realm_id = data.keycloak_realm.master.id
-  username = "test_user"
-  enabled  = true
-
-  initial_password {
-    value = "test_user_password"
-  }
-
-}
-
 resource "keycloak_openid_client" "test_client" {
   name                         = "test_client"
   access_type                  = "PUBLIC"
@@ -50,3 +39,24 @@ resource "keycloak_openid_client_default_scopes" "client_default_scopes" {
     "web-origins",
   ]
 }
+
+resource "keycloak_user" "test_user" {
+  realm_id = data.keycloak_realm.master.id
+  username = "test_user"
+  enabled  = true
+
+  initial_password {
+    value = "test-user-password"
+  }
+}
+
+resource "keycloak_user" "test_root" {
+  realm_id = data.keycloak_realm.master.id
+  username = "test_root"
+  enabled  = true
+
+  initial_password {
+    value = "test-root-password"
+  }
+}
+

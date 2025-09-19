@@ -1,0 +1,78 @@
+---
+apiVersion: auth.sneaksanddata.com/v1beta1
+kind: IdentityProviderDocument
+metadata:
+  labels:
+    local.debug: integration-tests
+  name: root
+  namespace: default
+spec:
+  active: true
+  oidc:
+    audiences:
+      - account
+    discoveryUrl: http://localhost:8080/realms/master/
+    issuers:
+      - http://localhost:8080/realms/master
+    userIdClaim: preferred_username
+---
+apiVersion: auth.sneaksanddata.com/v1beta1
+kind: ExternalIdentityDocument
+metadata:
+  labels:
+    local.debug: integration-tests
+  name: keycloak-test-root
+  namespace: default
+spec:
+  active: true
+  id: test_root
+  identityProvider: keycloak
+  principalRef:
+    principal: PhotoApp::User::"root"
+    schema: root-issuer
+  validatorSchemaId: integration-test-validator
+---
+apiVersion: auth.sneaksanddata.com/v1beta1
+kind: CedarEntityDocument
+metadata:
+  labels:
+    local.debug: integration-tests
+  name: root-issuer-root-photoapp
+  namespace: default
+spec:
+  active: true
+  entity: |
+    {
+      "uid": {
+        "type": "PhotoApp::User",
+        "id": "root"
+      },
+      "attrs": {
+      },
+      "parents": []
+    }
+---
+apiVersion: auth.sneaksanddata.com/v1beta1
+kind: SchemaDocument
+metadata:
+  labels:
+    local.debug: integration-tests
+  name: root-issuer
+  namespace: default
+spec:
+  active: true
+  schema: |
+    {
+      "PhotoApp": {
+        "commonTypes": {},
+        "entityTypes": {
+          "User": {
+            "shape": {
+              "type": "Record",
+              "attributes": {}
+            }
+          }
+        },
+        "actions": {}
+      }
+    }
