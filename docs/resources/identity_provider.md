@@ -19,10 +19,10 @@ description: |-
 
 - `audiences` (List of String)
 - `discovery_url` (String) The OIDC discovery URL of the identity provider.
+- `id` (String) The unique identifier of the identity provider.
 - `issuers` (List of String) List of issuers for the identity provider.
-- `name` (String) The name of the identity provider.
 - `user_id_claim` (String) The claim used to identify the user in the identity provider's token.
 
-### Read-Only
+### Optional
 
-- `id` (String) The unique identifier of the identity provider.
+- `name` (String, Deprecated) The name of the identity provider.

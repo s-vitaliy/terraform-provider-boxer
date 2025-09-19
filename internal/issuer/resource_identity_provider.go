@@ -44,11 +44,12 @@ func (resource *identityProviderResource) Schema(_ context.Context, _ resource.S
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description: "The unique identifier of the identity provider.",
-				Computed:    true,
+				Required:    true,
 			},
 			"name": schema.StringAttribute{
-				Description: "The name of the identity provider.",
-				Required:    true,
+				Description:        "The name of the identity provider.",
+				DeprecationMessage: "Use the id field instead",
+				Optional:           true,
 			},
 			"discovery_url": schema.StringAttribute{
 				Description: "The OIDC discovery URL of the identity provider.",
@@ -88,7 +89,7 @@ func (resource *identityProviderResource) Create(ctx context.Context, request re
 		return
 	}
 
-	err = resource.issuerClient.PostProvider(ctx, registration, issuerClient.PostProviderParams{ID: planModel.Name.ValueString()})
+	err = resource.issuerClient.PostProvider(ctx, registration, issuerClient.PostProviderParams{ID: planModel.ID.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Creating", "Identity Provider", err)
 		return
@@ -112,7 +113,7 @@ func (resource *identityProviderResource) Read(ctx context.Context, request reso
 		return
 	}
 
-	apiData, err := resource.issuerClient.GetProvider(ctx, issuerClient.GetProviderParams{ID: stateModel.Name.ValueString()})
+	apiData, err := resource.issuerClient.GetProvider(ctx, issuerClient.GetProviderParams{ID: stateModel.ID.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
@@ -156,12 +157,12 @@ func (resource *identityProviderResource) Update(ctx context.Context, request re
 		return
 	}
 
-	err = resource.issuerClient.PostProvider(ctx, registration, issuerClient.PostProviderParams{ID: stateModel.Name.ValueString()})
+	err = resource.issuerClient.PostProvider(ctx, registration, issuerClient.PostProviderParams{ID: stateModel.ID.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Updating", "Identity Provider", err)
 		return
 	}
-	apiData, err := resource.issuerClient.GetProvider(ctx, issuerClient.GetProviderParams{ID: stateModel.Name.ValueString()})
+	apiData, err := resource.issuerClient.GetProvider(ctx, issuerClient.GetProviderParams{ID: stateModel.ID.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
@@ -190,7 +191,7 @@ func (resource *identityProviderResource) Delete(ctx context.Context, request re
 		return
 	}
 
-	err = resource.issuerClient.DeleteProvider(ctx, issuerClient.DeleteProviderParams{ID: stateModel.Name.ValueString()})
+	err = resource.issuerClient.DeleteProvider(ctx, issuerClient.DeleteProviderParams{ID: stateModel.ID.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Deleting", "Identity Provider", err)
 		return

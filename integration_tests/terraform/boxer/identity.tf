@@ -1,5 +1,5 @@
 resource "boxer_identity_provider" "keycloak" {
-  name          = "keycloak"
+  id            = "keycloak"
   user_id_claim = "preferred_username"
   discovery_url = "http://localhost:8080/realms/master/"
   issuers = [
@@ -31,7 +31,7 @@ EOT
 }
 
 resource "boxer_external_identity" "alice" {
-  identity_provider = boxer_identity_provider.keycloak.name
+  identity_provider = boxer_identity_provider.keycloak.id
   id                = "test_user"
   principal = {
     schema_id    = boxer_principal.alice.schema_id
