@@ -16,5 +16,18 @@ description: |-
 
 ### Required
 
+- `external_auth` (Attributes) Configuration for external authentication (see [below for nested schema](#nestedatt--external_auth))
 - `issuer_host` (String) The host of the Boxer Issuer API.
 - `validator_host` (String) The host of the Boxer Issuer API.
+
+<a id="nestedatt--external_auth"></a>
+### Nested Schema for `external_auth`
+
+Required:
+
+- `identity_provider_id` (String) The ID of the external identity provider to use for authentication.
+- `internal_token_provider_endpoint` (String) The token endpoint of the external identity provider.
+
+Optional:
+
+- `security_token` (String, Sensitive) An external security token to use for Boxer Issuer API calls. If not set, the BOXER_EXTERNAL_SECURITY_TOKEN environment variable will be used if set.
