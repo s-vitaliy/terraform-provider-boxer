@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-boxer/internal/common"
 	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 
@@ -89,12 +90,12 @@ func (resource *identityProviderResource) Create(ctx context.Context, request re
 		return
 	}
 
+	tflog.Debug(ctx, "Creating IdentityProvider resource with ID: "+planModel.ID.ValueString())
 	err = resource.issuerClient.PostProvider(ctx, registration, issuerClient.PostProviderParams{ID: planModel.ID.ValueString()})
 	if err != nil {
 		common.GenerateError(&response.Diagnostics, "Creating", "Identity Provider", err)
 		return
 	}
-	planModel.ID = types.StringValue(planModel.Name.ValueString())
 	response.State.Set(ctx, planModel)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
@@ -226,7 +227,6 @@ func toBoxerIssuerModel(ctx context.Context, plan *identityProviderResourceModel
 }
 
 func (model *identityProviderResourceModel) From(apiData *issuerClient.OidcIdentityProviderRegistration) *identityProviderResourceModel {
-	model.Name = model.ID
 	model.DiscoveryUrl = types.StringValue(apiData.GetDiscoveryUrl())
 	model.UserIdClaim = types.StringValue(apiData.GetUserIdClaim())
 	model.Audiences = types.ListValueMust(types.StringType, encode(apiData.GetAudiences()))
