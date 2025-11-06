@@ -1,0 +1,18 @@
+apiVersion: v2
+name: setup
+description: Integration test setup chart for terraform-provider-boxer
+type: application
+version: 0.0.1
+appVersion: "0.0.1"
+dependencies:
+  - name: boxer-crd
+    version: "v0.0.5"
+    repository: "oci://ghcr.io/sneaksanddata/helm"
+  - name: boxer-issuer
+    version: "v0.0.14"
+    repository: "oci://ghcr.io/sneaksanddata/helm"
+  - name: boxer-validator-nginx
+    version: "v0.0.15"
+    repository: "oci://ghcr.io/sneaksanddata/helm"
+
+

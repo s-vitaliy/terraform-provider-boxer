@@ -3,24 +3,24 @@ apiVersion: auth.sneaksanddata.com/v1beta1
 kind: IdentityProviderDocument
 metadata:
   labels:
-    local.debug: integration-tests
-  name: root
+    application/boxer-issuer: integration-tests
+  name: keycloak
   namespace: default
 spec:
   active: true
   oidc:
     audiences:
       - account
-    discoveryUrl: http://localhost:8080/realms/master/
+    discoveryUrl: http://keycloak-keycloakx-http/auth/realms/master/
     issuers:
-      - http://localhost:8080/realms/master
+      - http://localhost:5555/auth/realms/master
     userIdClaim: preferred_username
 ---
 apiVersion: auth.sneaksanddata.com/v1beta1
 kind: ExternalIdentityDocument
 metadata:
   labels:
-    local.debug: integration-tests
+    application/boxer-issuer: integration-tests
   name: keycloak-test-root
   namespace: default
 spec:
@@ -36,7 +36,7 @@ apiVersion: auth.sneaksanddata.com/v1beta1
 kind: CedarEntityDocument
 metadata:
   labels:
-    local.debug: integration-tests
+    application/boxer-issuer: integration-tests
   name: root-issuer-root-photoapp
   namespace: default
 spec:
@@ -56,7 +56,7 @@ apiVersion: auth.sneaksanddata.com/v1beta1
 kind: SchemaDocument
 metadata:
   labels:
-    local.debug: integration-tests
+    application/boxer-issuer: integration-tests
   name: root-issuer
   namespace: default
 spec:

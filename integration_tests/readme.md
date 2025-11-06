@@ -1,4 +1,4 @@
-# Running the integration tests manually
+# Run the tests manually (getting the internal token and checking it)
 
 1. Start the Keycloak server:
 ```bash
@@ -16,7 +16,7 @@ export TF_VAR_external_token=$(curl \
   -d "username=test_root" \
   -d "password=test-root-password" \
   -d "grant_type=password" \
-  "http://localhost:8080/realms/master/protocol/openid-connect/token" | jq -r '.access_token') && echo $TF_VAR_external_token
+  "http://localhost:5555/auth/realms/master/protocol/openid-connect/token" | jq -r '.access_token') && echo $TF_VAR_external_token
   
 ```  
 4. Apply the terraform configuration
@@ -38,4 +38,3 @@ curl -v -X 'GET' 'http://localhost:8081/token/review' \
   -H "Authorization: Bearer $INTERNAL_TOKEN"
   
 ```
-
