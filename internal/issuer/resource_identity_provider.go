@@ -28,7 +28,7 @@ func NewIdentityProviderResource() resource.Resource {
 
 func (resource *identityProviderResource) Configure(_ context.Context, request resource.ConfigureRequest, response *resource.ConfigureResponse) {
 	client := getResourceIssuerClient(request, response)
-	if client == nil {
+	if client == nil { // coverage-ignore
 		return
 	}
 	resource.issuerClient = client
@@ -77,7 +77,7 @@ func (resource *identityProviderResource) Schema(_ context.Context, _ resource.S
 func (resource *identityProviderResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	var planModel identityProviderResourceModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -85,20 +85,20 @@ func (resource *identityProviderResource) Create(ctx context.Context, request re
 	}
 
 	registration, diags := toBoxerIssuerModel(ctx, &planModel)
-	if diags.HasError() {
+	if diags.HasError() { // coverage-ignore
 		response.Diagnostics.Append(diags...)
 		return
 	}
 
 	tflog.Debug(ctx, "Creating IdentityProvider resource with ID: "+planModel.ID.ValueString())
 	err = resource.issuerClient.PostProvider(ctx, registration, issuerClient.PostProviderParams{ID: planModel.ID.ValueString()})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Creating", "Identity Provider", err)
 		return
 	}
 	response.State.Set(ctx, planModel)
 	response.Diagnostics.Append(diags...)
-	if response.Diagnostics.HasError() {
+	if response.Diagnostics.HasError() { // coverage-ignore
 		return
 	}
 }
@@ -107,7 +107,7 @@ func (resource *identityProviderResource) Create(ctx context.Context, request re
 func (resource *identityProviderResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	var stateModel identityProviderResourceModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -115,7 +115,7 @@ func (resource *identityProviderResource) Read(ctx context.Context, request reso
 	}
 
 	apiData, err := resource.issuerClient.GetProvider(ctx, issuerClient.GetProviderParams{ID: stateModel.ID.ValueString()})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
 	}
@@ -124,7 +124,7 @@ func (resource *identityProviderResource) Read(ctx context.Context, request reso
 		ID: stateModel.ID,
 	}
 	err = newStateModel.handleReadApiResponse(ctx, apiData, &response.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't handle the API response, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -136,7 +136,7 @@ func (resource *identityProviderResource) Read(ctx context.Context, request reso
 func (resource *identityProviderResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	var planModel identityProviderResourceModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -145,7 +145,7 @@ func (resource *identityProviderResource) Update(ctx context.Context, request re
 
 	var stateModel identityProviderResourceModel
 	err = common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -153,18 +153,18 @@ func (resource *identityProviderResource) Update(ctx context.Context, request re
 	}
 
 	registration, diags := toBoxerIssuerModel(ctx, &planModel)
-	if diags.HasError() {
+	if diags.HasError() { // coverage-ignore
 		response.Diagnostics.Append(diags...)
 		return
 	}
 
 	err = resource.issuerClient.PostProvider(ctx, registration, issuerClient.PostProviderParams{ID: stateModel.ID.ValueString()})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Updating", "Identity Provider", err)
 		return
 	}
 	apiData, err := resource.issuerClient.GetProvider(ctx, issuerClient.GetProviderParams{ID: stateModel.ID.ValueString()})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
 	}
@@ -173,7 +173,7 @@ func (resource *identityProviderResource) Update(ctx context.Context, request re
 		ID: stateModel.ID,
 	}
 	err = newStateModel.handleReadApiResponse(ctx, apiData, &response.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't handle the API response, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -185,7 +185,7 @@ func (resource *identityProviderResource) Update(ctx context.Context, request re
 func (resource *identityProviderResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
 	var stateModel identityProviderResourceModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -193,7 +193,7 @@ func (resource *identityProviderResource) Delete(ctx context.Context, request re
 	}
 
 	err = resource.issuerClient.DeleteProvider(ctx, issuerClient.DeleteProviderParams{ID: stateModel.ID.ValueString()})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Deleting", "Identity Provider", err)
 		return
 	}
@@ -216,11 +216,11 @@ func toBoxerIssuerModel(ctx context.Context, plan *identityProviderResourceModel
 		Issuers:      make([]string, len(plan.Issuers.Elements())),
 	}
 	diags := plan.Audiences.ElementsAs(ctx, &registration.Audiences, false)
-	if diags.HasError() {
+	if diags.HasError() { // coverage-ignore
 		return nil, diags
 	}
 	diags = plan.Issuers.ElementsAs(ctx, &registration.Issuers, false)
-	if diags.HasError() {
+	if diags.HasError() { // coverage-ignore
 		return nil, diags
 	}
 	return &registration, nil
@@ -237,7 +237,7 @@ func (model *identityProviderResourceModel) From(apiData *issuerClient.OidcIdent
 func (model *identityProviderResourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
 	diags := state.Set(ctx, model)
 	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
+	if diagnostics.HasError() { // coverage-ignore
 		return fmt.Errorf("error getting plan")
 	}
 	return nil
@@ -259,7 +259,7 @@ func (model *identityProviderResourceModel) handleReadApiResponse(ctx context.Co
 		// If the API returns a not found error, we remove the resource from the state.
 		state.RemoveResource(ctx)
 		return nil
-	default:
+	default: // coverage-ignore
 		// If the API returns an unexpected type, we generate an error.
 		common.GenerateError(diags,
 			"Reading",

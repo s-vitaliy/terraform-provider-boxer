@@ -50,7 +50,32 @@ jobs:
           version: v2.1.0
 
       - name: Run integration tests
-        run: TF_ACC=1 go test -v ./...
+        run: TF_ACC=1 go test -v ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
+
+      - name: check test coverage
+        id: coverage
+        ## Since the official action does not support multi-arch images yet,
+        ## this action temporarily uses an experimental version from my own fork, until this PR is merged:
+        ## https://github.com/vladopajic/go-test-coverage/pull/233
+        uses: s-vitaliy/go-test-coverage@experimental
+        continue-on-error: true # Should fail after coverage comment is posted
+        with:
+          config: .testcoverage.yaml
+
+      - name: post coverage report
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-tag: coverage-report
+          message: |
+            go-test-coverage report:
+            ```${{ fromJSON(steps.coverage.outputs.report) }}```
+
+      - name: "finally check coverage"
+        # Temporarily disabled until we fix coverage issues
+        if: false && steps.coverage.outcome == 'failure'
+        shell: bash
+        run: echo "coverage check failed" && exit 1
 
       - name: Get logs from application pods
         if: always()
