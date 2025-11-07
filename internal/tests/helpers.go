@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -9,13 +10,14 @@ import (
 	"net/http"
 	"net/url"
 	"terraform-provider-boxer/internal"
+	"text/template"
 )
 
 type tokenResponse struct {
 	AccessToken string `json:"access_token"`
 }
 
-func getExternalToken(services *Services) (string, error) {
+func GetExternalToken(services *Services) (string, error) {
 	form := url.Values{}
 	form.Add("client_id", services.ExternalIdp.Credentials.ClientID)
 	form.Add("client_secret", services.ExternalIdp.Credentials.ClientSecret)
@@ -54,8 +56,24 @@ func providerFactory() tfprotov6.ProviderServer {
 	return p
 }
 
-var protoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
+var ProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
 	"boxer": func() (tfprotov6.ProviderServer, error) {
 		return providerFactory(), nil
 	},
+}
+
+func RenderTemplate(testContext *TestContext, templateName string) string {
+	tpl, err := template.New("configuration").ParseFiles(fmt.Sprintf("templates/%s", templateName))
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Generating test configuration...")
+	var buf bytes.Buffer
+	err = tpl.ExecuteTemplate(&buf, templateName, testContext)
+	if err != nil {
+		panic(err)
+	}
+	result := buf.String()
+	return result
 }

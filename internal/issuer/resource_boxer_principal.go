@@ -65,7 +65,7 @@ func (resource *boxerPrincipal) Schema(_ context.Context, _ resource.SchemaReque
 func (resource *boxerPrincipal) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	var planModel boxerPrincipalModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -77,7 +77,7 @@ func (resource *boxerPrincipal) Create(ctx context.Context, request resource.Cre
 		jx.Raw(planModel.DataJson.ValueString()),
 		issuerClient.PostPrincipalParams{Schema: planModel.SchemaId.ValueString()})
 
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Creating", "Boxer Principal", err)
 		return
 	}
@@ -90,7 +90,7 @@ func (resource *boxerPrincipal) Create(ctx context.Context, request resource.Cre
 	// If we can't save the state, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return
 	}
 }
@@ -99,7 +99,7 @@ func (resource *boxerPrincipal) Create(ctx context.Context, request resource.Cre
 func (resource *boxerPrincipal) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	var stateModel boxerPrincipalModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -113,7 +113,7 @@ func (resource *boxerPrincipal) Read(ctx context.Context, request resource.ReadR
 	tflog.Info(ctx, "Getting principal by ID", map[string]any{"principalId": stateModel.ID.ValueString()})
 	params := issuerClient.GetPrincipalParams{Schema: stateModel.SchemaId.ValueString(), ID: stateModel.ID.ValueString()}
 	_, err = resource.issuerClient.GetPrincipal(ctx, params)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Reading", "Boxer Principal", err)
 		return
 	}
@@ -122,7 +122,7 @@ func (resource *boxerPrincipal) Read(ctx context.Context, request resource.ReadR
 		stateModel.DataJson.ValueString(),
 		stateModel.SchemaId.ValueString(),
 		&response.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't save the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -134,7 +134,7 @@ func (resource *boxerPrincipal) Read(ctx context.Context, request resource.ReadR
 func (resource *boxerPrincipal) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	var planModel boxerPrincipalModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the planModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -142,7 +142,7 @@ func (resource *boxerPrincipal) Update(ctx context.Context, request resource.Upd
 	}
 	var stateModel boxerPrincipalModel
 	err = common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -165,7 +165,7 @@ func (resource *boxerPrincipal) Update(ctx context.Context, request resource.Upd
 	// If we can't save the state, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return
 	}
 }
@@ -174,7 +174,7 @@ func (resource *boxerPrincipal) Update(ctx context.Context, request resource.Upd
 func (resource *boxerPrincipal) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
 	var stateModel boxerPrincipalModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -203,7 +203,7 @@ func saveNewBoxerPrincipalState(ctx context.Context, id string, newData string, 
 	}
 	diags := state.Set(ctx, &newState)
 	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
+	if diagnostics.HasError() { // coverage-ignore
 		return fmt.Errorf("error getting plan")
 	}
 	return nil

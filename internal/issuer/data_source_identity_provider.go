@@ -2,13 +2,16 @@ package issuer
 
 import (
 	"context"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-boxer/internal/common"
 	"terraform-provider-boxer/pkg/generated/api/issuerClient"
-
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -24,7 +27,7 @@ func NewIdentityProviderDataSource() datasource.DataSource {
 
 func (dataSource *identityProviderDataSource) Configure(_ context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
 	client := getDataSourceIssuerClient(request, response)
-	if client == nil {
+	if client == nil { // coverage-ignore
 		// If the client is nil, we cannot proceed with the data source.
 		// This method will be called again when the provider is configured,
 		// so we can safely return here without setting the client.
@@ -54,6 +57,16 @@ func (dataSource *identityProviderDataSource) Schema(_ context.Context, _ dataso
 				Description: "The claim used to identify the user in the identity provider's token.",
 				Computed:    true,
 			},
+			"audiences": schema.ListAttribute{
+				Description: "The list of audiences accepted by the identity provider.",
+				ElementType: types.StringType,
+				Computed:    true,
+			},
+			"issuers": schema.ListAttribute{
+				Description: "The list of issuers accepted by the identity provider.",
+				ElementType: types.StringType,
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -63,7 +76,7 @@ func (dataSource *identityProviderDataSource) Read(ctx context.Context, request 
 	tflog.Info(ctx, "Reading identity provider data source")
 	var configModel identityProviderDataSourceModel
 	err := common.ReadFromConfig(ctx, &configModel, request.Config, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the config, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -71,7 +84,7 @@ func (dataSource *identityProviderDataSource) Read(ctx context.Context, request 
 	}
 
 	apiData, err := dataSource.issuerClient.GetProvider(ctx, issuerClient.GetProviderParams{ID: configModel.ID.ValueString()})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Reading", "Identity Provider", err)
 		return
 	}
@@ -79,11 +92,8 @@ func (dataSource *identityProviderDataSource) Read(ctx context.Context, request 
 	switch apiResponse := apiData.(type) {
 	case *issuerClient.OidcIdentityProviderRegistration:
 		tflog.Debug(ctx, "Identity provider found, updating state")
-		configModel.DiscoveryUrl = types.StringValue(apiResponse.GetDiscoveryUrl())
-		configModel.UserIdClaim = types.StringValue(apiResponse.GetUserIdClaim())
-		diag := response.State.Set(ctx, &configModel)
-		response.Diagnostics.Append(diag...)
-		if response.Diagnostics.HasError() {
+		err := configModel.From(apiResponse).saveToState(ctx, &response.State, &response.Diagnostics)
+		if err != nil { // coverage-ignore
 			return
 		}
 	case *issuerClient.GetProviderNotFound:
@@ -100,8 +110,34 @@ type identityProviderDataSourceModel struct {
 	ID           types.String `tfsdk:"id"`
 	DiscoveryUrl types.String `tfsdk:"discovery_url"`
 	UserIdClaim  types.String `tfsdk:"user_id_claim"`
-	//Audiences    types.List   `tfsdk:"audiences"`
-	//Issuers      types.List   `json:"issuers"`
+	Audiences    types.List   `tfsdk:"audiences"`
+	Issuers      types.List   `tfsdk:"issuers"`
+}
+
+func (model *identityProviderDataSourceModel) From(source *issuerClient.OidcIdentityProviderRegistration) *identityProviderDataSourceModel {
+	model.DiscoveryUrl = types.StringValue(source.GetDiscoveryUrl())
+	model.UserIdClaim = types.StringValue(source.GetUserIdClaim())
+	issuers := make([]attr.Value, len(source.GetIssuers()))
+	for i, issuer := range source.GetIssuers() {
+		issuers[i] = types.StringValue(issuer)
+	}
+	model.Issuers = types.ListValueMust(types.StringType, issuers)
+
+	audiences := make([]attr.Value, len(source.GetAudiences()))
+	for i, audience := range source.GetAudiences() {
+		audiences[i] = types.StringValue(audience)
+	}
+	model.Audiences = types.ListValueMust(types.StringType, audiences)
+	return model
+}
+
+func (model *identityProviderDataSourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
+	diags := state.Set(ctx, &model)
+	diagnostics.Append(diags...)
+	if diagnostics.HasError() {
+		return fmt.Errorf("error saving state")
+	}
+	return nil
 }
 
 // identityProviderDataSource is the data source implementation.

@@ -9,5 +9,6 @@ threshold:
 
 exclude:
   paths:
-    - ^pkg/generated  # exclude generated code
-    - main.go         # application entry point
+    - ^pkg/generated              # exclude generated code
+    - ^internal/tests/assertions  # exclude test assertions
+    - main.go                     # application entry point

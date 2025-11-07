@@ -21,5 +21,7 @@ description: |-
 
 ### Read-Only
 
+- `audiences` (List of String) The list of audiences accepted by the identity provider.
 - `discovery_url` (String) The OIDC discovery URL of the identity provider.
+- `issuers` (List of String) The list of issuers accepted by the identity provider.
 - `user_id_claim` (String) The claim used to identify the user in the identity provider's token.
