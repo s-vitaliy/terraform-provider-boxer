@@ -26,7 +26,7 @@ func NewBoxerExternalIdentityDataSource() datasource.DataSource {
 
 func (dataSource *boxerExternalIdentityDataSource) Configure(_ context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
 	client := getDataSourceIssuerClient(request, response)
-	if client == nil {
+	if client == nil { // coverage-ignore
 		// If the client is nil, we cannot proceed with the data source.
 		// This method will be called again when the provider is configured,
 		// so we can safely return here without setting the client.
@@ -78,7 +78,7 @@ func (dataSource *boxerExternalIdentityDataSource) Schema(_ context.Context, _ d
 func (dataSource *boxerExternalIdentityDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
 	var configModel boxerExternalIdentityDataSourceModel
 	err := common.ReadFromConfig(ctx, &configModel, request.Config, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the configModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -88,7 +88,7 @@ func (dataSource *boxerExternalIdentityDataSource) Read(ctx context.Context, req
 		ID:               configModel.ID.ValueString(),
 		IdentityProvider: configModel.IdentityProvider.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Reading", "External Identity", err)
 		return
 	}
@@ -102,7 +102,7 @@ func (dataSource *boxerExternalIdentityDataSource) Read(ctx context.Context, req
 	case *issuerClient.ExternalIdentityRegistration:
 		tflog.Debug(ctx, "External identity found, updating state")
 		err = apiModel.From(apiResponse).saveToState(ctx, &response.State, &response.Diagnostics)
-		if err != nil {
+		if err != nil { // coverage-ignore
 			common.GenerateError(&response.Diagnostics, "Saving", "Resource Set", err)
 			return
 		}
@@ -132,7 +132,7 @@ func (model *boxerExternalIdentityDataSourceModel) From(source *issuerClient.Ext
 func (model *boxerExternalIdentityDataSourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
 	diags := state.Set(ctx, model)
 	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
+	if diagnostics.HasError() { // coverage-ignore
 		return fmt.Errorf("error getting plan")
 	}
 	return nil

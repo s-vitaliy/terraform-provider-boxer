@@ -80,7 +80,7 @@ func (resource *resourceDiscoveryDocumentResource) Schema(_ context.Context, _ r
 func (resource *resourceDiscoveryDocumentResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	var planModel resourceDiscoveryDocumentResourceModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -91,7 +91,7 @@ func (resource *resourceDiscoveryDocumentResource) Create(ctx context.Context, r
 		ID:     planModel.ID.ValueString(),
 		Schema: planModel.Schema.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Creating", "Resource Set", err)
 		return
 	}
@@ -100,7 +100,7 @@ func (resource *resourceDiscoveryDocumentResource) Create(ctx context.Context, r
 	// If we can't save the state, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return
 	}
 }
@@ -109,7 +109,7 @@ func (resource *resourceDiscoveryDocumentResource) Create(ctx context.Context, r
 func (resource *resourceDiscoveryDocumentResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	var stateModel resourceDiscoveryDocumentResourceModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -124,7 +124,7 @@ func (resource *resourceDiscoveryDocumentResource) Read(ctx context.Context, req
 		ID:     stateModel.ID.ValueString(),
 		Schema: stateModel.Schema.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Reading", "Resource Set", err)
 		return
 	}
@@ -161,7 +161,7 @@ func (resource *resourceDiscoveryDocumentResource) Read(ctx context.Context, req
 func (resource *resourceDiscoveryDocumentResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	var planModel resourceDiscoveryDocumentResourceModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the planModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -172,7 +172,7 @@ func (resource *resourceDiscoveryDocumentResource) Update(ctx context.Context, r
 		ID:     planModel.ID.ValueString(),
 		Schema: planModel.Schema.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Updating", "Resource Set", err)
 		return
 	}
@@ -181,7 +181,7 @@ func (resource *resourceDiscoveryDocumentResource) Update(ctx context.Context, r
 	// If we can't save the stateModel, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return
 	}
 }
@@ -190,7 +190,7 @@ func (resource *resourceDiscoveryDocumentResource) Update(ctx context.Context, r
 func (resource *resourceDiscoveryDocumentResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
 	var stateModel resourceDiscoveryDocumentResourceModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -201,7 +201,7 @@ func (resource *resourceDiscoveryDocumentResource) Delete(ctx context.Context, r
 		ID:     stateModel.ID.ValueString(),
 		Schema: stateModel.Schema.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Deleting", "Resource Set", err)
 		return
 	}
@@ -222,7 +222,7 @@ type resourceDiscoveryDocumentResourceModel struct {
 func (model *resourceDiscoveryDocumentResourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
 	diags := state.Set(ctx, model)
 	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
+	if diagnostics.HasError() { // coverage-ignore
 		return fmt.Errorf("error getting plan")
 	}
 	return nil

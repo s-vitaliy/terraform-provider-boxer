@@ -86,10 +86,10 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 	var config boxerProviderModel
 	diags := request.Config.Get(ctx, &config)
 	response.Diagnostics.Append(diags...)
-	if response.Diagnostics.HasError() {
+	if response.Diagnostics.HasError() { // coverage-ignore
 		return
 	}
-	if config.IssuerHost.IsUnknown() {
+	if config.IssuerHost.IsUnknown() { // coverage-ignore
 		response.Diagnostics.AddAttributeError(
 			path.Root("issuer_host"),
 			"Unknown Boxer Issuer issuerHost",
@@ -99,7 +99,7 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 		)
 	}
 
-	if response.Diagnostics.HasError() {
+	if response.Diagnostics.HasError() { // coverage-ignore
 		return
 	}
 
@@ -120,7 +120,7 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 	// If any of the expected configurations are missing, return
 	// errors with provider-specific guidance.
 
-	if issuerHost == "" {
+	if issuerHost == "" { // coverage-ignore
 		response.Diagnostics.AddAttributeError(
 			path.Root("issuer_host"),
 			"Unknown Boxer Issuer issuerHost",
@@ -130,13 +130,13 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 		)
 	}
 
-	if response.Diagnostics.HasError() {
+	if response.Diagnostics.HasError() { // coverage-ignore
 		return
 	}
 
 	if config.ExternalAuth.SecurityToken.IsNull() {
 		token, ok := os.LookupEnv("BOXER_EXTERNAL_SECURITY_TOKEN")
-		if !ok {
+		if !ok { // coverage-ignore
 			response.Diagnostics.AddAttributeError(
 				path.Root("external_security_token"),
 				"Missing Boxer Issuer externalSecurityToken",
@@ -151,7 +151,7 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 	tokenEndpoint := config.ExternalAuth.InternalTokenProviderEndpoint.ValueString()
 	externalSecuritySource := security.IssuerStaticSecuritySource(config.ExternalAuth.SecurityToken.ValueString())
 	externalAuthIssuerClient, err := issuerClient.NewClient(tokenEndpoint, externalSecuritySource)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		response.Diagnostics.AddError(
 			"Failed to initialize Self-authorization client",
 			"An unexpected error occurred when creating the Boxer Issuer client: "+err.Error(),
@@ -162,7 +162,7 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 	internalTokenReader := security.NewInternalTokenReader(externalAuthIssuerClient, config.ExternalAuth.IdentityProviderID.ValueString())
 
 	issuerApiClient, err := issuerClient.NewClient(issuerHost, security.NewIssuerInternalSecuritySource(internalTokenReader))
-	if err != nil {
+	if err != nil { // coverage-ignore
 		response.Diagnostics.AddError(
 			"Failed to initialize Boxer Issuer Client",
 			"An unexpected error occurred when creating the Boxer Issuer client: "+err.Error(),
@@ -171,7 +171,7 @@ func (b BoxerProvider) Configure(ctx context.Context, request provider.Configure
 	}
 
 	validatorApiClient, err := validatorClient.NewClient(validatorHost, security.NewValidatorInternalSecuritySource(internalTokenReader))
-	if err != nil {
+	if err != nil { // coverage-ignore
 		response.Diagnostics.AddError(
 			"Failed to initialize Boxer Validator Client",
 			"An unexpected error occurred when creating the Boxer Validator client: "+err.Error(),

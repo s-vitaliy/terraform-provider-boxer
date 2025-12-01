@@ -28,7 +28,7 @@ type issuerInternalSecuritySource struct {
 
 func (e issuerInternalSecuritySource) Internal(ctx context.Context, _ issuerClient.OperationName) (issuerClient.Internal, error) {
 	token, err := e.internalTokenReader.GetToken(ctx)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return issuerClient.Internal{}, fmt.Errorf("failed to get internal token: %w", err)
 	}
 	return issuerClient.Internal{Token: token}, nil

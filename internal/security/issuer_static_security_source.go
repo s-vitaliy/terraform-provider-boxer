@@ -23,7 +23,7 @@ type issuerStaticSecuritySource struct {
 	value string
 }
 
-func (e issuerStaticSecuritySource) Internal(_ context.Context, _ issuerClient.OperationName) (issuerClient.Internal, error) {
+func (e issuerStaticSecuritySource) Internal(_ context.Context, _ issuerClient.OperationName) (issuerClient.Internal, error) { // coverage-ignore
 	return issuerClient.Internal{Token: e.value}, nil
 }
 

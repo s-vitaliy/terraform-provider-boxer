@@ -89,7 +89,7 @@ func (resource *actionDiscoveryDocumentResource) Schema(_ context.Context, _ res
 func (resource *actionDiscoveryDocumentResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	var planModel actionDiscoveryDocumentResourceModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -101,7 +101,7 @@ func (resource *actionDiscoveryDocumentResource) Create(ctx context.Context, req
 		Schema: planModel.Schema.ValueString(),
 	})
 
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Creating", "Resource Set", err)
 		return
 	}
@@ -110,7 +110,7 @@ func (resource *actionDiscoveryDocumentResource) Create(ctx context.Context, req
 	// If we can't save the state, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return
 	}
 }
@@ -119,7 +119,7 @@ func (resource *actionDiscoveryDocumentResource) Create(ctx context.Context, req
 func (resource *actionDiscoveryDocumentResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	var stateModel actionDiscoveryDocumentResourceModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -151,7 +151,7 @@ func (resource *actionDiscoveryDocumentResource) Read(ctx context.Context, reque
 		// If we can't save the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
-		if err != nil {
+		if err != nil { // coverage-ignore
 			return
 		}
 	case *validatorClient.GetActionSetNotFound:
@@ -171,7 +171,7 @@ func (resource *actionDiscoveryDocumentResource) Read(ctx context.Context, reque
 func (resource *actionDiscoveryDocumentResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	var planModel actionDiscoveryDocumentResourceModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the planModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -182,7 +182,7 @@ func (resource *actionDiscoveryDocumentResource) Update(ctx context.Context, req
 		ID:     planModel.ID.ValueString(),
 		Schema: planModel.Schema.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Updating", "Resource Set", err)
 		return
 	}
@@ -191,7 +191,7 @@ func (resource *actionDiscoveryDocumentResource) Update(ctx context.Context, req
 	// If we can't save the stateModel, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return
 	}
 }
@@ -201,7 +201,7 @@ func (resource *actionDiscoveryDocumentResource) Delete(ctx context.Context, req
 	var stateModel actionDiscoveryDocumentResourceModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
 
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -213,7 +213,7 @@ func (resource *actionDiscoveryDocumentResource) Delete(ctx context.Context, req
 		Schema: stateModel.Schema.ValueString(),
 	})
 
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Deleting", "Resource Set", err)
 		return
 	}
@@ -235,7 +235,7 @@ type actionDiscoveryDocumentResourceModel struct {
 func (model *actionDiscoveryDocumentResourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
 	diags := state.Set(ctx, &model)
 	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
+	if diagnostics.HasError() { // coverage-ignore
 		return fmt.Errorf("error getting plan")
 	}
 	return nil

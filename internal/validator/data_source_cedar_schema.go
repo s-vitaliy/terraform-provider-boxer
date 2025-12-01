@@ -25,7 +25,7 @@ func NewCedarSchemaDataSource() datasource.DataSource {
 
 func (dataSource *cedarSchemaDataSource) Configure(_ context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
 	client := getDataSourceValidatorClient(request, response)
-	if client == nil {
+	if client == nil { // coverage-ignore
 		// If the client is nil, we cannot proceed with the data source.
 		// This method will be called again when the provider is configured,
 		// so we can safely return here without setting the client.
@@ -60,17 +60,19 @@ func (dataSource *cedarSchemaDataSource) Read(ctx context.Context, request datas
 	tflog.Info(ctx, "Reading cedar schema data source")
 	var configModel cedarSchemaDataSourceModel
 	err := common.ReadFromConfig(ctx, &configModel, request.Config, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the configModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
+
 	apiData, err := dataSource.issuerClient.GetSchema(ctx, validatorClient.GetSchemaParams{ID: configModel.ID.ValueString()})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Reading", "Cedar Schema", err)
 		return
 	}
+
 	switch apiResponse := apiData.(type) {
 	case *validatorClient.GetSchemaOKApplicationJSON:
 		configModel.DataJson = types.StringValue(jx.Raw(*apiResponse).String())

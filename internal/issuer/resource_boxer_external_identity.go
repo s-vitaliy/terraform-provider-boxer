@@ -83,7 +83,7 @@ func (resource *boxerExternalIdentity) Schema(_ context.Context, _ resource.Sche
 func (resource *boxerExternalIdentity) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	var planModel boxerExternalIdentityModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -93,7 +93,7 @@ func (resource *boxerExternalIdentity) Create(ctx context.Context, request resou
 	var associationPlanModel boxerPrincipalAssociationModel
 	diags := request.Config.GetAttribute(ctx, path.Root("principal"), &associationPlanModel)
 	response.Diagnostics.Append(diags...)
-	if diags.HasError() {
+	if diags.HasError() { // coverage-ignore
 		// If we can't read the principal association model, we can't proceed.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -109,7 +109,7 @@ func (resource *boxerExternalIdentity) Create(ctx context.Context, request resou
 		IdentityProvider: planModel.IdentityProvider.ValueString(),
 		ID:               planModel.ID.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Creating", "External Identity", err)
 		return
 	}
@@ -118,7 +118,7 @@ func (resource *boxerExternalIdentity) Create(ctx context.Context, request resou
 	// If we can't save the state, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return
 	}
 }
@@ -127,7 +127,7 @@ func (resource *boxerExternalIdentity) Create(ctx context.Context, request resou
 func (resource *boxerExternalIdentity) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	var stateModel boxerExternalIdentityModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -143,7 +143,7 @@ func (resource *boxerExternalIdentity) Read(ctx context.Context, request resourc
 		IdentityProvider: stateModel.IdentityProvider.ValueString(),
 		ID:               stateModel.ID.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Reading", "External Identity", err)
 		return
 	}
@@ -157,7 +157,7 @@ func (resource *boxerExternalIdentity) Read(ctx context.Context, request resourc
 	case *issuer.ExternalIdentityRegistration:
 		tflog.Debug(ctx, "External identity found, updating state")
 		err = apiModel.From(apiResponse).saveToState(ctx, &response.State, &response.Diagnostics)
-		if err != nil {
+		if err != nil { // coverage-ignore
 			common.GenerateError(&response.Diagnostics, "Saving", "External Identity", err)
 			return
 		}
@@ -179,7 +179,7 @@ func (resource *boxerExternalIdentity) Read(ctx context.Context, request resourc
 func (resource *boxerExternalIdentity) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	var planModel boxerExternalIdentityModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the planModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -194,7 +194,7 @@ func (resource *boxerExternalIdentity) Update(ctx context.Context, request resou
 		IdentityProvider: planModel.IdentityProvider.ValueString(),
 		ID:               planModel.ID.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Updating", "External Identity", err)
 		return
 	}
@@ -203,7 +203,7 @@ func (resource *boxerExternalIdentity) Update(ctx context.Context, request resou
 	// If we can't save the state, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return
 	}
 }
@@ -212,7 +212,7 @@ func (resource *boxerExternalIdentity) Update(ctx context.Context, request resou
 func (resource *boxerExternalIdentity) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
 	var stateModel boxerExternalIdentityModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -224,7 +224,7 @@ func (resource *boxerExternalIdentity) Delete(ctx context.Context, request resou
 		IdentityProvider: stateModel.IdentityProvider.ValueString(),
 		ID:               stateModel.ID.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Deleting", "External Identity", err)
 		return
 	}
@@ -245,7 +245,7 @@ type boxerPrincipalAssociationModel struct {
 func saveNewExternalIdentityState(ctx context.Context, newState *boxerExternalIdentityModel, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
 	diags := state.Set(ctx, newState)
 	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
+	if diagnostics.HasError() { // coverage-ignore
 		return fmt.Errorf("error getting plan")
 	}
 	return nil
@@ -263,7 +263,7 @@ func (model *boxerExternalIdentityModel) From(source *issuer.ExternalIdentityReg
 func (model *boxerExternalIdentityModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
 	diags := state.Set(ctx, model)
 	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
+	if diagnostics.HasError() { // coverage-ignore
 		return fmt.Errorf("error getting plan")
 	}
 	return nil

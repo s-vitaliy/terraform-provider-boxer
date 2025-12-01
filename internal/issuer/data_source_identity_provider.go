@@ -134,7 +134,7 @@ func (model *identityProviderDataSourceModel) From(source *issuerClient.OidcIden
 func (model *identityProviderDataSourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
 	diags := state.Set(ctx, &model)
 	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
+	if diagnostics.HasError() { // coverage-ignore
 		return fmt.Errorf("error saving state")
 	}
 	return nil

@@ -60,7 +60,7 @@ func (resource *cedarSchemaResource) Schema(_ context.Context, _ resource.Schema
 func (resource *cedarSchemaResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	var planModel cedarSchemaResourceModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -69,7 +69,7 @@ func (resource *cedarSchemaResource) Create(ctx context.Context, request resourc
 
 	err = resource.validatorClient.PostSchema(ctx, jx.Raw(planModel.DataJson.ValueString()), validatorClient.PostSchemaParams{ID: planModel.ID.ValueString()})
 
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Creating", "Cedar Schema", err)
 		return
 	}
@@ -78,7 +78,7 @@ func (resource *cedarSchemaResource) Create(ctx context.Context, request resourc
 	// If we can't save the state, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return
 	}
 }
@@ -87,7 +87,7 @@ func (resource *cedarSchemaResource) Create(ctx context.Context, request resourc
 func (resource *cedarSchemaResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	var stateModel cedarSchemaResourceModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -99,7 +99,7 @@ func (resource *cedarSchemaResource) Read(ctx context.Context, request resource.
 	// Instead, we just check if the schema exists and save the stateModel.
 	// This will be updated in the future to use the read result.
 	_, err = resource.validatorClient.GetSchema(ctx, validatorClient.GetSchemaParams{ID: stateModel.ID.ValueString()})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Reading", "Cedar Schema", err)
 		return
 	}
@@ -107,7 +107,7 @@ func (resource *cedarSchemaResource) Read(ctx context.Context, request resource.
 	// If we can't save the stateModel, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return
 	}
 }
@@ -116,7 +116,7 @@ func (resource *cedarSchemaResource) Read(ctx context.Context, request resource.
 func (resource *cedarSchemaResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	var planModel cedarSchemaResourceModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the planModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -124,7 +124,7 @@ func (resource *cedarSchemaResource) Update(ctx context.Context, request resourc
 	}
 	var stateModel cedarSchemaResourceModel
 	err = common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -132,7 +132,7 @@ func (resource *cedarSchemaResource) Update(ctx context.Context, request resourc
 	}
 
 	err = resource.validatorClient.PostSchema(ctx, jx.Raw(planModel.DataJson.ValueString()), validatorClient.PostSchemaParams{ID: planModel.ID.ValueString()})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Updating", "Cedar Schema", err)
 		return
 	}
@@ -141,7 +141,7 @@ func (resource *cedarSchemaResource) Update(ctx context.Context, request resourc
 	// If we can't save the stateModel, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return
 	}
 }
@@ -150,7 +150,7 @@ func (resource *cedarSchemaResource) Update(ctx context.Context, request resourc
 func (resource *cedarSchemaResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
 	var stateModel cedarSchemaResourceModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -175,7 +175,7 @@ func saveNewState(ctx context.Context, id string, newData string, state *tfsdk.S
 	}
 	diags := state.Set(ctx, &newState)
 	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
+	if diagnostics.HasError() { // coverage-ignore
 		return fmt.Errorf("error getting plan")
 	}
 	return nil

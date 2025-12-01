@@ -38,3 +38,6 @@ go.work.sum
 
 # Codegen temporary files
 pkg/openapi.json*
+
+# Integration tsts dependency charts
+/integration_tests/helm/setup/charts/*.tgz

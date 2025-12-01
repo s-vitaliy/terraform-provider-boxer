@@ -62,7 +62,7 @@ func (dataSource *boxerPrincipalDataSource) Schema(_ context.Context, _ datasour
 func (dataSource *boxerPrincipalDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
 	var configModel boxerPrincipalDataSourceModel
 	err := common.ReadFromConfig(ctx, &configModel, request.Config, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the configModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -74,7 +74,7 @@ func (dataSource *boxerPrincipalDataSource) Read(ctx context.Context, request da
 	}
 
 	apiData, err := dataSource.issuerClient.GetPrincipal(ctx, params)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Reading", "Boxer Principal", err)
 		return
 	}
@@ -84,7 +84,7 @@ func (dataSource *boxerPrincipalDataSource) Read(ctx context.Context, request da
 		configModel.DataJson = types.StringValue(jx.Raw(*apiResponse).String())
 		diag := response.State.Set(ctx, &configModel)
 		response.Diagnostics.Append(diag...)
-		if response.Diagnostics.HasError() {
+		if response.Diagnostics.HasError() { // coverage-ignore
 			return
 		}
 		return

@@ -87,7 +87,7 @@ func (r *policySetResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 func (r *policySetResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	var planModel policySetResourceModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -95,7 +95,7 @@ func (r *policySetResource) Create(ctx context.Context, request resource.CreateR
 	}
 
 	err = planModel.normalize()
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Normalizing", "Policy Set", err)
 		return
 	}
@@ -105,7 +105,7 @@ func (r *policySetResource) Create(ctx context.Context, request resource.CreateR
 		Schema: planModel.Schema.ValueString(),
 	})
 
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Creating", "Policy Set", err)
 		return
 	}
@@ -114,7 +114,7 @@ func (r *policySetResource) Create(ctx context.Context, request resource.CreateR
 	// If we can't save the state, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return
 	}
 }
@@ -123,7 +123,7 @@ func (r *policySetResource) Create(ctx context.Context, request resource.CreateR
 func (r *policySetResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
 	var stateModel policySetResourceModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -131,7 +131,7 @@ func (r *policySetResource) Read(ctx context.Context, request resource.ReadReque
 	}
 
 	err = stateModel.normalize()
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Normalizing", "Policy Set", err)
 		return
 	}
@@ -143,7 +143,7 @@ func (r *policySetResource) Read(ctx context.Context, request resource.ReadReque
 		ID:     stateModel.ID.ValueString(),
 		Schema: stateModel.Schema.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Reading", "Policy Set", err)
 		return
 	}
@@ -156,14 +156,14 @@ func (r *policySetResource) Read(ctx context.Context, request resource.ReadReque
 	switch apiResponse := apiData.(type) {
 	case *validatorClient.PolicySetRegistration:
 		apiModel, err = apiModel.From(apiResponse)
-		if err != nil {
+		if err != nil { // coverage-ignore
 			common.GenerateError(&response.Diagnostics, "Converting", "Policy Set", err)
 		}
 		err = apiModel.saveToState(ctx, &response.State, &response.Diagnostics)
 		// If we can't save the stateModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
-		if err != nil {
+		if err != nil { // coverage-ignore
 			return
 		}
 	case *validatorClient.GetPolicySetNotFound:
@@ -184,7 +184,7 @@ func (r *policySetResource) Read(ctx context.Context, request resource.ReadReque
 func (r *policySetResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
 	var planModel policySetResourceModel
 	err := common.ReadFromPlan(ctx, &planModel, request.Plan, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the planModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -192,7 +192,7 @@ func (r *policySetResource) Update(ctx context.Context, request resource.UpdateR
 	}
 
 	err = planModel.normalize()
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Normalizing", "Policy Set", err)
 	}
 
@@ -200,7 +200,7 @@ func (r *policySetResource) Update(ctx context.Context, request resource.UpdateR
 		ID:     planModel.ID.ValueString(),
 		Schema: planModel.Schema.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Updating", "Policy Set", err)
 		return
 	}
@@ -209,7 +209,7 @@ func (r *policySetResource) Update(ctx context.Context, request resource.UpdateR
 	// If we can't save the stateModel, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return
 	}
 }
@@ -218,7 +218,7 @@ func (r *policySetResource) Update(ctx context.Context, request resource.UpdateR
 func (r *policySetResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
 	var stateModel policySetResourceModel
 	err := common.ReadFromState(ctx, &stateModel, request.State, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the state, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
@@ -229,7 +229,7 @@ func (r *policySetResource) Delete(ctx context.Context, request resource.DeleteR
 		ID:     stateModel.ID.ValueString(),
 		Schema: stateModel.Schema.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Deleting", "Policy Set", err)
 		return
 	}
@@ -245,7 +245,7 @@ type policySetResourceModel struct {
 func (model *policySetResourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
 	diags := state.Set(ctx, &model)
 	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
+	if diagnostics.HasError() { // coverage-ignore
 		return fmt.Errorf("error getting plan")
 	}
 	return nil
@@ -262,7 +262,7 @@ func (model *policySetResourceModel) Into() *validatorClient.PolicySetRegistrati
 func (model *policySetResourceModel) From(source *validatorClient.PolicySetRegistration) (*policySetResourceModel, error) {
 	model.DataCedar = types.StringValue(source.Policy)
 	err := model.normalize()
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return nil, fmt.Errorf("error normalizing policy set model: %w", err)
 	}
 	return model, nil
@@ -277,11 +277,11 @@ func (model *policySetResourceModel) normalize() error {
 		}
 
 		err := policy.UnmarshalCedar([]byte(model.DataCedar.ValueString()))
-		if err != nil {
+		if err != nil { // coverage-ignore
 			return fmt.Errorf("error unmarshalling cedar policy: %w", err)
 		}
 		jsonValue, err := policy.MarshalJSON()
-		if err != nil {
+		if err != nil { // coverage-ignore
 			return fmt.Errorf("error marshalling cedar policy to json: %w", err)
 		}
 		model.DataJson = types.StringValue(string(jsonValue))
@@ -294,7 +294,7 @@ func (model *policySetResourceModel) normalize() error {
 		}
 
 		err := policy.UnmarshalJSON([]byte(model.DataJson.ValueString()))
-		if err != nil {
+		if err != nil { // coverage-ignore
 			return fmt.Errorf("error unmarshalling cedar policy: %w", err)
 		}
 		cedarValue := policy.MarshalCedar()

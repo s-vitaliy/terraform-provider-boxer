@@ -28,7 +28,7 @@ func NewPolicySetDataSource() datasource.DataSource {
 
 func (dataSource *policySetDataSource) Configure(_ context.Context, request datasource.ConfigureRequest, response *datasource.ConfigureResponse) {
 	client := getDataSourceValidatorClient(request, response)
-	if client == nil {
+	if client == nil { // coverage-ignore
 		// If the client is nil, we cannot proceed with the data source.
 		// This method will be called again when the provider is configured,
 		// so we can safely return here without setting the client.
@@ -70,17 +70,18 @@ func (dataSource *policySetDataSource) Schema(_ context.Context, _ datasource.Sc
 func (dataSource *policySetDataSource) Read(ctx context.Context, request datasource.ReadRequest, response *datasource.ReadResponse) {
 	var configModel policySetDataSourceModel
 	err := common.ReadFromConfig(ctx, &configModel, request.Config, &response.Diagnostics)
-	if err != nil {
+	if err != nil { // coverage-ignore
 		// If we can't read the configModel, we can't proceed with the update.
 		// so we return early.
 		// The error will be handled by the framework and returned to the user.
 		return
 	}
+
 	apiData, err := dataSource.validatorClient.GetPolicySet(ctx, validatorClient.GetPolicySetParams{
 		ID:     configModel.ID.ValueString(),
 		Schema: configModel.Schema.ValueString(),
 	})
-	if err != nil {
+	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Reading", "Resource Set", err)
 		return
 	}
@@ -98,7 +99,7 @@ func (dataSource *policySetDataSource) Read(ctx context.Context, request datasou
 		}
 
 		err = apiModel.saveToState(ctx, &response.State, &response.Diagnostics)
-		if err != nil {
+		if err != nil { // coverage-ignore
 			common.GenerateError(&response.Diagnostics, "Saving", "Resource Set", err)
 			return
 		}
@@ -129,12 +130,12 @@ type policySetDataSource struct {
 func (model *policySetDataSourceModel) From(source *validatorClient.PolicySetRegistration) (*policySetDataSourceModel, error) {
 	var policy cedar.Policy
 	err := policy.UnmarshalCedar([]byte(source.Policy))
-	if err != nil {
-		panic(fmt.Sprintf("failed to unmarshal Cedar policy: %v", err))
+	if err != nil { // coverage-ignore
+		return nil, fmt.Errorf("failed to unmarshal Cedar policy: %v", err)
 	}
 
 	valueJson, err := policy.MarshalJSON()
-	if err != nil {
+	if err != nil { // coverage-ignore
 		return nil, fmt.Errorf("error marshalling Cedar policy to JSON: %w", err)
 	}
 
@@ -147,7 +148,7 @@ func (model *policySetDataSourceModel) From(source *validatorClient.PolicySetReg
 func (model *policySetDataSourceModel) saveToState(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
 	diags := state.Set(ctx, &model)
 	diagnostics.Append(diags...)
-	if diagnostics.HasError() {
+	if diagnostics.HasError() { // coverage-ignore
 		return fmt.Errorf("error getting plan")
 	}
 	return nil

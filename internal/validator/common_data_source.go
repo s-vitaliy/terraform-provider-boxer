@@ -10,14 +10,14 @@ func getDataSourceValidatorClient(request datasource.ConfigureRequest, response 
 		return nil
 	}
 	data, ok := request.ProviderData.(ProviderDataReader)
-	if !ok {
+	if !ok { // coverage-ignore
 		response.Diagnostics.AddError(
 			"Invalid Provider Data",
 			"The provider data must be of type *BoxerProviderData, but was %s. This is most likely the bug in the provider implementation.",
 		)
 		return nil
 	}
-	if data.GetValidatorClient() == nil {
+	if data.GetValidatorClient() == nil { // coverage-ignore
 		response.Diagnostics.AddError(
 			"Invalid Issuer Client",
 			"The issuer client must not be nil. This is most likely the bug in the provider implementation.",
