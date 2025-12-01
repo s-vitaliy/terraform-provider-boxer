@@ -17,7 +17,7 @@ jobs:
       pull-requests: write # required for dependabot PRs
       contents: read       # required for dependabot PRs
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup Go
         uses: actions/setup-go@v6
