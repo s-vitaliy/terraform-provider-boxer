@@ -8,11 +8,11 @@ provider "boxer" {
     issuer_host    = "http://localhost:5555/issuer"
     validator_host = "http://localhost:5555/validator"
 }
-
+# The data_json is invalid, as ContextType is not defined and incorrectly referenced under `actions`
 resource "boxer_issuer_cedar_schema" "example" {
    id = "{{ .ObjectName }}"
    validate_data_json = true
-   data_json = <<EOT
+      data_json = <<EOT
 {
   "PhotoApp": {
     "commonTypes": {
@@ -21,20 +21,6 @@ resource "boxer_issuer_cedar_schema" "example" {
         "attributes": {
           "age": { "type": "Long" },
           "name": { "type": "String" }
-        }
-      },
-      "ContextType": {
-        "type": "Record",
-        "attributes": {
-          "ip": {
-            "type": "Extension",
-            "name": "ipaddr",
-            "required": false
-          },
-          "authenticated": {
-            "type": "Boolean",
-            "required": true
-          }
         }
       }
     },
@@ -63,8 +49,7 @@ resource "boxer_issuer_cedar_schema" "example" {
             "Photo"
           ],
           "context": {
-            "type": "EntityOrCommon",
-            "name": "ContextType"
+            "type": "ContextType"
           }
         }
       }

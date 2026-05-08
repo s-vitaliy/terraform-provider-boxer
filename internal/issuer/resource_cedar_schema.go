@@ -3,15 +3,18 @@ package issuer
 import (
 	"context"
 	"fmt"
+	cedarschema "github.com/cedar-policy/cedar-go/x/exp/schema"
 	"github.com/go-faster/jx"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-boxer/internal/common"
-	"terraform-provider-boxer/pkg/generated/api/issuerClient"
-
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+
+	"terraform-provider-boxer/internal/common"
+	"terraform-provider-boxer/pkg/generated/api/issuerClient"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -52,6 +55,12 @@ func (resource *cedarSchemaResource) Schema(_ context.Context, _ resource.Schema
 				Description: "The schema data in JSON format.",
 				Required:    true,
 			},
+			"validate_data_json": schema.BoolAttribute{
+				Description: "Validate dataJSON against Cedar.",
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
+			},
 		},
 	}
 }
@@ -67,6 +76,16 @@ func (resource *cedarSchemaResource) Create(ctx context.Context, request resourc
 		return
 	}
 
+	// if flag is specified, validate the schema before we Post it
+	if planModel.ValidateDataJson.ValueBool() {
+		var unmarshalled cedarschema.Schema
+		err = unmarshalled.UnmarshalJSON([]byte(planModel.DataJson.ValueString()))
+		if err != nil {
+			tflog.Error(ctx, fmt.Sprintf("Invalid Schema: %s", err))
+			response.Diagnostics.AddError("Invalid Cedar schema.", fmt.Sprintf("Error: %s", err))
+			return
+		}
+	}
 	err = resource.issuerClient.PostSchema(ctx, jx.Raw(planModel.DataJson.ValueString()), issuerClient.PostSchemaParams{ID: planModel.ID.ValueString()})
 
 	if err != nil { // coverage-ignore
@@ -74,7 +93,7 @@ func (resource *cedarSchemaResource) Create(ctx context.Context, request resourc
 		return
 	}
 
-	err = saveNewState(ctx, planModel.ID.ValueString(), planModel.DataJson.ValueString(), &response.State, &response.Diagnostics)
+	err = saveNewState(ctx, planModel.ID.ValueString(), planModel.DataJson.ValueString(), planModel.ValidateDataJson.ValueBool(), &response.State, &response.Diagnostics)
 	// If we can't save the state, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
@@ -103,7 +122,7 @@ func (resource *cedarSchemaResource) Read(ctx context.Context, request resource.
 		common.GenerateError(&response.Diagnostics, "Reading", "Cedar Schema", err)
 		return
 	}
-	err = saveNewState(ctx, stateModel.ID.ValueString(), stateModel.DataJson.ValueString(), &response.State, &response.Diagnostics)
+	err = saveNewState(ctx, stateModel.ID.ValueString(), stateModel.DataJson.ValueString(), stateModel.ValidateDataJson.ValueBool(), &response.State, &response.Diagnostics)
 	// If we can't save the stateModel, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
@@ -137,7 +156,7 @@ func (resource *cedarSchemaResource) Update(ctx context.Context, request resourc
 		return
 	}
 
-	err = saveNewState(ctx, stateModel.ID.ValueString(), planModel.DataJson.ValueString(), &response.State, &response.Diagnostics)
+	err = saveNewState(ctx, stateModel.ID.ValueString(), stateModel.DataJson.ValueString(), stateModel.ValidateDataJson.ValueBool(), &response.State, &response.Diagnostics)
 	// If we can't save the stateModel, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
@@ -164,14 +183,16 @@ func (resource *cedarSchemaResource) Delete(ctx context.Context, request resourc
 }
 
 type cedarSchemaResourceModel struct {
-	ID       types.String `tfsdk:"id"`
-	DataJson types.String `tfsdk:"data_json"`
+	ID               types.String `tfsdk:"id"`
+	DataJson         types.String `tfsdk:"data_json"`
+	ValidateDataJson types.Bool   `tfsdk:"validate_data_json"`
 }
 
-func saveNewState(ctx context.Context, id string, newData string, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
+func saveNewState(ctx context.Context, id string, newData string, validateDataJson bool, state *tfsdk.State, diagnostics *diag.Diagnostics) error {
 	newState := cedarSchemaResourceModel{
-		ID:       types.StringValue(id),
-		DataJson: types.StringValue(newData),
+		ID:               types.StringValue(id),
+		DataJson:         types.StringValue(newData),
+		ValidateDataJson: types.BoolValue(validateDataJson),
 	}
 	diags := state.Set(ctx, &newState)
 	diagnostics.Append(diags...)

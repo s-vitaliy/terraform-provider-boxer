@@ -11,6 +11,7 @@ provider "boxer" {
 
 resource "boxer_issuer_cedar_schema" "example" {
    id = "{{ .ObjectName }}"
+   validate_data_json = true
       data_json = <<EOT
       {
         "PhotoApp": {
@@ -33,7 +34,8 @@ resource "boxer_issuer_cedar_schema" "example" {
                 "type": "Record",
                 "attributes": {
                   "personInformation": {
-                    "type": "PersonType"
+                    "type": "EntityOrCommon",
+                    "name": "PersonType"
                   },
                   "userId": {
                     "type": "String"

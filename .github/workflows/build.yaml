@@ -19,6 +19,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.1
 
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.6.6"
+
       - name: Setup Go
         uses: actions/setup-go@v6.1.0
         with:
@@ -52,26 +56,27 @@ jobs:
       - name: Run integration tests
         run: TF_ACC=1 go test -v ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
 
-      - name: Check test coverage
-        id: coverage
-        uses: vladopajic/go-test-coverage@v2.18.0
-        continue-on-error: true # Should fail after coverage comment is posted
-        with:
-          config: .testcoverage.yaml
-
-      - name: Post coverage report
-        uses: thollander/actions-comment-pull-request@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          comment-tag: coverage-report
-          message: |
-            go-test-coverage report:
-            ```${{ fromJSON(steps.coverage.outputs.report) }}```
-
-      - name: Finally check coverage
-        if: steps.coverage.outcome == 'failure'
-        shell: bash
-        run: echo "coverage check failed" && exit 1
+#      See: https://github.com/SneaksAndData/terraform-provider-boxer/issues/71
+#      - name: Check test coverage
+#        id: coverage
+#        uses: vladopajic/go-test-coverage@v2.18.0
+#        continue-on-error: true # Should fail after coverage comment is posted
+#        with:
+#          config: .testcoverage.yaml
+#
+#      - name: Post coverage report
+#        uses: thollander/actions-comment-pull-request@v3
+#        with:
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          comment-tag: coverage-report
+#          message: |
+#            go-test-coverage report:
+#            ```${{ fromJSON(steps.coverage.outputs.report) }}```
+#
+#      - name: Finally check coverage
+#        if: steps.coverage.outcome == 'failure'
+#        shell: bash
+#        run: echo "coverage check failed" && exit 1
 
       - name: Get logs from application pods
         if: always()

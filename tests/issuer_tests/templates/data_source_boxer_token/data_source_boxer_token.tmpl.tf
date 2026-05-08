@@ -24,6 +24,7 @@ resource "boxer_identity_provider" "example" {
 
 resource "boxer_issuer_cedar_schema" "example" {
    id = "{{ .ObjectName }}"
+   validate_data_json = true
       data_json = <<EOT
       {
         "PhotoApp": {
@@ -46,7 +47,8 @@ resource "boxer_issuer_cedar_schema" "example" {
                 "type": "Record",
                 "attributes": {
                   "personInformation": {
-                    "type": "PersonType"
+                    "type": "EntityOrCommon",
+                    "name": "PersonType"
                   },
                   "userId": {
                     "type": "String"
@@ -63,6 +65,7 @@ EOT
 
 resource "boxer_validator_cedar_schema" "example" {
   id        = "{{ .ObjectName }}-validator"
+  validate_data_json = true
   data_json = <<EOT
   {
     "PhotoApp": {
@@ -99,13 +102,15 @@ resource "boxer_validator_cedar_schema" "example" {
         "viewPhoto": {
           "appliesTo": {
             "principalTypes": [
-                "User"
+              "User",
+              "UserGroup"
             ],
             "resourceTypes": [
-                "Photo"
+              "Photo"
             ],
             "context": {
-                "type": "ContextType"
+              "type": "EntityOrCommon",
+              "name": "ContextType"
             }
           }
         }

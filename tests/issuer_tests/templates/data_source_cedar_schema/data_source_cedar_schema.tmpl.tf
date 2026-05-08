@@ -33,7 +33,8 @@ resource "boxer_issuer_cedar_schema" "example" {
                 "type": "Record",
                 "attributes": {
                   "personInformation": {
-                    "type": "PersonType"
+                    "type": "EntityOrCommon",
+                    "name": "PersonType"
                   },
                   "userId": {
                     "type": "String"

@@ -5,7 +5,7 @@ go 1.24.0
 toolchain go1.24.5
 
 require (
-	github.com/cedar-policy/cedar-go v1.2.5
+	github.com/cedar-policy/cedar-go v1.6.0
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.1.0
 	github.com/hashicorp/terraform-json v0.27.2

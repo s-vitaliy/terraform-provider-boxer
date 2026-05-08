@@ -50,10 +50,7 @@ resource "boxer_validator_cedar_schema" "example" {
             ],
             "resourceTypes": [
                 "Photo"
-            ],
-            "context": {
-                "type": "ContextType"
-            }
+            ]
           }
         }
       }
