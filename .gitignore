@@ -41,3 +41,9 @@ pkg/openapi.json*
 
 # Integration tsts dependency charts
 /integration_tests/helm/setup/charts/*.tgz
+
+# Terraform state files and directories in the examples directory
+/examples/**/.terraform/
+/examples/**/.terraform.lock.hcl
+/examples/**/terraform.tfstate
+/examples/**/terraform.tfstate.backup

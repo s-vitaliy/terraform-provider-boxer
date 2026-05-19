@@ -7,8 +7,14 @@ terraform {
 }
 
 provider "boxer" {
-  issuer_host    = "http://localhost:8888/"
-  validator_host = "http://localhost:8888/"
+  external_auth = {
+    security_token = "<insert-token-here>"
+    identity_provider_id = "keycloak"
+    internal_token_provider_endpoint = "http://localhost:5555/issuer"
+  }
+
+  issuer_host    = "http://localhost:5555/issuer"
+  validator_host = "http://localhost:5555/validator"
 }
 
 resource "boxer_issuer_cedar_schema" "example" {
@@ -56,5 +62,5 @@ EOT
 }
 
 output "test" {
-  value = boxer_cedar_schema.example
+  value = boxer_issuer_cedar_schema.example
 }

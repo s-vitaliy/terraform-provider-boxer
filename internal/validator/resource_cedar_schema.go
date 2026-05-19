@@ -3,6 +3,7 @@ package validator
 import (
 	"context"
 	"fmt"
+
 	cedarschema "github.com/cedar-policy/cedar-go/x/exp/schema"
 	"github.com/go-faster/jx"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -149,13 +150,20 @@ func (resource *cedarSchemaResource) Update(ctx context.Context, request resourc
 		return
 	}
 
-	err = resource.validatorClient.PostSchema(ctx, jx.Raw(planModel.DataJson.ValueString()), validatorClient.PostSchemaParams{ID: planModel.ID.ValueString()})
+	boxerRequest := validatorClient.PostSchemaParams{ID: planModel.ID.ValueString()}
+	err = resource.validatorClient.PostSchema(ctx, jx.Raw(planModel.DataJson.ValueString()), boxerRequest)
 	if err != nil { // coverage-ignore
 		common.GenerateError(&response.Diagnostics, "Updating", "Cedar Schema", err)
 		return
 	}
 
-	err = saveNewState(ctx, stateModel.ID.ValueString(), planModel.DataJson.ValueString(), planModel.ValidateDataJson.ValueBool(), &response.State, &response.Diagnostics)
+	err = saveNewState(ctx,
+		planModel.ID.ValueString(),
+		planModel.DataJson.ValueString(),
+		planModel.ValidateDataJson.ValueBool(),
+		&response.State,
+		&response.Diagnostics)
+
 	// If we can't save the stateModel, we can't proceed with the update.
 	// so we return early.
 	// The error will be handled by the framework and returned to the user.
